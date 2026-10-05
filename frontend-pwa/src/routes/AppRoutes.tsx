@@ -43,6 +43,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
@@ -77,6 +78,11 @@ export function AppRoutes() {
 
       </Route>
 
+      {/* UC-08 & UC-10: Admin & NCC Partner Portal Login, Dashboards & Homestay Management */}
+      <Route path="admin/login" element={<UnifiedAuthPage />} />
+      <Route path="portal/login" element={<UnifiedAuthPage />} />
+      <Route path="login" element={<UnifiedAuthPage />} />
+      <Route path="register" element={<UnifiedAuthPage />} />
     </Routes>
   );
 }
