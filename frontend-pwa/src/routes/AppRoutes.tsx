@@ -43,6 +43,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
 
@@ -62,6 +63,7 @@ export function AppRoutes() {
           
           
           
+          <Route path="design-system" element={<DesignSystemPage />} />
           <Route path="download" element={<DownloadAppPage />} />
           <Route path="tai-app" element={<DownloadAppPage />} />
           <Route path="cai-dat-app" element={<DownloadAppPage />} />
