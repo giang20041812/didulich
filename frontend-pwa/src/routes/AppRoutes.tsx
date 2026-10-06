@@ -44,6 +44,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
 }
 
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
+const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
@@ -63,6 +64,8 @@ export function AppRoutes() {
           </Route>
           
           
+          {/* Profile / Other standard layout pages */}
+          <Route path="profile" element={<UserProfilePage />} />
           
           <Route path="design-system" element={<DesignSystemPage />} />
           <Route path="download" element={<DownloadAppPage />} />
