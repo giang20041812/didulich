@@ -43,6 +43,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
@@ -63,6 +64,7 @@ export function AppRoutes() {
           <Route element={<TravelerRoute />}>
           </Route>
           
+          <Route path="destinations" element={<DestinationListPage />} />
           
           {/* Profile / Other standard layout pages */}
           <Route path="profile" element={<UserProfilePage />} />
