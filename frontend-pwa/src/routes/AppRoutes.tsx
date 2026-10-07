@@ -48,6 +48,7 @@ const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/Festi
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
 const TravelGuidePage = lazyPage(() => import('@/pages/customer/guide/TravelGuidePage'));
 const PlaceDetailPage = lazyPage(() => import('@/pages/customer/culture/PlaceDetailPage'));
+const PhotoCreditsPage = lazyPage(() => import('@/pages/customer/PhotoCreditsPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
@@ -92,6 +93,7 @@ export function AppRoutes() {
           <Route path="rental/:identifier" element={<PlaceDetailPage />} />
           <Route path="design-system" element={<DesignSystemPage />} />
           <Route path="cam-nang" element={<TravelGuidePage />} />
+          <Route path="nguon-anh" element={<PhotoCreditsPage />} />
           <Route path="guide" element={<TravelGuidePage />} />
           <Route path="download" element={<DownloadAppPage />} />
           <Route path="tai-app" element={<DownloadAppPage />} />
