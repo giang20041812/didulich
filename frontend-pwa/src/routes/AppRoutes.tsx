@@ -43,6 +43,8 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
+const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
@@ -64,11 +66,20 @@ export function AppRoutes() {
           <Route element={<TravelerRoute />}>
           </Route>
           
+          <Route path="experiences" element={<CultureFestivalPage />} />
+          <Route path="experiences/:slug" element={<FestivalDetailPage />} />
+          <Route path="festivals/:slug" element={<FestivalDetailPage />} />
           <Route path="destinations" element={<DestinationListPage />} />
           
           {/* Profile / Other standard layout pages */}
           <Route path="profile" element={<UserProfilePage />} />
           
+          {/* Keep existing routes but map them properly or leave for later phases */}
+          <Route path="culture" element={<CultureFestivalPage />} />
+          <Route path="culture/:slug" element={<FestivalDetailPage />} />
+          <Route path="explore" element={<CultureFestivalPage />} />
+          <Route path="explore/:slug" element={<FestivalDetailPage />} />
+          <Route path="tours" element={<CultureFestivalPage />} />
           <Route path="design-system" element={<DesignSystemPage />} />
           <Route path="download" element={<DownloadAppPage />} />
           <Route path="tai-app" element={<DownloadAppPage />} />
