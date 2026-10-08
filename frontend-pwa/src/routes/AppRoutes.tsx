@@ -45,6 +45,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
 
 const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
 const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'));
+const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -111,6 +112,9 @@ export function AppRoutes() {
         <Route element={<TravelerRoute />}>
         </Route>
 
+        {/* Dedicated Homestay, Room Availability & Fullscreen Map Routes (No Sidebar for fullscreen) */}
+        <Route path="homestay/:slug/map" element={<FullScreenMapPage />} />
+        <Route path="map" element={<FullScreenMapPage />} />
       </Route>
 
       {/* UC-08 & UC-10: Admin & NCC Partner Portal Login, Dashboards & Homestay Management */}
