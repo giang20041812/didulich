@@ -43,6 +43,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -64,6 +65,8 @@ export function AppRoutes() {
         {/* Khung ứng dụng chính với Sidebar Layout */}
         <Route element={<SidebarLayout />}>
           
+          {/* Navigation via Sidebar */}
+          <Route path="homestays" element={<HomestayListPage />} />
           
           {/* User Bookings Management */}
           <Route element={<TravelerRoute />}>
