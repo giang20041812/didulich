@@ -44,6 +44,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
 }
 
 const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
+const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -67,6 +68,7 @@ export function AppRoutes() {
           
           {/* Navigation via Sidebar */}
           <Route path="homestays" element={<HomestayListPage />} />
+          <Route path="homestays/:id" element={<HomestayDetailPage />} />
           
           {/* User Bookings Management */}
           <Route element={<TravelerRoute />}>
