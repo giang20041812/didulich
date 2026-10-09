@@ -6,6 +6,7 @@ import TravelerRoute from '@/components/layout/TravelerRoute';
 // Trang chủ nằm trong bundle chính; các trang còn lại tải theo từng route (import trực tiếp, không qua '@/pages',
 // để cổng Admin / NCC và thư viện biểu đồ, bản đồ không bị kéo vào lần tải đầu của khách).
 // Khung cổng Admin / NCC cũng tải lười: chúng kéo theo axios (lib/axiosBoot) — khách du lịch không cần tải.
+import HomePage from '@/pages/home/HomePage';
 import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 
@@ -43,6 +44,9 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
   };
 }
 
+const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
+const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'));
+const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -63,7 +67,11 @@ export function AppRoutes() {
       <Route element={<CustomerRoute />}>
         {/* Khung ứng dụng chính với Sidebar Layout */}
         <Route element={<SidebarLayout />}>
+          <Route index element={<HomePage />} />
           
+          {/* Navigation via Sidebar */}
+          <Route path="homestays" element={<HomestayListPage />} />
+          <Route path="homestays/:id" element={<HomestayDetailPage />} />
           
           {/* User Bookings Management */}
           <Route element={<TravelerRoute />}>
@@ -106,6 +114,9 @@ export function AppRoutes() {
         <Route element={<TravelerRoute />}>
         </Route>
 
+        {/* Dedicated Homestay, Room Availability & Fullscreen Map Routes (No Sidebar for fullscreen) */}
+        <Route path="homestay/:slug/map" element={<FullScreenMapPage />} />
+        <Route path="map" element={<FullScreenMapPage />} />
       </Route>
 
       {/* UC-08 & UC-10: Admin & NCC Partner Portal Login, Dashboards & Homestay Management */}

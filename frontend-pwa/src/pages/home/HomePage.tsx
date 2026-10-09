@@ -1,0 +1,788 @@
+import { useState, useEffect, useLayoutEffect, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react"
+import { Link } from "react-router-dom"
+import SearchHub from "@/components/layout/SearchHub"
+import { Handshake, Tag, Headphones, ShieldCheck, Mountain, Tent, BookOpenText, PhoneCall, CalendarCheck, Smartphone, ChevronRight, MapPin, ArrowRight, Compass } from "lucide-react"
+import { fetchHomeData, peekHomeData } from "@/services/homeService"
+import { prefetchHomestay } from "@/services/homestayService"
+import { placeDetailPath } from "@/lib/placeRoutes"
+import { HomeResponseDto, PlaceSummaryDto } from "@/types/home"
+import { getCurrentCustomer, saveTravelerSession } from "@/lib/currentCustomer"
+import type { GoogleSignupProfile } from "@/services/authService"
+import FramerSwipeCardStack from "@/components/ui/FramerSwipeCardStack"
+// Form tạo tài khoản khi One Tap gặp email Google lần đầu — nạp lười vì kéo theo axios (authService).
+const GoogleSignupDialog = lazy(() => import("@/components/auth/GoogleSignupDialog"));
+import NearMePanel from "@/components/home/NearMePanel"
+import NearMeToggle from "@/components/home/NearMeToggle"
+import { SakuraBlossomIcon } from "@/components/ui/SakuraBlossomIcon"
+import Reveal from "@/components/ui/Reveal"
+import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
+import { formatVnd } from "@/lib/compactCard"
+import { mediaUrl } from "@/lib/mediaUrl"
+import { LogoMark } from "@/components/ui/logo"
+import { resolvePlacePhoto } from "@/lib/placeImages"
+import HeroBackdrop from "@/components/home/HeroBackdrop"
+import HomeMotifs from "@/components/home/HomeMotifs"
+import CardFrame from "@/components/ui/CardFrame"
+
+/**
+ * Tiêu đề section kiểu editorial: nhãn overline nhỏ (gạch ngang dẫn) + tiêu đề lớn + mô tả dẫn dắt. `action` (vd. "Xem
+ * tất cả") nằm cùng hàng nhãn overline trên điện thoại; máy tính đặt nút riêng ở góc phải.
+ */
+function SectionHeading({ eyebrow, title, description, action, tone = 'text-[#0a7d64]' }: { eyebrow: string; title: string; description?: string; action?: ReactNode; tone?: string }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className={`inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] ${tone}`}>
+          <span className="h-px w-6 bg-current opacity-60" aria-hidden />
+          {eyebrow}
+        </p>
+        {action && <div className="md:hidden">{action}</div>}
+      </div>
+      <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
+        {title}
+      </h2>
+      {description && (
+        <p className="mt-2 max-w-xl text-sm md:text-[15px] font-medium leading-relaxed text-slate-500">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Link "Xem tất cả" gọn cho điện thoại (cùng hàng nhãn overline). */
+function MobileSeeAll({ to }: { to: string }) {
+  return (
+    <Link to={to} className="inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-bold text-[#0a7d64] active:bg-emerald-50">
+      Xem tất cả <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+    </Link>
+  );
+}
+
+/** Nút "Xem thêm" ở góc phải tiêu đề section trên máy tính (viên thuốc, mũi tên trượt nhẹ khi rê chuột). */
+function DesktopSeeAll({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="group/see hidden md:inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-bold text-[#0a7d64] ring-1 ring-[#0a7d64]/20 shadow-[0_6px_16px_-10px_rgba(10,125,100,0.6)] transition-[background-color,color,box-shadow] duration-200 hover:bg-[#0a7d64] hover:text-white hover:ring-[#0a7d64] hover:shadow-[0_10px_22px_-10px_rgba(10,125,100,0.8)] active:scale-[0.98]"
+    >
+      {children}
+      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/see:translate-x-0.5" aria-hidden />
+    </Link>
+  );
+}
+
+/**
+ * Bề mặt thẻ dùng chung của trang chủ: bo 16px, viền bằng ring (vẽ theo đúng đường cong, không răng cưa như border + ảnh
+ * tràn), bóng hai lớp nhuộm xanh rừng. Chỉ transition transform + box-shadow (không transition-all) cho rê chuột mượt. Viền xanh rừng
+ * có sẵn (ring), rê chuột thì đậm lên.
+ */
+const CARD =
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 shadow-[0_1px_2px_rgba(16,40,34,0.05),0_10px_24px_-14px_rgba(16,40,34,0.18)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(16,40,34,0.05),0_28px_48px_-18px_rgba(16,40,34,0.38)]';
+/** Màu viền: xanh rừng cho thẻ điểm đến / tiện ích (đặc sản dùng vàng hổ phách), có sẵn và đậm lên khi rê chuột. */
+const CARD_GREEN = `${CARD} ring-emerald-800/25 hover:ring-emerald-600/50`;
+/** Thẻ điểm đến / đặc sản: phần thông tin nền xanh rừng đậm (không trắng), chân ảnh tan vào nền kèm quầng sáng (CARD_GLOW). */
+const CARD_DARK =
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#0b5a47] ring-1 ring-emerald-400/20 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]';
+/** Chân ảnh tan vào #0b5a47 (xanh "glow"), cũng là màu đầu phần thông tin (CARD_INFO_BG) nên không lộ đường nối. */
+const CARD_FADE = 'pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0b5a47] via-[#0b5a47]/70 via-35% to-transparent';
+const CARD_INFO_BG = 'bg-gradient-to-b from-[#0b5a47] to-[#06281f]';
+/** Khung ảnh đầu thẻ: cắt theo bo góc trên bằng clip-path nên mép cong mịn cả khi ảnh đang phóng. */
+const CARD_MEDIA = 'clip-top-2xl relative w-full overflow-hidden bg-slate-100';
+const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]';
+const CARD_SHADE = 'absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent';
+
+/**
+ * Các phần sau hero là những "tấm" vuông vức nối tiếp nhau (không bo góc), đổ bóng nhẹ ngược lên phần trước để có chiều
+ * sâu. Mỗi tấm là một màn hình (home-screen) và một điểm dừng của scroll-snap (home-snap-panel, xem globals.css).
+ */
+const SHEET = 'home-snap-panel home-screen relative isolate pt-14 pb-20 md:pt-16 md:pb-24 shadow-[0_-14px_30px_-26px_rgba(10,46,38,0.45)]';
+
+/** Tiện ích cho chuyến đi (cột trái phần cuối trang). */
+const TRAVEL_TOOLS = [
+  {
+    to: '/cam-nang',
+    Icon: BookOpenText,
+    title: 'Cẩm nang du lịch',
+    text: 'Thời điểm đẹp, đường đi, chi phí và lưu ý vùng cao.',
+    cta: 'Đọc cẩm nang',
+    tile: 'from-[#12a184] to-[#07604c] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(7,96,76,0.8)]',
+    accent: 'text-emerald-700',
+  },
+  {
+    to: '/cam-nang#khan-cap',
+    Icon: PhoneCall,
+    title: 'Danh bạ khẩn cấp',
+    text: 'Gọi ngay 113 · 114 · 115 và gửi SOS kèm vị trí.',
+    cta: 'Xem danh bạ',
+    tile: 'from-[#f43f5e] to-[#be123c] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(190,18,60,0.8)]',
+    accent: 'text-rose-600',
+  },
+  {
+    to: '/bookings',
+    Icon: CalendarCheck,
+    title: 'Đơn đặt phòng',
+    text: 'Tra cứu mã đơn, hủy/sửa phòng và đánh giá chuyến đi.',
+    cta: 'Tra cứu đơn',
+    tile: 'from-[#fbbf24] to-[#d97706] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_16px_-8px_rgba(217,119,6,0.8)]',
+    accent: 'text-amber-700',
+  },
+  {
+    to: '/download',
+    Icon: Smartphone,
+    title: 'Cài app du lịch',
+    text: 'Dùng offline, nhận thông báo tình trạng phòng.',
+    cta: 'Tải ứng dụng',
+    tile: 'from-[#334155] to-[#0f172a] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_16px_-8px_rgba(15,23,42,0.8)]',
+    accent: 'text-slate-800',
+  },
+];
+
+/** Bốn cam kết giá trị (cột phải, nền xanh rừng đậm). */
+const COMMITMENTS = [
+  { Icon: Handshake, title: 'Trải Nghiệm Bản Địa', text: 'Do chính người Mông, Thái bản địa làm chủ và dẫn dắt trọn vẹn.', tag: 'Văn hóa thật', tile: 'bg-emerald-400/15 text-emerald-300 ring-emerald-300/25' },
+  { Icon: Tag, title: 'Giá Niêm Yết Minh Bạch', text: 'Đúng giá chủ nhà niêm yết, không phí ẩn hay phụ thu vô lý.', tag: 'Minh bạch 100%', tile: 'bg-amber-300/15 text-amber-300 ring-amber-300/25' },
+  { Icon: Headphones, title: 'Đồng Hành 24/7', text: 'Hỗ trợ suốt hành trình di chuyển, sẵn sàng kể cả lúc nửa đêm.', tag: 'Hỗ trợ tức thì', tile: 'bg-rose-400/15 text-rose-300 ring-rose-300/25' },
+  { Icon: ShieldCheck, title: 'Linh Hoạt & An Tâm', text: 'Đổi lịch dễ dàng khi thời tiết xấu, đặt phòng có bảo vệ an toàn.', tag: 'Bảo vệ quyền lợi', tile: 'bg-cyan-300/15 text-cyan-200 ring-cyan-200/25' },
+];
+
+
+
+const formatDayMonth = (dStr?: string) => {
+  if (!dStr) return '';
+  const parts = dStr.split('-');
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}` : dStr;
+};
+
+/** Nhãn mùa đẹp của điểm đến từ dữ liệu ("Mùa đẹp: 15/09 – 10/10" hoặc "Quanh năm"). */
+const seasonLabel = (dest: PlaceSummaryDto): { text: string; yearRound: boolean } => {
+  const start = formatDayMonth(dest.suitableDateStart);
+  const end = formatDayMonth(dest.suitableDateEnd);
+  if ((!start && !end) || dest.suitableDateStart?.toLowerCase() === 'quanh năm') return { text: 'Quanh năm', yearRound: true };
+  if (start && end) return { text: `Mùa đẹp: ${start} – ${end}`, yearRound: false };
+  return { text: end ? `Mùa đẹp đến: ${end}` : `Mùa đẹp: ${start}`, yearRound: false };
+};
+
+/** Tag "thời điểm phù hợp" trong khung video: mùa đẹp (hồng cam) hoặc quanh năm (xanh). */
+function SuitableTimeTag({ place }: { place: PlaceSummaryDto }) {
+  const season = seasonLabel(place);
+  return (
+    <span className={`inline-flex max-w-full items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-extrabold text-white shadow-sm ${season.yearRound ? 'bg-gradient-to-r from-teal-500 to-emerald-600' : 'bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500'}`}>
+      <SakuraBlossomIcon className="w-3.5 h-3.5 shrink-0" />
+      <span className="truncate">{season.text}</span>
+    </span>
+  );
+}
+
+/**
+ * Logo + "Đi Du Lịch" + tagline. `compact`: cỡ nhỏ để nằm gọn trong thẻ banner 3:2 trên điện thoại (bản máy tính ở ngoài
+ * thẻ, cỡ lớn). Hai bản cùng có trong DOM nhưng luôn ẩn một (display: none) nên chỉ một tiêu đề được đọc / hiện.
+ */
+function HeroTitle({ compact = false, className = '' }: { compact?: boolean; className?: string }) {
+  return (
+    <div className={`${compact ? 'flex min-w-0 items-center gap-3' : 'flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 md:gap-5 mb-4 md:mb-5'} ${className}`}>
+      {/* Biểu tượng "Đi" + chữ "Du Lịch" bên dưới đọc liền thành "Đi Du Lịch". Không còn khung kính / viền trắng quanh logo. */}
+      <div data-intro-logo className="hero-rise relative shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]">
+        <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32'} />
+      </div>
+      <div className="min-w-0">
+        {compact ? (
+          <h1 data-intro-word className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.1rem,10.5vw,3rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+            Du Lịch
+          </h1>
+        ) : (
+          <h1 data-intro-word className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,8vw,7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+            Du Lịch
+          </h1>
+        )}
+        {/* Hiện sau ~3 giây như một nét viết tiếp; giữ chỗ ngay từ đầu nên không đẩy bố cục */}
+        <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,3.4vw,2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
+          đi khắp mọi nơi
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** Thẻ điểm đến: ảnh 4:3 + tag mùa đẹp + địa phương, tên và nút mũi tên. Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
+function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
+  const src = mediaUrl(resolvePlacePhoto(dest.coverImageUrl), 640);
+  return (
+    <CardFrame kind="mountain">
+      <Link to={`/destinations/${dest.id}`} className={CARD_DARK}>
+        <div className={`${CARD_MEDIA} aspect-[4/3]`}>
+          {src ? (
+            <img src={src} alt={dest.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
+              <Mountain className="h-7 w-7" />
+            </div>
+          )}
+          <div className={CARD_SHADE} />
+          <div className={CARD_FADE} />
+
+          {/* Tag mùa đẹp góc trên trái */}
+          <div className="absolute left-2 top-2 z-10 max-w-[calc(100%-1rem)] [&>span]:text-[10px]">
+            <SuitableTimeTag place={dest} />
+          </div>
+
+          {/* Địa phương góc dưới trái của ảnh */}
+          {dest.regionName && (
+            <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 text-[11px] font-semibold text-white/95 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
+              <MapPin className="w-3 h-3 text-emerald-300 shrink-0" />
+              <span className="truncate">{dest.regionName}</span>
+            </div>
+          )}
+        </div>
+
+        <div className={`flex flex-1 items-center justify-between gap-2 px-3 py-2.5 ${CARD_INFO_BG}`}>
+          <div className="min-w-0">
+            <h3 className="text-sm font-extrabold text-white group-hover:text-emerald-200 transition-colors duration-300 line-clamp-1">
+              {dest.name}
+            </h3>
+            {dest.description && (
+              <p className="mt-0.5 text-[11px] text-white/65 line-clamp-1">{dest.description}</p>
+            )}
+          </div>
+          <span className="w-7 h-7 shrink-0 rounded-full bg-emerald-400/15 ring-1 ring-emerald-300/30 flex items-center justify-center text-emerald-200 transition-[background-color,color,transform] duration-300 group-hover:bg-emerald-400 group-hover:text-[#05241e] group-hover:translate-x-0.5">
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      </Link>
+    </CardFrame>
+  );
+}
+
+/** Thẻ đặc sản: ảnh vuông + tag + địa phương, tên và giá. Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
+function SpecialtyCard({ item }: { item: NonNullable<HomeResponseDto['specialties']>[number] }) {
+  const authenticUrl = resolvePlacePhoto(item.coverImageUrl);
+  const src = authenticUrl ? mediaUrl(authenticUrl, 640) : null;
+  return (
+    <CardFrame kind="specialty">
+      <Link to={placeDetailPath(item.kind, item.id)} className={CARD_DARK}>
+        <div className={`${CARD_MEDIA} aspect-square`}>
+          {src ? (
+            <img src={src} alt={item.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
+              <Tag className="h-6 w-6" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+          <div className={CARD_FADE} />
+
+          {/* Tag đặc sản / món ngon */}
+          {item.tagBadge && (
+            <div className="absolute left-1.5 top-1.5 z-10 max-w-[calc(100%-0.75rem)]">
+              <span className="inline-flex max-w-full rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-amber-950 shadow-[0_4px_10px_-4px_rgba(180,83,9,0.7)]">
+                <span className="truncate">{item.tagBadge}</span>
+              </span>
+            </div>
+          )}
+
+          {/* Địa phương */}
+          {item.regionName && (
+            <div className="absolute bottom-1.5 left-2 right-2 z-10 flex items-center gap-0.5 text-[11px] font-semibold text-white/95 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
+              <MapPin className="w-3 h-3 text-amber-300 shrink-0" />
+              <span className="truncate">{item.regionName}</span>
+            </div>
+          )}
+        </div>
+
+        <div className={`flex flex-1 flex-col px-2.5 py-2 ${CARD_INFO_BG}`}>
+          <h3 className="text-[13px] font-extrabold text-white group-hover:text-emerald-200 transition-colors duration-300 line-clamp-1">
+            {item.name}
+          </h3>
+          {item.priceRefMin ? (
+            <p className="mt-0.5 truncate text-[11px] font-bold text-emerald-300">
+              Từ {formatVnd(item.priceRefMin)} {item.priceUnitNote ? `/ ${item.priceUnitNote}` : ''}
+            </p>
+          ) : (
+            <p className="mt-0.5 truncate text-[11px] text-white/65 font-medium">Thức quà truyền thống</p>
+          )}
+        </div>
+      </Link>
+    </CardFrame>
+  );
+}
+
+export default function HomePage() {
+  // Quay lại trang chủ: hiện ngay dữ liệu đã có trong tab, làm mới ở nền (không màn hình chờ).
+  const [homeData, setHomeData] = useState<HomeResponseDto | null>(() => peekHomeData() ?? null);
+  const [loading, setLoading] = useState(() => !peekHomeData());
+  /** Mục đang hiện danh sách "Gần tôi" thay cho thẻ gợi ý. */
+  const [nearDestinations, setNearDestinations] = useState(false);
+  const [nearHomestays, setNearHomestays] = useState(false);
+
+  const loadHomeData = useCallback(async () => {
+    if (!peekHomeData()) setLoading(true);
+    try {
+      setHomeData(await fetchHomeData());
+    } catch (err) {
+      console.error('Error in HomePage fetch:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadHomeData();
+  }, [loadHomeData]);
+
+  // Lướt tới đâu tự căn vào đầu panel gần nhất (kéo sang panel kế tiếp) — chỉ bật khi đang ở trang chủ VÀ đã có nội dung:
+  // màn hình chờ chưa có panel nào, snap bắt buộc sẽ ép trang nhảy xuống chân trang.
+  // useLayoutEffect: khi rời trang chủ, class được gỡ ngay lúc gỡ DOM — TRƯỚC khi ScrollToTop cuộn trang mới về đầu. Gỡ
+  // bằng useEffect thì muộn hơn: lúc cuộn về 0, điểm snap "main + footer" vẫn còn hiệu lực và kéo trang mới xuống chân trang.
+  const hasContent = !loading && !!homeData;
+  useLayoutEffect(() => {
+    if (!hasContent) return undefined;
+    const root = document.documentElement;
+    root.classList.add('home-snap');
+    return () => root.classList.remove('home-snap');
+  }, [hasContent]);
+
+
+  useEffect(() => {
+    if (loading || homeData) return;
+    const retry = () => { void loadHomeData(); };
+    window.addEventListener('focus', retry);
+    window.addEventListener('online', retry);
+    return () => {
+      window.removeEventListener('focus', retry);
+      window.removeEventListener('online', retry);
+    };
+  }, [loading, homeData, loadHomeData]);
+
+  // Email Google lần đầu qua One Tap: khách điền form tạo tài khoản rồi mới vào.
+  const [googleSignup, setGoogleSignup] = useState<{ idToken: string; profile: GoogleSignupProfile } | null>(null);
+
+  // Tự động gọi Sign In Google One Tap trên trang chủ khi chưa đăng nhập
+  useEffect(() => {
+    const customer = getCurrentCustomer();
+    if (customer) return; // Đã đăng nhập thì không gọi
+
+    let cleanupFn: (() => void) | undefined;
+
+    const handleGoogleCredential = async (idToken: string) => {
+      try {
+        // authService dùng axios — nạp lười lúc thật sự đăng nhập, khỏi kéo axios vào bundle trang chủ.
+        const { googleSignIn } = await import("@/services/authService");
+        const result = await googleSignIn(idToken);
+        if (result.kind === 'signup') {
+          setGoogleSignup({ idToken: result.idToken, profile: result.profile });
+          return;
+        }
+        saveTravelerSession(result.session);
+      } catch (err) {
+        console.warn('Auto Google login failed:', err);
+      }
+    };
+
+    // Tải Firebase / Google Identity sau lần render đầu để không nằm trong bundle chính của trang chủ.
+    import("@/lib/firebase")
+      .then(({ initGoogleOneTap }) => initGoogleOneTap(handleGoogleCredential))
+      .then((cancel) => {
+        cleanupFn = cancel;
+      });
+
+    return () => {
+      if (cleanupFn) cleanupFn();
+    };
+  }, []);
+
+  // Merge API destinations with curated destinations (avoid duplicates by slug or id)
+  const allDestinations = useMemo(() => {
+    const list: PlaceSummaryDto[] = [];
+    const seen = new Set<string>();
+
+    if (homeData?.featuredDestinations) {
+      homeData.featuredDestinations.forEach(item => {
+        const key = item.slug || String(item.id);
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push(item);
+        }
+      });
+    }
+
+    return list;
+  }, [homeData]);
+
+  // Ưu tiên điểm đến có mùa đẹp cụ thể trước "Quanh năm", hiện hết (lưới 10 thẻ mỗi trang, lướt / bấm ‹ › xem thêm như homestay)
+  const filteredDestinations = useMemo(() => {
+    const list = [...allDestinations];
+    list.sort((a, b) => {
+      const aHasSeason = a.suitableDateStart && a.suitableDateStart.toLowerCase() !== 'quanh năm' && /\d/.test(a.suitableDateStart);
+      const bHasSeason = b.suitableDateStart && b.suitableDateStart.toLowerCase() !== 'quanh năm' && /\d/.test(b.suitableDateStart);
+
+      if (aHasSeason && !bHasSeason) return -1;
+      if (!aHasSeason && bHasSeason) return 1;
+      return 0;
+    });
+
+    return list;
+  }, [allDestinations]);
+
+  // Homestay: mọi homestay API trả về — mỗi trang 8 thẻ, lướt sang để xem thêm.
+  const displayedHomestays = useMemo(() => homeData?.homestays ?? [], [homeData]);
+
+  // Đặc sản: hiện hết món API trả về (lưới 10 thẻ mỗi trang, 2 hàng × 5 cột)
+  const displayedSpecialties = useMemo(() => homeData?.specialties ?? [], [homeData]);
+
+  if (loading) {
+    return (
+      <div className="w-full flex flex-col min-h-screen bg-[var(--color-canvas)]">
+        {/* Hero Section Skeleton */}
+        <section className="relative z-30 w-full min-h-[460px] md:min-h-[500px] flex items-center justify-center pt-[calc(var(--app-header-height,130px)+16px)] pb-16 bg-[#07362c]">
+          <HeroBackdrop />
+          <div className="relative z-30 flex flex-col items-center justify-center px-4 max-w-5xl mx-auto w-full animate-pulse">
+            <div className="h-14 md:h-20 bg-emerald-800/60 rounded-2xl w-3/4 max-w-xl mb-4" />
+            <div className="h-5 bg-emerald-800/40 rounded-full w-1/2 max-w-md mb-8" />
+            <div className="w-full h-32 md:h-[78px] bg-white/95 rounded-2xl shadow-[0_28px_60px_-24px_rgba(4,36,29,0.6)]" />
+          </div>
+        </section>
+
+        {/* Content Section Skeleton */}
+        <div className="bg-white">
+          <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 py-10 space-y-12">
+            <div>
+              <div className="h-7 bg-gray-200 rounded-full w-48 mb-6 animate-pulse" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="bg-white rounded-2xl overflow-hidden ring-1 ring-slate-900/[0.06] shadow-[0_10px_24px_-14px_rgba(16,40,34,0.18)] animate-pulse flex flex-col">
+                    <div className="w-full h-48 bg-gray-200 mb-3" />
+                    <div className="mx-4 h-4 bg-gray-200 rounded-full w-3/4 mb-2.5" />
+                    <div className="mx-4 h-3 bg-gray-100 rounded-full w-1/2 mb-4" />
+                    <div className="m-4 mt-auto h-8 bg-gray-100 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="h-7 bg-gray-200 rounded-full w-56 mb-6 animate-pulse" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="bg-white rounded-2xl overflow-hidden ring-1 ring-slate-900/[0.06] shadow-[0_10px_24px_-14px_rgba(16,40,34,0.18)] animate-pulse flex flex-col">
+                    <div className="w-full h-40 bg-gray-200 mb-3" />
+                    <div className="mx-4 h-4 bg-gray-200 rounded-full w-3/4 mb-2" />
+                    <div className="mx-4 h-3 bg-gray-100 rounded-full w-1/2 mb-3" />
+                    <div className="m-4 mt-auto h-8 bg-gray-100 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!homeData) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center text-red-500 font-medium">
+        <p>Không thể kết nối đến hệ thống. Vui lòng thử lại sau.</p>
+        <button
+          type="button"
+          onClick={() => { void loadHomeData(); }}
+          className="mt-4 rounded-full bg-[#043D32] px-5 py-2 text-white transition-colors hover:bg-[#0a7d64]"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    // overflow-x-clip (không phải hidden): hidden biến khung này thành vùng cuộn riêng, scroll-snap của các phần sẽ gắn vào
+    // nó thay vì vào trang.
+    <div className="w-full min-w-0 overflow-x-clip flex flex-col bg-white">
+      {/* 1. Hero Section */}
+      <section className="home-snap-panel relative z-30 w-full min-h-[520px] md:min-h-[max(720px,100dvh)] flex flex-col pt-[calc(var(--app-header-height,130px)+16px)] pb-8 md:pb-28">
+        {/* Ảnh ruộng bậc thang cũ + chuyển động: trôi chậm, nắng, mây, gió lướt ruộng lúa (xem HeroBackdrop).
+            Mọi kích thước: ảnh phủ kín cả hero, header đè lên; điện thoại chỉ thu nhỏ lại và rút ngắn hero. */}
+        <HeroBackdrop />
+
+        <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-hidden">
+          <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-12">
+            <HeroTitle className="flex" />
+            <p className="hero-rise hidden md:block [animation-delay:260ms] max-w-[640px] break-words [overflow-wrap:anywhere] text-lg sm:text-xl md:text-[22px] lg:text-[26px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
+              Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn
+            </p>
+          </div>
+
+          <div className="hero-rise [animation-delay:420ms] w-full flex flex-col items-center">
+            {/* SearchHub (đặt phòng trước): tỉnh / thành · thời gian · số người → "Tìm homestay" (/homestays); lối phụ
+                "Hoặc lên lịch trình trước" (/lich-trinh/tao) */}
+            <div className="w-full max-w-5xl mx-auto relative z-20">
+              <SearchHub />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Các phần sau hero: TRẮNG → SƯƠNG CHÀM → LÚA CHÍN → TRẮNG, mỗi phần là một tấm vuông nối tiếp nhau (SHEET), nền
+          có quầng màu tĩnh (globals.css: .home-glow-*) và họa tiết minh họa riêng cho từng phần (HomeMotifs), rồi tới chân trang. */}
+      {/* 3. Điểm Đến Thích Hợp Theo Mùa */}
+      <section className="home-snap-panel home-screen relative isolate pt-14 pb-20 md:pt-16 md:pb-24 home-glow-mint">
+        <HomeMotifs variant="destinations" />
+        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
+          {/* Tiêu đề bên trái, "Khám phá thêm" ở góc phải (máy tính) / cạnh nhãn overline (điện thoại) */}
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <Reveal className="min-w-0 flex-1">
+              <SectionHeading
+                eyebrow="Khám phá theo mùa"
+                title="Hôm nay đi đâu"
+                description="Điểm đến đẹp ngay lúc này — gợi ý theo thời điểm vàng của từng vùng Tây Bắc."
+                action={<MobileSeeAll to="/destinations" />}
+              />
+            </Reveal>
+            <DesktopSeeAll to="/destinations">Khám phá thêm điểm đến</DesktopSeeAll>
+          </div>
+
+          {/* "Gần tôi" nổi bật, kèm lời giải thích ngắn (bỏ chip lọc khu vực — carousel đã gọn) */}
+          <Reveal delay={80}>
+            <div className="mb-7 flex items-center gap-3">
+              <NearMeToggle
+                active={nearDestinations}
+                onToggle={() => setNearDestinations((on) => !on)}
+                noun="điểm đến"
+              />
+              <p className="min-w-0 text-xs font-medium leading-snug text-slate-500">
+                {nearDestinations
+                  ? 'Xếp theo khoảng cách từ chỗ bạn đứng.'
+                  : 'Đang đi du lịch? Xem điểm đến quanh bạn.'}
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Điểm đến: danh sách dạng lưới (list/grid) kèm hiệu ứng động khi chuột chạm đến */}
+          <Reveal delay={140}>
+          {nearDestinations ? (
+            <NearMePanel kind="ATTRACTION" />
+          ) : filteredDestinations.length > 0 ? (
+            // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ như homestay (thẻ giữa + hai thẻ mờ hai bên).
+            <FramerSwipeCardStack
+              perPage={10}
+              gridClassName="grid grid-cols-5 gap-3 md:gap-4"
+              label="Điểm đến theo mùa"
+            >
+              {filteredDestinations.map((dest) => <DestinationCard key={dest.id} dest={dest} />)}
+            </FramerSwipeCardStack>
+          ) : (
+            <div className="py-12 flex flex-col items-center justify-center text-[#66716c] bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+              <Mountain className="w-10 h-10 text-slate-300 mb-3" />
+              <p className="font-medium text-sm text-slate-600">Chưa có dữ liệu điểm đến</p>
+            </div>
+          )}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 4. Homestay Bản Địa & Chốn Nghỉ Bình Yên */}
+      <section className={`${SHEET} home-glow-sky`}>
+        <HomeMotifs variant="homestay" />
+        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <Reveal className="min-w-0 flex-1">
+              <SectionHeading
+                eyebrow="Lưu trú bản địa"
+                title="Homestay & Nhà Nghỉ"
+                description="Chốn nghỉ sát ruộng bậc thang, giữ trọn hương vị đời sống Tây Bắc."
+                action={<MobileSeeAll to="/homestays" />}
+              />
+            </Reveal>
+            <DesktopSeeAll to="/homestays">Xem tất cả Homestay bản địa</DesktopSeeAll>
+          </div>
+
+          {/* "Gần tôi": nút chính của phần homestay, kèm lời giải thích ngắn */}
+          <Reveal delay={60}>
+            <div className="mb-7 flex items-center gap-3">
+              <NearMeToggle
+                active={nearHomestays}
+                onToggle={() => setNearHomestays((on) => !on)}
+                noun="homestay"
+              />
+              <p className="min-w-0 text-xs font-medium leading-snug text-slate-500">
+                {nearHomestays
+                  ? 'Xếp theo khoảng cách từ chỗ bạn đứng.'
+                  : 'Đang đi du lịch? Tìm chỗ nghỉ gần nhất.'}
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Homestay: từ tablet mỗi trang 8 thẻ (2 hàng × 4 cột), lướt / bấm ‹ › xem thêm; điện thoại vuốt từng thẻ */}
+          <Reveal delay={100}>
+          {nearHomestays ? (
+            <NearMePanel kind="HOMESTAY" />
+          ) : displayedHomestays.length > 0 ? (
+            <FramerSwipeCardStack perPage={8} gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5" label="Homestay & nhà nghỉ">
+              {displayedHomestays.map((hs) => (
+                <CompactPlaceCard
+                  key={hs.id}
+                  to={`/homestays/${hs.id}`}
+                  name={hs.name}
+                  imageUrl={hs.coverImageUrl}
+                  location={hs.regionName}
+                  price={formatVnd(hs.priceRefMin, 'Liên hệ')}
+                  priceUnit={hs.priceRefMin ? 'đêm' : null}
+                  // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
+                  onIntent={() => prefetchHomestay(hs.id)}
+                  badge={hs.tagBadge ? <CompactCardBadge className="bg-[#0a7d64]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
+                  compact={true}
+                  frame="house"
+                />
+              ))}
+            </FramerSwipeCardStack>
+          ) : (
+            <div className="py-10 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+              <Tent className="w-10 h-10 text-slate-300 mb-2" />
+              <p className="font-medium text-sm">Chưa có homestay bản địa nào</p>
+            </div>
+          )}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 5. Đặc Sản Nổi Tiếng - Danh sách món ngon & thức quà bản địa dạng list/grid kèm hiệu ứng hover */}
+      <section className={`${SHEET} home-glow-ripe`}>
+        <HomeMotifs variant="specialty" />
+        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
+          <div className="mb-7 flex items-end justify-between gap-4">
+            <Reveal className="min-w-0 flex-1">
+              <SectionHeading
+                eyebrow="Ẩm thực & quà tặng"
+                title="Đặc Sản Nổi Tiếng"
+                description="Đặc sản do người bản địa làm ra — mang hương vị Tây Bắc về làm quà."
+                action={<MobileSeeAll to="/specialties" />}
+                tone="text-amber-700"
+              />
+            </Reveal>
+            <DesktopSeeAll to="/specialties">Khám phá thêm thức quà</DesktopSeeAll>
+          </div>
+
+          <Reveal delay={100}>
+          {displayedSpecialties.length > 0 ? (
+            // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ (thẻ vuông nên hẹp hơn thẻ điểm đến).
+            <FramerSwipeCardStack
+              perPage={10}
+              gridClassName="grid grid-cols-5 gap-3 md:gap-4"
+              label="Đặc sản nổi tiếng"
+            >
+              {displayedSpecialties.map((item) => <SpecialtyCard key={item.id} item={item} />)}
+            </FramerSwipeCardStack>
+          ) : (
+            <div className="py-12 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+              <Tag className="w-10 h-10 text-slate-300 mb-2" />
+              <p className="font-medium text-sm">Chưa có đặc sản nào</p>
+            </div>
+          )}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 6. KẾT HỢP: TIỆN ÍCH DU KHÁCH & CAM KẾT DU LỊCH */}
+      <section className={`${SHEET} bg-white`}>
+        <HomeMotifs variant="journey" />
+        <div aria-hidden className="home-dots pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
+        <div className="relative max-w-[1280px] mx-auto w-full px-4 md:px-8">
+          <Reveal className="mb-9 md:mb-12 text-center">
+            <p className="mb-2 inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#0a7d64]">
+              <span className="h-px w-6 bg-current opacity-60" aria-hidden />
+              Đồng hành trọn vẹn
+              <span className="h-px w-6 bg-current opacity-60" aria-hidden />
+            </p>
+            <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
+              Tiện Ích Du Khách & Cam Kết Du Lịch
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm md:text-[15px] font-medium leading-relaxed text-slate-500">
+              Mọi tiện ích cần thiết để sẵn sàng khởi hành, gắn liền với 4 cam kết giá trị đồng hành cùng bạn trên mọi nẻo đường Tây Bắc.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Cột 1: Tiện ích cho chuyến đi — tấm sáng */}
+            <div className="flex flex-col rounded-3xl bg-gradient-to-b from-[#f2f7f4] to-white p-4 sm:p-5 md:p-6 ring-1 ring-slate-900/[0.05]">
+              <Reveal delay={40} className="mb-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white ring-1 ring-emerald-600/15 shadow-[0_4px_10px_-6px_rgba(10,125,100,0.5)] flex items-center justify-center text-[#0a7d64]">
+                  <Compass className="w-[18px] h-[18px]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base md:text-lg leading-tight">Tiện Ích Cho Chuyến Đi</h3>
+                  <p className="text-xs text-slate-500">Công cụ chuẩn bị nhanh và tra cứu hành trình</p>
+                </div>
+              </Reveal>
+
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5 flex-1">
+                {TRAVEL_TOOLS.map(({ to, Icon, title, text, cta, tile, accent }, i) => (
+                  <Reveal key={to} delay={80 + i * 40}>
+                    <Link to={to} className={`${CARD_GREEN} justify-between p-3 sm:p-4`}>
+                      <div>
+                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${tile} flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105`}>
+                          <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                        </div>
+                        <h4 className="mt-2.5 sm:mt-3.5 font-bold text-slate-900 text-[13px] sm:text-sm leading-snug">{title}</h4>
+                        <p className="mt-1 text-[11px] sm:text-xs text-slate-500 leading-relaxed">{text}</p>
+                      </div>
+                      <div className={`mt-2.5 sm:mt-3.5 pt-2 sm:pt-2.5 border-t border-slate-100 flex items-center text-[11px] sm:text-xs font-bold ${accent}`}>
+                        <span>{cta}</span>
+                        <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform duration-200 group-hover:translate-x-1" />
+                      </div>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+
+            {/* Cột 2: Cam kết giá trị — tấm xanh rừng đậm làm điểm nhấn cuối trang */}
+            <div className="relative flex flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d4a3d] via-[#083a30] to-[#05241e] p-4 sm:p-5 md:p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,36,30,0.8)]">
+              <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(28rem_18rem_at_100%_0%,rgba(250,204,21,0.16),transparent_70%),radial-gradient(24rem_16rem_at_0%_100%,rgba(45,212,191,0.14),transparent_70%)]" />
+              <Reveal delay={40} className="relative mb-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white/10 ring-1 ring-white/20 flex items-center justify-center text-[var(--color-sun)]">
+                  <ShieldCheck className="w-[18px] h-[18px]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-white text-base md:text-lg leading-tight">Cam Kết Giá Trị</h3>
+                  <p className="text-xs text-white/60">4 lời hứa đồng hành cùng mỗi chuyến đi của bạn</p>
+                </div>
+              </Reveal>
+
+              <div className="relative grid grid-cols-2 gap-2.5 sm:gap-3.5 flex-1">
+                {COMMITMENTS.map(({ Icon, title, text, tag, tile }, i) => (
+                  <Reveal key={title} delay={80 + i * 40}>
+                    <div className="flex h-full flex-col justify-between rounded-2xl bg-white/[0.06] p-3 sm:p-4 ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[background-color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:bg-white/[0.1]">
+                      <div>
+                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl ring-1 flex items-center justify-center ${tile}`}>
+                          <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                        </div>
+                        <h4 className="mt-2.5 sm:mt-3.5 font-bold text-white text-[13px] sm:text-sm leading-snug">{title}</h4>
+                        <p className="mt-1 text-[11px] sm:text-xs text-white/65 leading-relaxed">{text}</p>
+                      </div>
+                      <span className="mt-2.5 sm:mt-3.5 pt-2 sm:pt-2.5 border-t border-white/10 text-[10px] sm:text-[11px] font-bold text-[var(--color-sun)] uppercase tracking-wider">
+                        {tag}
+                      </span>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {googleSignup && (
+        <Suspense fallback={null}>
+          <GoogleSignupDialog
+            idToken={googleSignup.idToken}
+            profile={googleSignup.profile}
+            onClose={() => setGoogleSignup(null)}
+            onCreated={(session) => {
+              saveTravelerSession(session);
+              setGoogleSignup(null);
+            }}
+          />
+        </Suspense>
+      )}
+    </div>
+  )
+}
