@@ -6,6 +6,7 @@ import TravelerRoute from '@/components/layout/TravelerRoute';
 // Trang chủ nằm trong bundle chính; các trang còn lại tải theo từng route (import trực tiếp, không qua '@/pages',
 // để cổng Admin / NCC và thư viện biểu đồ, bản đồ không bị kéo vào lần tải đầu của khách).
 // Khung cổng Admin / NCC cũng tải lười: chúng kéo theo axios (lib/axiosBoot) — khách du lịch không cần tải.
+import HomePage from '@/pages/home/HomePage';
 import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 
@@ -66,6 +67,7 @@ export function AppRoutes() {
       <Route element={<CustomerRoute />}>
         {/* Khung ứng dụng chính với Sidebar Layout */}
         <Route element={<SidebarLayout />}>
+          <Route index element={<HomePage />} />
           
           {/* Navigation via Sidebar */}
           <Route path="homestays" element={<HomestayListPage />} />
