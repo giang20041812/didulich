@@ -47,6 +47,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
 const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
 const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'));
 const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'));
+const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -76,6 +77,8 @@ export function AppRoutes() {
           {/* User Bookings Management */}
           <Route element={<TravelerRoute />}>
           </Route>
+          {/* Khách quét mã QR nhận phòng dán tại homestay (chưa đăng nhập vẫn mở được, trang mời đăng nhập) */}
+          <Route path="qr/:code" element={<QrCheckinPage />} />
           
           <Route path="experiences" element={<CultureFestivalPage />} />
           <Route path="experiences/:slug" element={<FestivalDetailPage />} />
