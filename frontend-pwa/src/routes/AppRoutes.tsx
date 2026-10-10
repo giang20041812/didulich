@@ -47,6 +47,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>) {
 const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
 const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'));
 const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'));
+const BookingPage = lazyPage(() => import('@/pages/customer/booking/BookingPage'));
 const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
@@ -113,6 +114,8 @@ export function AppRoutes() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
+        {/* Trang Đặt phòng dùng layout độc lập, chỉ có Logo và Tên */}
+        <Route path="booking" element={<BookingPage />} />
 
         <Route element={<TravelerRoute />}>
         </Route>
