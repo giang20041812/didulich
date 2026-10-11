@@ -2,6 +2,7 @@ import type { Express } from 'express';
 import { authRouter } from './auth.js';
 import { exploreRouter } from './explore.js';
 import { healthRouter } from './health.js';
+import { journeyRouter } from './publicJourney.js';
 import { publicCatalogRouter } from './publicCatalog.js';
 import { bookingRouter, stayRouter } from './publicBooking.js';
 import { sepayRouter } from './sepayWebhook.js';
@@ -11,6 +12,7 @@ export function mountRoutes(app: Express): void {
   app.use(healthRouter);
   app.use('/api/v1/auth', authRouter);
   app.use(publicCatalogRouter);
+  app.use(journeyRouter);
   app.use(bookingRouter);
   app.use(exploreRouter);
   app.use(stayRouter);
