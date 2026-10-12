@@ -50,6 +50,8 @@ const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullS
 const BookingPage = lazyPage(() => import('@/pages/customer/booking/BookingPage'));
 const UserBookingListPage = lazyPage(() => import('@/pages/customer/booking/UserBookingListPage'));
 const UserBookingDetailPage = lazyPage(() => import('@/pages/customer/booking/UserBookingDetailPage'));
+const JourneyDetailPage = lazyPage(() => import('@/pages/customer/journey/JourneyDetailPage'));
+const SharedJourneyPage = lazyPage(() => import('@/pages/customer/journey/SharedJourneyPage'));
 const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
@@ -82,9 +84,13 @@ export function AppRoutes() {
             <Route path="bookings" element={<UserBookingListPage />} />
             <Route path="my-bookings" element={<UserBookingListPage />} />
             <Route path="bookings/:bookingCode" element={<UserBookingDetailPage />} />
+            {/* Một lịch trình đã lưu (danh sách "Của tôi" nằm ở trang Lịch trình) */}
+            <Route path="journeys/:id" element={<JourneyDetailPage />} />
           </Route>
           {/* Khách quét mã QR nhận phòng dán tại homestay (chưa đăng nhập vẫn mở được, trang mời đăng nhập) */}
           <Route path="qr/:code" element={<QrCheckinPage />} />
+          {/* Lịch trình được chia sẻ công khai — ai có link đều xem được */}
+          <Route path="j/:token" element={<SharedJourneyPage />} />
           
           <Route path="experiences" element={<CultureFestivalPage />} />
           <Route path="experiences/:slug" element={<FestivalDetailPage />} />
