@@ -52,6 +52,8 @@ const UserBookingListPage = lazyPage(() => import('@/pages/customer/booking/User
 const UserBookingDetailPage = lazyPage(() => import('@/pages/customer/booking/UserBookingDetailPage'));
 const JourneyDetailPage = lazyPage(() => import('@/pages/customer/journey/JourneyDetailPage'));
 const SharedJourneyPage = lazyPage(() => import('@/pages/customer/journey/SharedJourneyPage'));
+const TripPlannerPage = lazyPage(() => import('@/pages/customer/trip/TripPlannerPage'));
+const TripsHubPage = lazyPage(() => import('@/pages/customer/trip/TripsHubPage'));
 const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
@@ -65,6 +67,11 @@ const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
 
+/** Đường dẫn cũ → trang mới, giữ tham số (vd /trai-nghiem?share=1 → /lich-trinh?share=1) hoặc thay bằng search. */
+function Moved({ to, search }: { to: string; search?: string }) {
+  const location = useLocation();
+  return <Navigate to={{ pathname: to, search: search ?? location.search }} replace />;
+}
 
 export function AppRoutes() {
   return (
@@ -89,6 +96,10 @@ export function AppRoutes() {
           </Route>
           {/* Khách quét mã QR nhận phòng dán tại homestay (chưa đăng nhập vẫn mở được, trang mời đăng nhập) */}
           <Route path="qr/:code" element={<QrCheckinPage />} />
+          {/* Lịch trình: tạo mới (nút chính) · Khám phá (lịch trình du khách đăng công khai) · Của tôi (?tab=cua-toi) */}
+          <Route path="lich-trinh" element={<TripsHubPage />} />
+          <Route path="trai-nghiem" element={<Moved to="/lich-trinh" />} />
+          <Route path="journeys" element={<Moved to="/lich-trinh" search="?tab=cua-toi" />} />
           {/* Lịch trình được chia sẻ công khai — ai có link đều xem được */}
           <Route path="j/:token" element={<SharedJourneyPage />} />
           
@@ -128,7 +139,11 @@ export function AppRoutes() {
         {/* Trang Đặt phòng dùng layout độc lập, chỉ có Logo và Tên */}
         <Route path="booking" element={<BookingPage />} />
 
+        {/* Tạo / sửa lịch trình (khung riêng như trang đặt phòng): mở ra là lịch trình trống theo từng ngày + gợi ý bắt đầu.
+            Tạo mới không cần đăng nhập (đăng nhập khi lưu); sửa lịch trình đã lưu thì cần. */}
+        <Route path="lich-trinh/tao" element={<TripPlannerPage />} />
         <Route element={<TravelerRoute />}>
+          <Route path="lich-trinh/:id" element={<TripPlannerPage />} />
         </Route>
 
         {/* Dedicated Homestay, Room Availability & Fullscreen Map Routes (No Sidebar for fullscreen) */}
