@@ -64,6 +64,7 @@ const RestaurantListPage = lazyPage(() => import('@/pages/customer/services/Rest
 const SpecialtyListPage = lazyPage(() => import('@/pages/customer/services/SpecialtyListPage'));
 const DishDetailPage = lazyPage(() => import('@/pages/customer/services/DishDetailPage'));
 const TransportListPage = lazyPage(() => import('@/pages/customer/services/TransportListPage'));
+const ComboListPage = lazyPage(() => import('@/pages/customer/combo/ComboListPage'));
 const UtilityListPage = lazyPage(() => import('@/pages/customer/services/UtilityListPage'));
 const PhotoCreditsPage = lazyPage(() => import('@/pages/customer/PhotoCreditsPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
@@ -130,6 +131,7 @@ export function AppRoutes() {
           <Route path="food" element={<RestaurantListPage />} />
           <Route path="food/:identifier" element={<PlaceDetailPage />} />
           <Route path="tours" element={<CultureFestivalPage />} />
+          <Route path="combo" element={<ComboListPage />} />
           <Route path="transport" element={<TransportListPage />} />
           <Route path="transport/:identifier" element={<PlaceDetailPage />} />
           <Route path="services" element={<UtilityListPage />} />
