@@ -60,6 +60,8 @@ const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/Festi
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
 const TravelGuidePage = lazyPage(() => import('@/pages/customer/guide/TravelGuidePage'));
 const PlaceDetailPage = lazyPage(() => import('@/pages/customer/culture/PlaceDetailPage'));
+const RestaurantListPage = lazyPage(() => import('@/pages/customer/services/RestaurantListPage'));
+const DishDetailPage = lazyPage(() => import('@/pages/customer/services/DishDetailPage'));
 const PhotoCreditsPage = lazyPage(() => import('@/pages/customer/PhotoCreditsPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
@@ -109,7 +111,9 @@ export function AppRoutes() {
           <Route path="destinations" element={<DestinationListPage />} />
           <Route path="destinations/:identifier" element={<PlaceDetailPage />} />
           <Route path="places/:identifier" element={<PlaceDetailPage />} />
+          <Route path="restaurants" element={<RestaurantListPage />} />
           <Route path="restaurants/:identifier" element={<PlaceDetailPage />} />
+          <Route path="specialties/:identifier" element={<DishDetailPage />} />
           
           {/* Profile / Other standard layout pages */}
           <Route path="profile" element={<UserProfilePage />} />
@@ -119,6 +123,7 @@ export function AppRoutes() {
           <Route path="culture/:slug" element={<FestivalDetailPage />} />
           <Route path="explore" element={<CultureFestivalPage />} />
           <Route path="explore/:slug" element={<FestivalDetailPage />} />
+          <Route path="food" element={<RestaurantListPage />} />
           <Route path="food/:identifier" element={<PlaceDetailPage />} />
           <Route path="tours" element={<CultureFestivalPage />} />
           <Route path="transport/:identifier" element={<PlaceDetailPage />} />
