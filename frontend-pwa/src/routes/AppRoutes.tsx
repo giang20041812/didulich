@@ -70,6 +70,8 @@ const UtilityListPage = lazyPage(() => import('@/pages/customer/services/Utility
 const PhotoCreditsPage = lazyPage(() => import('@/pages/customer/PhotoCreditsPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
+const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegisterPage'));
+const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
@@ -173,6 +175,8 @@ export function AppRoutes() {
       <Route path="portal/login" element={<UnifiedAuthPage />} />
       <Route path="login" element={<UnifiedAuthPage />} />
       <Route path="register" element={<UnifiedAuthPage />} />
+      <Route path="register/partner" element={<ProviderRegisterPage />} />
+      <Route path="portal/suspended" element={<ProviderSuspendedPage />} />
     </Routes>
   );
 }
