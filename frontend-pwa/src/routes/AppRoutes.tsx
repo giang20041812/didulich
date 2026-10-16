@@ -74,6 +74,7 @@ const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegisterPage'));
 const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
+const PartnerCalendarPage = lazyPage(() => import('@/pages/partner/PartnerCalendarPage'));
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
 const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
 const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
@@ -197,6 +198,7 @@ export function AppRoutes() {
         {/* NCC đăng nhập vào thẳng Lịch phòng — việc làm hằng ngày của chủ nhà; Tổng quan chuyển sang /partner/overview. */}
         {/* Nhà xe / trải nghiệm không có lịch phòng: /partner mở Tổng quan dịch vụ (PartnerHome). */}
         <Route path="partner" element={<PartnerHome />} />
+        <Route path="partner/calendar" element={<PartnerCalendarPage />} />
         <Route path="partner/services" element={<PartnerServicesHomePage />} />
         <Route path="partner/listings" element={<PartnerListingsPage />} />
         <Route path="partner/combos" element={<PartnerCombosPage />} />
