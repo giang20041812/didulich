@@ -10,6 +10,7 @@ import HomePage from '@/pages/home/HomePage';
 import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 
+const PartnerLayout = lazy(() => import('@/components/partner/PartnerLayout'));
 
 /** Chỗ chờ chung khi khung / trang chưa tải xong — cùng kiểu con quay của lazyPage. */
 function RouteFallback() {
@@ -177,6 +178,8 @@ export function AppRoutes() {
       <Route path="register" element={<UnifiedAuthPage />} />
       <Route path="register/partner" element={<ProviderRegisterPage />} />
       <Route path="portal/suspended" element={<ProviderSuspendedPage />} />
+      <Route element={<Suspense fallback={<RouteFallback />}><PartnerLayout /></Suspense>}>
+      </Route>
     </Routes>
   );
 }
