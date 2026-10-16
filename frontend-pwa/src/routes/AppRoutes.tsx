@@ -74,8 +74,10 @@ const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProf
 const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegisterPage'));
 const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
+const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
+const PartnerHomestayCreatePage = lazyPage(() => import('@/pages/partner/PartnerHomestayCreatePage'));
 const PartnerProfilePage = lazyPage(() => import('@/pages/partner/PartnerProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
@@ -188,6 +190,9 @@ export function AppRoutes() {
         <Route path="partner" element={<PartnerHome />} />
         <Route path="partner/services" element={<PartnerServicesHomePage />} />
         <Route path="partner/overview" element={<PartnerDashboardPage />} />
+        <Route path="partner/homestays" element={<PartnerHomestaysPage />} />
+        {/* Đăng Homestay: thông tin + ảnh + loại phòng + gửi duyệt trong một luồng */}
+        <Route path="partner/homestay/create" element={<PartnerHomestayCreatePage />} />
         <Route path="partner/profile" element={<PartnerProfilePage />} />
       </Route>
     </Routes>
