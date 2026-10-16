@@ -77,6 +77,8 @@ const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSusp
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
 const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
 const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
+const PartnerBookingsPage = lazyPage(() => import('@/pages/partner/PartnerBookingsPage'));
+const PartnerBookingProcessPage = lazyPage(() => import('@/pages/partner/PartnerBookingProcessPage'));
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
 const PartnerHomestayEditPage = lazyPage(() => import('@/pages/partner/PartnerHomestayEditPage'));
@@ -197,6 +199,8 @@ export function AppRoutes() {
         <Route path="partner/overview" element={<PartnerDashboardPage />} />
         <Route path="partner/homestays" element={<PartnerHomestaysPage />} />
         <Route path="partner/rooms" element={<PartnerRoomsPage />} />
+        <Route path="partner/bookings" element={<PartnerBookingsPage />} />
+        <Route path="partner/bookings/:id" element={<PartnerBookingProcessPage />} />
         {/* Đăng Homestay: thông tin + ảnh + loại phòng + gửi duyệt trong một luồng */}
         <Route path="partner/homestay/create" element={<PartnerHomestayCreatePage />} />
         <Route path="partner/homestay/:id/edit" element={<PartnerHomestayEditPage />} />
