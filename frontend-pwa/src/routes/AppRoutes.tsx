@@ -73,6 +73,10 @@ const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegisterPage'));
 const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
+const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
+const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
+const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
+const PartnerProfilePage = lazyPage(() => import('@/pages/partner/PartnerProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
 const DownloadAppPage = lazyPage(() => import('@/pages/system/DownloadAppPage'));
 const NotFoundPage = lazyPage(() => import('@/pages/system/NotFoundPage'));
@@ -179,6 +183,12 @@ export function AppRoutes() {
       <Route path="register/partner" element={<ProviderRegisterPage />} />
       <Route path="portal/suspended" element={<ProviderSuspendedPage />} />
       <Route element={<Suspense fallback={<RouteFallback />}><PartnerLayout /></Suspense>}>
+        {/* NCC đăng nhập vào thẳng Lịch phòng — việc làm hằng ngày của chủ nhà; Tổng quan chuyển sang /partner/overview. */}
+        {/* Nhà xe / trải nghiệm không có lịch phòng: /partner mở Tổng quan dịch vụ (PartnerHome). */}
+        <Route path="partner" element={<PartnerHome />} />
+        <Route path="partner/services" element={<PartnerServicesHomePage />} />
+        <Route path="partner/overview" element={<PartnerDashboardPage />} />
+        <Route path="partner/profile" element={<PartnerProfilePage />} />
       </Route>
     </Routes>
   );
