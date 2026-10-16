@@ -56,6 +56,7 @@ const SharedJourneyPage = lazyPage(() => import('@/pages/customer/journey/Shared
 const TripPlannerPage = lazyPage(() => import('@/pages/customer/trip/TripPlannerPage'));
 const TripsHubPage = lazyPage(() => import('@/pages/customer/trip/TripsHubPage'));
 const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'));
+const CheckinQrPosterPage = lazyPage(() => import('@/pages/portal/CheckinQrPosterPage'));
 const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'));
 const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
@@ -75,8 +76,10 @@ const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegiste
 const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
 const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
+const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
+const PartnerHomestayEditPage = lazyPage(() => import('@/pages/partner/PartnerHomestayEditPage'));
 const PartnerHomestayCreatePage = lazyPage(() => import('@/pages/partner/PartnerHomestayCreatePage'));
 const PartnerProfilePage = lazyPage(() => import('@/pages/partner/PartnerProfilePage'));
 const DesignSystemPage = lazyPage(() => import('@/pages/system/DesignSystemPage'));
@@ -184,6 +187,8 @@ export function AppRoutes() {
       <Route path="register" element={<UnifiedAuthPage />} />
       <Route path="register/partner" element={<ProviderRegisterPage />} />
       <Route path="portal/suspended" element={<ProviderSuspendedPage />} />
+      {/* Tờ in mã QR nhận phòng của một homestay (Admin / NCC) — trang riêng không khung để in cho sạch */}
+      <Route path="in-ma-qr/:placeId" element={<CheckinQrPosterPage />} />
       <Route element={<Suspense fallback={<RouteFallback />}><PartnerLayout /></Suspense>}>
         {/* NCC đăng nhập vào thẳng Lịch phòng — việc làm hằng ngày của chủ nhà; Tổng quan chuyển sang /partner/overview. */}
         {/* Nhà xe / trải nghiệm không có lịch phòng: /partner mở Tổng quan dịch vụ (PartnerHome). */}
@@ -191,8 +196,11 @@ export function AppRoutes() {
         <Route path="partner/services" element={<PartnerServicesHomePage />} />
         <Route path="partner/overview" element={<PartnerDashboardPage />} />
         <Route path="partner/homestays" element={<PartnerHomestaysPage />} />
+        <Route path="partner/rooms" element={<PartnerRoomsPage />} />
         {/* Đăng Homestay: thông tin + ảnh + loại phòng + gửi duyệt trong một luồng */}
         <Route path="partner/homestay/create" element={<PartnerHomestayCreatePage />} />
+        <Route path="partner/homestay/:id/edit" element={<PartnerHomestayEditPage />} />
+        <Route path="partner/homestay/:id/rooms" element={<PartnerRoomsPage />} />
         <Route path="partner/profile" element={<PartnerProfilePage />} />
       </Route>
     </Routes>
