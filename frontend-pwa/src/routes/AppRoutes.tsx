@@ -79,6 +79,8 @@ const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomes
 const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
 const PartnerBookingsPage = lazyPage(() => import('@/pages/partner/PartnerBookingsPage'));
 const PartnerBookingProcessPage = lazyPage(() => import('@/pages/partner/PartnerBookingProcessPage'));
+const PartnerListingsPage = lazyPage(() => import('@/pages/partner/PartnerListingsPage'));
+const PartnerCombosPage = lazyPage(() => import('@/pages/partner/PartnerCombosPage'));
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
 const PartnerHomestayEditPage = lazyPage(() => import('@/pages/partner/PartnerHomestayEditPage'));
@@ -196,6 +198,8 @@ export function AppRoutes() {
         {/* Nhà xe / trải nghiệm không có lịch phòng: /partner mở Tổng quan dịch vụ (PartnerHome). */}
         <Route path="partner" element={<PartnerHome />} />
         <Route path="partner/services" element={<PartnerServicesHomePage />} />
+        <Route path="partner/listings" element={<PartnerListingsPage />} />
+        <Route path="partner/combos" element={<PartnerCombosPage />} />
         <Route path="partner/overview" element={<PartnerDashboardPage />} />
         <Route path="partner/homestays" element={<PartnerHomestaysPage />} />
         <Route path="partner/rooms" element={<PartnerRoomsPage />} />
