@@ -80,7 +80,10 @@ const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomes
 const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
 const PartnerBookingsPage = lazyPage(() => import('@/pages/partner/PartnerBookingsPage'));
 const PartnerBookingProcessPage = lazyPage(() => import('@/pages/partner/PartnerBookingProcessPage'));
+const PartnerReviewsPage = lazyPage(() => import('@/pages/partner/PartnerReviewsPage'));
+const PartnerExplorePlacesPage = lazyPage(() => import('@/pages/partner/PartnerExplorePlacesPage'));
 const PartnerListingsPage = lazyPage(() => import('@/pages/partner/PartnerListingsPage'));
+const PartnerNearbyOffersPage = lazyPage(() => import('@/pages/partner/PartnerNearbyOffersPage'));
 const PartnerCombosPage = lazyPage(() => import('@/pages/partner/PartnerCombosPage'));
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'));
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'));
@@ -201,12 +204,15 @@ export function AppRoutes() {
         <Route path="partner/calendar" element={<PartnerCalendarPage />} />
         <Route path="partner/services" element={<PartnerServicesHomePage />} />
         <Route path="partner/listings" element={<PartnerListingsPage />} />
+        <Route path="partner/nearby" element={<PartnerNearbyOffersPage />} />
         <Route path="partner/combos" element={<PartnerCombosPage />} />
         <Route path="partner/overview" element={<PartnerDashboardPage />} />
         <Route path="partner/homestays" element={<PartnerHomestaysPage />} />
         <Route path="partner/rooms" element={<PartnerRoomsPage />} />
         <Route path="partner/bookings" element={<PartnerBookingsPage />} />
         <Route path="partner/bookings/:id" element={<PartnerBookingProcessPage />} />
+        <Route path="partner/reviews" element={<PartnerReviewsPage />} />
+        <Route path="partner/explore-places" element={<PartnerExplorePlacesPage />} />
         {/* Đăng Homestay: thông tin + ảnh + loại phòng + gửi duyệt trong một luồng */}
         <Route path="partner/homestay/create" element={<PartnerHomestayCreatePage />} />
         <Route path="partner/homestay/:id/edit" element={<PartnerHomestayEditPage />} />
