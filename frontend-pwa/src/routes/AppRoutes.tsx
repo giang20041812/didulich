@@ -11,6 +11,7 @@ import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 
 const PartnerLayout = lazy(() => import('@/components/partner/PartnerLayout'));
+const AdminGuard = lazy(() => import('@/components/admin/AdminGuard'));
 
 /** Chỗ chờ chung khi khung / trang chưa tải xong — cùng kiểu con quay của lazyPage. */
 function RouteFallback() {
@@ -74,6 +75,7 @@ const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'));
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'));
 const ProviderRegisterPage = lazyPage(() => import('@/pages/auth/ProviderRegisterPage'));
 const ProviderSuspendedPage = lazyPage(() => import('@/pages/portal/ProviderSuspendedPage'));
+const AdminDashboardPage = lazyPage(() => import('@/pages/admin/AdminDashboardPage'));
 const PartnerCalendarPage = lazyPage(() => import('@/pages/partner/PartnerCalendarPage'));
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'));
 const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
@@ -197,6 +199,16 @@ export function AppRoutes() {
       <Route path="portal/suspended" element={<ProviderSuspendedPage />} />
       {/* Tờ in mã QR nhận phòng của một homestay (Admin / NCC) — trang riêng không khung để in cho sạch */}
       <Route path="in-ma-qr/:placeId" element={<CheckinQrPosterPage />} />
+      <Route
+        path="admin"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <AdminGuard>
+              <AdminDashboardPage />
+            </AdminGuard>
+          </Suspense>
+        }
+      />
       <Route element={<Suspense fallback={<RouteFallback />}><PartnerLayout /></Suspense>}>
         {/* NCC đăng nhập vào thẳng Lịch phòng — việc làm hằng ngày của chủ nhà; Tổng quan chuyển sang /partner/overview. */}
         {/* Nhà xe / trải nghiệm không có lịch phòng: /partner mở Tổng quan dịch vụ (PartnerHome). */}
