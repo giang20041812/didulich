@@ -1,4 +1,5 @@
 import type { Express } from 'express';
+import { adminRouter } from './admin.js';
 import { authRouter } from './auth.js';
 import { exploreRouter } from './explore.js';
 import { healthRouter } from './health.js';
@@ -20,6 +21,7 @@ export function mountRoutes(app: Express): void {
   app.use(bookingRouter);
   app.use(travelerRouter);
   app.use(partnerRouter);
+  app.use(adminRouter);
   app.use(exploreRouter);
   app.use(comboRouter);
   app.use(stayRouter);
