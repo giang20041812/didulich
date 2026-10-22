@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "container",
+  "regions": ["sin1"],
+  "rewrites": [
+    { "source": "/keepalive", "destination": "https://viettrek-api.vercel.app/api/public/health" },
+    { "source": "/keepalive-b", "destination": "https://viettrek-api.vercel.app/api/public/health" },
+    { "source": "/cron/tick", "destination": "https://viettrek-api.vercel.app/api/internal/cron/tick" }
+  ],
+  "crons": [
+    { "path": "/cron/tick", "schedule": "* * * * *" },
+    { "path": "/keepalive-b", "schedule": "* * * * *" }
+  ]
+}

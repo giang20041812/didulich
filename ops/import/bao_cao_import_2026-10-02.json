@@ -1,0 +1,67 @@
+[
+ {
+  "code": "HS002",
+  "name": "New Highland Hotel",
+  "placeId": 12,
+  "slug": "homestay-bbc2f281-86b3-4434-b6e4-4544efab40bb",
+  "phone": "0966242337",
+  "password": "Ncc@Mcc02!",
+  "skipped": "phòng 4 giường (1 phòng) — file Excel không có giá, chưa tạo để tránh bán sai giá.",
+  "verify": true
+ },
+ {
+  "code": "HS003",
+  "name": "Trai Bản Homestay",
+  "placeId": 13,
+  "slug": "homestay-ad9eec6b-1249-4434-a15a-4c1a7390ee4b",
+  "phone": "0979929101",
+  "password": "Ncc@Mcc03!",
+  "skipped": null,
+  "verify": true
+ },
+ {
+  "code": "HS004",
+  "name": "Hoa Sơn Trà Hotel",
+  "placeId": 14,
+  "slug": "homestay-0f678a85-eca9-4048-ad52-38d254ab34fa",
+  "phone": "0974664911",
+  "password": "Ncc@Mcc04!",
+  "skipped": "Số lượng \"Phòng thường\" gộp 6 phòng 1-giường-to + 3 phòng 2-giường-nhỏ theo ghi chú file Excel (12 phòng tổng) — cần NCC xác nhận lại.",
+  "verify": true
+ },
+ {
+  "code": "HS005",
+  "name": "Baan Mali Homestay",
+  "placeId": 15,
+  "slug": "homestay-97dc6858-3adb-4987-83a4-c837f03f1325",
+  "phone": "0983994669",
+  "password": "Ncc@Mcc05!",
+  "skipped": "phòng cộng đồng (1) — chưa có giá theo ghi chú file Excel.",
+  "verify": true
+ },
+ {
+  "code": "HS006",
+  "name": "Homestay Hoà Thảo",
+  "placeId": 16,
+  "slug": "homestay-144d84c9-5342-46ec-a14a-5ec6a9fe6721",
+  "phone": "0974503699",
+  "password": "Ncc@Mcc06!",
+  "skipped": "Số lượng phòng đơn/đôi file Excel không ghi rõ — tạm đặt 1 phòng mỗi loại để tránh bán quá sức chứa; NCC cập nhật lại sau. Phòng dom giá theo người, tạm nhập 200.000đ/đêm theo ghi chú.",
+  "verify": true
+ },
+ {
+  "ra_soat_lan_2": "02/10/2026 — audit từng trường so với Excel",
+  "da_va": [
+   "HS005: mô tả về đúng nguyên văn Excel (bỏ chữ 'với' thừa)",
+   "HS003: beds Bungalow 1 giường (Giường x1), Bungalow 2 giường (Giường x2), Bungalow 3 giường (Giường x3)",
+   "HS006: phòng dom -> INACTIVE (Excel giá theo người 150-200k/người, hệ thống bán theo phòng); giá thấp nhất hiển thị về 350.000đ đúng cột L",
+   "Code: RoomTypeDto thêm status; FE HomestayDetailPage lọc phòng INACTIVE (cần deploy BE+FE)"
+  ],
+  "con_lai_chu_dich": [
+   "SĐT 2 của HS001 (0984000708) & HS004 (0328608977): API portal chỉ hỗ trợ 1 SĐT chính",
+   "Phòng không có giá trong Excel nên không tạo: Sàn + nhà gỗ (Anh Túc), phòng 4 giường (New Highland), phòng cộng đồng (Baan Mali)",
+   "HS004: Excel không có mô tả — đã tự viết mô tả trung thực theo dữ liệu địa chỉ/số phòng",
+   "Tọa độ HS004/HS005 theo cụm Tổ 2 (±300m) — NCC chỉnh lại khi có GPS"
+  ]
+ }
+]

@@ -1,0 +1,39 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "VITE_API_URL=https://viettrek-api.vercel.app VITE_API_ORIGIN=https://viettrek-api.vercel.app npm --prefix frontend-pwa run dev -- --port 5199 --strictPort"
+      ],
+      "port": 5199
+    },
+    {
+      "name": "test-db",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/private/tmp/claude-501/-Users-lebahuy-Desktop-DiDuLicj-main/13b473a0-046a-4f46-917f-251cc8e83641/scratchpad/localstack/pg/start-pg.mjs"
+      ],
+      "port": 55433
+    },
+    {
+      "name": "test-api",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "/private/tmp/claude-501/-Users-lebahuy-Desktop-DiDuLicj-main/13b473a0-046a-4f46-917f-251cc8e83641/scratchpad/localstack/run-api.sh"
+      ],
+      "port": 58080
+    },
+    {
+      "name": "frontend-test",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "VITE_API_URL=http://localhost:58080 VITE_API_ORIGIN=http://localhost:58080 npm --prefix frontend-pwa run dev -- --port 5200 --strictPort"
+      ],
+      "port": 5200
+    }
+  ]
+}
