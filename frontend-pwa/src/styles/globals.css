@@ -673,20 +673,22 @@
 .motif[data-ink] :is(path, circle, ellipse):not([stroke-dasharray]) {
   stroke-dasharray: var(--len) calc(var(--len) + 4px);
   stroke-dashoffset: calc(var(--len) + 2px);
-  transition: stroke-dashoffset var(--dur, 1600ms) cubic-bezier(0.45, 0, 0.2, 1) var(--delay, 0ms);
 }
 .motif[data-ink] path[stroke-dasharray] {
   opacity: 0;
-  transition: opacity 1600ms ease 600ms;
 }
 .motif[data-ink] path[fill-opacity] {
   fill-opacity: 0;
 }
+/* Chuyển động chỉ gắn ở trạng thái đã vẽ: lúc thêm data-ink (ẩn nét) phải ẩn ngay, nếu không nét đang hiện sẵn sẽ bị
+   "xóa ngược" dần theo từng độ trễ trước khi kịp vẽ. */
 .motif[data-ink][data-drawn] :is(path, circle, ellipse):not([stroke-dasharray]) {
   stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--dur, 1600ms) cubic-bezier(0.45, 0, 0.2, 1) var(--delay, 0ms);
 }
 .motif[data-ink][data-drawn] path[stroke-dasharray] {
   opacity: 1;
+  transition: opacity 1600ms ease 600ms;
 }
 .motif[data-ink][data-drawn] path[fill-opacity] {
   fill-opacity: 0.4;
