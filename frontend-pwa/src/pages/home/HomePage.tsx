@@ -29,14 +29,11 @@ import CardFrame from "@/components/ui/CardFrame"
  * Tiêu đề section kiểu editorial: nhãn overline nhỏ (gạch ngang dẫn) + tiêu đề lớn + mô tả dẫn dắt. `action` (vd. "Xem
  * tất cả") nằm cùng hàng nhãn overline trên điện thoại; máy tính đặt nút riêng ở góc phải.
  */
-function SectionHeading({ eyebrow, title, description, action, tone = 'text-[#0a7d64]' }: { eyebrow: string; title: string; description?: string; action?: ReactNode; tone?: string }) {
+function SectionHeading({ title, description, action, tone = 'text-[#0a7d64]' }: { title: string; description?: string; action?: ReactNode; tone?: string }) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className={`inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] ${tone}`}>
-          <span className="h-px w-6 bg-current opacity-60" aria-hidden />
-          {eyebrow}
-        </p>
+
         {action && <div className="md:hidden">{action}</div>}
       </div>
       <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
@@ -518,7 +515,7 @@ export default function HomePage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <Reveal className="min-w-0 flex-1">
               <SectionHeading
-                eyebrow="Khám phá theo mùa"
+
                 title="Hôm nay đi đâu"
                 action={<MobileSeeAll to="/destinations" />}
               />
@@ -572,7 +569,7 @@ export default function HomePage() {
           <div className="mb-6 flex items-end justify-between gap-4">
             <Reveal className="min-w-0 flex-1">
               <SectionHeading
-                eyebrow="Lưu trú bản địa"
+
                 title="Homestay & Nhà Nghỉ"
 
                 action={<MobileSeeAll to="/homestays" />}
@@ -637,7 +634,7 @@ export default function HomePage() {
           <div className="mb-7 flex items-end justify-between gap-4">
             <Reveal className="min-w-0 flex-1">
               <SectionHeading
-                eyebrow="Ẩm thực & quà tặng"
+
                 title="Đặc Sản Nổi Tiếng"
                 action={<MobileSeeAll to="/specialties" />}
                 tone="text-amber-700"
@@ -672,11 +669,7 @@ export default function HomePage() {
         <div aria-hidden className="home-dots pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
         <div className="relative max-w-[1280px] mx-auto w-full px-4 md:px-8">
           <Reveal className="mb-9 md:mb-12 text-center">
-            <p className="mb-2 inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#0a7d64]">
-              <span className="h-px w-6 bg-current opacity-60" aria-hidden />
-              Đồng hành trọn vẹn
-              <span className="h-px w-6 bg-current opacity-60" aria-hidden />
-            </p>
+
             <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
               Tiện Ích Du Khách & Cam Kết Du Lịch
             </h2>
