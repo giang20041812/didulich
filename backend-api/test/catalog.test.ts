@@ -55,6 +55,33 @@ describe('public places', () => {
     expect(again.status).toBe(304);
   });
 
+  it('lists published homestays that have no rooms yet as info-only (contact directly)', async () => {
+    const ncc = await createProvider();
+    const bookable = await createPlace({ name: 'Có phòng bán', providerId: ncc.providerId, priceRefMin: 500000 });
+    await createRoomType(bookable, 'Phòng đôi', 500000);
+    await createPlace({ name: 'Chỉ có thông tin', providerId: null, priceRefMin: 300000 });
+    // Loại phòng đã tắt (INACTIVE) vẫn là chỗ nghỉ có phòng nhưng không bán được → không được liệt kê như "chỉ có thông tin".
+    const closed = await createPlace({ name: 'Đã tắt bán phòng', providerId: ncc.providerId });
+    const closedRoom = await createRoomType(closed, 'Phòng', 400000);
+    await exec(`UPDATE room_type SET status = 'INACTIVE' WHERE id = $1`, [closedRoom]);
+
+    const all = await request(app).get('/api/public/places?kind=HOMESTAY&size=12');
+    expect(all.body.content.map((c: { name: string }) => c.name).sort()).toEqual(['Chỉ có thông tin', 'Có phòng bán']);
+    const info = all.body.content.find((c: { name: string }) => c.name === 'Chỉ có thông tin');
+    expect(info).toMatchObject({ priceRefMin: 300000, hasOnlineRooms: false });
+    expect(all.body.content.find((c: { name: string }) => c.name === 'Có phòng bán')).toMatchObject({ hasOnlineRooms: true });
+
+    // Số khách không loại chỗ nghỉ chưa biết sức chứa; lọc theo giá thì vẫn chỉ lấy chỗ có phòng bán có giá.
+    const guests = await request(app).get('/api/public/places?kind=HOMESTAY&guests=4');
+    expect(guests.body.content.map((c: { name: string }) => c.name)).toContain('Chỉ có thông tin');
+    const priced = await request(app).get('/api/public/places?kind=HOMESTAY&maxPrice=1000000');
+    expect(priced.body.content.map((c: { name: string }) => c.name)).toEqual(['Có phòng bán']);
+    // Loại khác không bị thêm trường này.
+    await createPlace({ name: 'Quán ăn', kind: 'RESTAURANT', providerId: null });
+    const restaurants = await request(app).get('/api/public/places?kind=RESTAURANT');
+    expect(restaurants.body.content[0]).not.toHaveProperty('hasOnlineRooms');
+  });
+
   it('filters by price, keyword (accent-insensitive) and validates', async () => {
     const ncc = await createProvider();
     const a = await createPlace({ name: 'Mù Cang Chải Homestay', providerId: ncc.providerId });
