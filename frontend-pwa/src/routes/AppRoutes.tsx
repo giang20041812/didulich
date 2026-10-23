@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ComponentType } from 'react';
+import { lazy, Suspense, type ComponentType, type ReactElement } from 'react';
 import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import SidebarLayout from '@/components/layout/SidebarLayout';
 import CustomerRoute from '@/components/layout/CustomerRoute';
@@ -13,7 +13,7 @@ import { PageSkeleton, DetailSkeleton, DashboardSkeleton, FormSkeleton, ListPage
 type SkeletonKind = 'cards' | 'detail' | 'list' | 'dashboard' | 'form';
 
 /** Khung chờ đúng dạng trang đích (lưới thẻ / chi tiết / danh sách dòng / tổng quan / biểu mẫu). */
-const SKELETONS: Record<SkeletonKind, () => JSX.Element> = {
+const SKELETONS: Record<SkeletonKind, () => ReactElement> = {
   cards: () => <PageSkeleton />,
   detail: () => <DetailSkeleton />,
   list: () => <ListPageFallback />,
