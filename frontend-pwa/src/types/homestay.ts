@@ -156,6 +156,8 @@ export interface HomestayDto {
   operationStatus?: PlaceOperationStatus;
   operationStatusReason?: string | null;
   availableForSelectedDates?: boolean;
+  /** false = chưa mở bán phòng trực tuyến (chỉ có thông tin tham khảo): khách liên hệ trực tiếp. */
+  hasOnlineRooms?: boolean;
   contacts?: PlaceContactItem[];
   amenities?: string[];
   suitableDateStart?: string;

@@ -50,6 +50,7 @@ interface PlaceSummaryApiItem {
   operationStatus?: HomestayDto['operationStatus'];
   operationStatusReason?: string | null;
   availableForSelectedDates?: boolean;
+  hasOnlineRooms?: boolean;
 }
 
 const readPageResponse = (value: unknown): PageResponse<PlaceSummaryApiItem> => {
@@ -169,6 +170,7 @@ export const fetchHomestays = async (params?: HomestayFilterParams): Promise<Pag
         operationStatus: item.operationStatus,
         operationStatusReason: item.operationStatusReason,
         availableForSelectedDates: item.availableForSelectedDates,
+        hasOnlineRooms: item.hasOnlineRooms,
       };
       }),
     };
