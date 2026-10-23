@@ -29,7 +29,7 @@ import CardFrame from "@/components/ui/CardFrame"
  * Tiêu đề section kiểu editorial: nhãn overline nhỏ (gạch ngang dẫn) + tiêu đề lớn + mô tả dẫn dắt. `action` (vd. "Xem
  * tất cả") nằm cùng hàng nhãn overline trên điện thoại; máy tính đặt nút riêng ở góc phải.
  */
-function SectionHeading({ title, description, action, tone = 'text-[#0a7d64]' }: { title: string; description?: string; action?: ReactNode; tone?: string }) {
+function SectionHeading({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
@@ -637,7 +637,6 @@ export default function HomePage() {
 
                 title="Đặc Sản Nổi Tiếng"
                 action={<MobileSeeAll to="/specialties" />}
-                tone="text-amber-700"
               />
             </Reveal>
             <DesktopSeeAll to="/specialties">Khám phá thêm thức quà</DesktopSeeAll>
