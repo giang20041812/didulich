@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -38,6 +38,61 @@ const DROPDOWN_ITEM =
  *  logo | menu giữa | tài khoản. */
 const DESKTOP_QUERY = '(min-width: 48rem)';
 
+interface PillRect { left: number; top: number; width: number; height: number }
+
+/** Viên thuốc nền trượt theo mục đang chọn (aria-current="page") trong `navRef`: đo vị trí mục đó, đổi mục thì viên
+ *  thuốc di chuyển sang chỗ mới thay vì mỗi mục tự đổi nền. Lần đo đầu không có chuyển động để khỏi trượt từ góc. */
+function useSlidingPill(navRef: RefObject<HTMLElement | null>, deps: unknown[]) {
+  const [rect, setRect] = useState<PillRect | null>(null);
+  const [animate, setAnimate] = useState(false);
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return undefined;
+    const measure = () => {
+      const el = nav.querySelector<HTMLElement>('[aria-current="page"]');
+      if (!el || !el.offsetWidth) {
+        setRect(null);
+        return;
+      }
+      const next = { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight };
+      setRect((prev) =>
+        prev && prev.left === next.left && prev.top === next.top && prev.width === next.width && prev.height === next.height
+          ? prev
+          : next,
+      );
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(nav);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  useEffect(() => {
+    if (rect && !animate) {
+      const id = requestAnimationFrame(() => setAnimate(true));
+      return () => cancelAnimationFrame(id);
+    }
+    return undefined;
+  }, [rect, animate]);
+
+  return { rect, animate };
+}
+
+function SlidingPill({ rect, animate, className }: { rect: PillRect | null; animate: boolean; className: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`pointer-events-none absolute left-0 top-0 rounded-full ${
+        animate ? 'transition-[transform,width,height,opacity,background-color,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]' : ''
+      } ${rect ? 'opacity-100' : 'opacity-0'} ${className}`}
+      style={rect ? { width: rect.width, height: rect.height, transform: `translate(${rect.left}px, ${rect.top}px)` } : undefined}
+    />
+  );
+}
+
 interface HeaderProps {
   isSidebarOpen?: boolean;
   toggleSidebar?: () => void;
@@ -66,6 +121,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
   const accountRef = useRef<HTMLDivElement>(null);
   const accountButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
+  const desktopNavRef = useRef<HTMLElement>(null);
+  const mobileNavListRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   /** Khối tìm kiếm của trang (SearchHub) đã cuộn khuất: ô giữa header hiển thị thanh tìm kiếm thu gọn thay cho menu. */
@@ -251,11 +308,14 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
   const navItemTone = (active: boolean) =>
     active
       ? isSolid
-        ? 'bg-[var(--color-primary-50)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(10,125,100,0.14)]'
-        : 'bg-white/15 text-[var(--color-sun)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
+        ? 'text-[var(--color-primary)]'
+        : 'text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]'
       : isSolid
         ? 'text-slate-700 hover:bg-slate-900/[0.04] hover:text-[var(--color-primary)]'
         : 'text-white hover:bg-white/10 hover:text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]';
+
+  const desktopPill = useSlidingPill(desktopNavRef, [location.pathname, visibleCount, isSolid, searchCompact]);
+  const mobilePill = useSlidingPill(mobileNavListRef, [location.pathname, isSolid]);
 
   const userInitial = user?.fullName
     ? user.fullName.trim().charAt(0).toUpperCase()
@@ -326,7 +386,16 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
 
           {/* Ô giữa: Luôn hiển thị thanh menu điều hướng chính như ảnh số 2 */}
           <div className="min-w-0 md:justify-self-center hidden md:block">
-            <nav aria-label="Điều hướng chính" className="flex items-center justify-center gap-1">
+            <nav ref={desktopNavRef} aria-label="Điều hướng chính" className="relative flex items-center justify-center gap-1">
+              <SlidingPill
+                rect={desktopPill.rect}
+                animate={desktopPill.animate}
+                className={
+                  isSolid
+                    ? 'bg-[var(--color-primary-50)] shadow-[inset_0_0_0_1px_rgba(10,125,100,0.14)]'
+                    : 'bg-white/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
+                }
+              />
               {visibleNav.map((item) => {
                 const active = isCustomerNavActive(item, location.pathname);
                 return (
@@ -334,7 +403,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     key={item.id}
                     to={item.path}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-[background-color,color] duration-200 ${navItemSize} ${navItemTone(active)}`}
+                    className={`relative flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors duration-200 ${navItemSize} ${navItemTone(active)}`}
                   >
                     <item.Icon className="w-4 h-4 shrink-0" aria-hidden />
                     <span>{item.label}</span>
@@ -351,7 +420,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     onClick={() => setMoreOpenFor(isMoreOpen ? null : location)}
                     aria-expanded={isMoreOpen}
                     aria-haspopup="true"
-                    className={`flex items-center gap-1 whitespace-nowrap transition-[background-color,color] duration-200 cursor-pointer ${navItemSize} ${navItemTone(overflowActive)}`}
+                    aria-current={overflowActive ? 'page' : undefined}
+                    className={`relative flex items-center gap-1 whitespace-nowrap transition-colors duration-200 cursor-pointer ${navItemSize} ${navItemTone(overflowActive)}`}
                   >
                     Thêm
                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isMoreOpen ? 'rotate-180' : ''}`} aria-hidden />
@@ -602,7 +672,12 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 isSolid ? 'border-t border-slate-200/60 bg-white/70' : 'bg-transparent'
               } ${navMore ? '[mask-image:linear-gradient(to_right,#000_calc(100%-44px),transparent)]' : ''}`}
             >
-              <nav aria-label="Điều hướng chính" className="flex items-center gap-1.5 shrink-0 min-w-max mx-auto">
+              <nav ref={mobileNavListRef} aria-label="Điều hướng chính" className="relative flex items-center gap-1.5 shrink-0 min-w-max mx-auto">
+                <SlidingPill
+                  rect={mobilePill.rect}
+                  animate={mobilePill.animate}
+                  className={isSolid ? 'bg-[var(--color-primary)]' : 'bg-white/20'}
+                />
                 {CUSTOMER_NAV.map((item) => {
                   const active = isCustomerNavActive(item, location.pathname);
                   return (
@@ -610,11 +685,11 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                       key={item.id}
                       to={item.path}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 shrink-0 rounded-full ${
+                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 shrink-0 rounded-full ${
                         active
                           ? isSolid
-                            ? 'bg-[var(--color-primary)] text-white'
-                            : 'bg-white/20 text-[var(--color-sun)]'
+                            ? 'text-white'
+                            : 'text-[var(--color-sun)]'
                           : isSolid
                             ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                             : 'text-white/85 hover:text-white'
