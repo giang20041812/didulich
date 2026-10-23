@@ -39,7 +39,7 @@ export default defineConfig({
     // Đang chạy backend local thì: PREVIEW_API_TARGET=http://127.0.0.1:8080 npm run preview
     proxy: {
       '/api': {
-        target: process.env.PREVIEW_API_TARGET || 'https://viettrek-api.vercel.app',
+        target: process.env.PREVIEW_API_TARGET || 'https://vt-api-two.vercel.app',
         changeOrigin: true,
       },
       '/media': {

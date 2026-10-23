@@ -79,7 +79,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://viettrek-api.vercel.app/api/:path*"
+      "destination": "https://vt-api-two.vercel.app/api/:path*"
     },
     {
       "source": "/media/:path*",
