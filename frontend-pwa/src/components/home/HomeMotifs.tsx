@@ -186,7 +186,7 @@ export default function HomeMotifs({ variant, className = 'inset-0' }: { variant
   const { tone, drum, items } = LAYOUT[variant];
   const ref = useRef<HTMLDivElement>(null);
   // Cùng điều kiện với snap từng màn hình (globals.css, .home-screen): mỗi phần vừa một màn hình nên vẽ cả bộ cùng lúc.
-  const together = useMediaQuery('(min-width: 768px) and (min-height: 600px)');
+  const together = useMediaQuery('(min-width: 1024px) and (min-height: 760px)');
   const [sectionDrawn, setSectionDrawn] = useState(false);
 
   // Phần "tới" khi mép trên của nó lên khỏi đường 65% chiều cao màn hình. Đầu trang luôn cao đúng một màn hình nên lúc mới mở
