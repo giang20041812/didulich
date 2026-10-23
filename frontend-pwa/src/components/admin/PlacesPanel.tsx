@@ -4,6 +4,7 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useAdminPermission } from '@/hooks/useAdminPermission';
 import { adminService } from '@/services/adminService';
 import { getApiErrorMessage } from '@/lib/apiError';
+import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import type {
   AdminPlaceSummaryDto,
   CategoryKind,
@@ -29,7 +30,7 @@ import { useUrlStatus } from '@/hooks/useUrlStatus';
 import { useStatusCounts } from '@/hooks/useStatusCounts';
 import { actionButtonClass } from './statusStyles';
 import PlaceQuickPreview from './PlaceQuickPreview';
-import { KIND_META, kindMeta, VERIFICATION_LABEL, VERIFICATION_TONE, VISIBILITY_LABEL, VISIBILITY_TONE } from './placeMeta';
+import { DATA_VERIFIED_LABEL, DATA_VERIFIED_TONE, KIND_META, kindMeta, VERIFICATION_LABEL, VERIFICATION_TONE, VISIBILITY_LABEL, VISIBILITY_TONE } from './placeMeta';
 
 interface PlacesPanelProps {
   notify: (type: 'success' | 'error', text: string) => void;
@@ -52,6 +53,12 @@ const STATUS_VALUES = STATUS_ITEMS.map((i) => i.value);
 const VISIBILITY_OPTIONS: SelectOption<PlaceVisibility>[] = [
   { value: '', label: 'Tất cả' },
   ...(['PUBLISHED', 'UNPUBLISHED', 'DRAFT'] as PlaceVisibility[]).map((v) => ({ value: v, label: VISIBILITY_LABEL[v] })),
+];
+type DataVerifiedFilter = 'true' | 'false';
+const DATA_VERIFIED_OPTIONS: SelectOption<DataVerifiedFilter>[] = [
+  { value: '', label: 'Tất cả' },
+  { value: 'true', label: DATA_VERIFIED_LABEL.true },
+  { value: 'false', label: DATA_VERIFIED_LABEL.false },
 ];
 const KIND_OPTIONS: SelectOption<CategoryKind>[] = [
   { value: '', label: 'Tất cả' },
@@ -79,6 +86,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
   const [verification, setVerification] = useUrlStatus<PlaceVerificationStatus>(STATUS_VALUES, 'UNVERIFIED');
   const [visibility, setVisibility] = useState<PlaceVisibility | ''>('');
   const [kind, setKind] = useState<CategoryKind | ''>('');
+  const [dataVerified, setDataVerified] = useState<DataVerifiedFilter | ''>('');
   const [createdFrom, setCreatedFrom] = useState('');
   const [createdTo, setCreatedTo] = useState('');
   const [sort, setSort] = useState('createdAt:desc');
@@ -93,9 +101,11 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
 
   const [pending, setPending] = useState<PendingAction | null>(null);
   const [dialogError, setDialogError] = useState('');
+  /** Địa điểm đang lưu cờ dữ liệu xác thực — khóa công tắc để không gửi chồng yêu cầu. */
+  const [savingDataId, setSavingDataId] = useState<number | null>(null);
 
   const debouncedKeyword = useDebouncedValue(keyword);
-  const activeCount = [debouncedKeyword, visibility, kind, createdFrom || createdTo].filter(Boolean).length;
+  const activeCount = [debouncedKeyword, visibility, kind, dataVerified, createdFrom || createdTo].filter(Boolean).length;
 
   const resetPage = <T,>(setter: (v: T) => void) => (v: T) => {
     setter(v);
@@ -107,6 +117,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
     setKeyword('');
     setVisibility('');
     setKind('');
+    setDataVerified('');
     setCreatedFrom('');
     setCreatedTo('');
     setPage(0);
@@ -132,6 +143,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
           verification: verification || undefined,
           visibility: visibility || undefined,
           kind: kind || undefined,
+          dataVerified: dataVerified ? dataVerified === 'true' : undefined,
           createdFrom: createdFrom || undefined,
           createdTo: createdTo || undefined,
           sortBy,
@@ -145,7 +157,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [debouncedKeyword, verification, visibility, kind, createdFrom, createdTo, sort, page]);
+  }, [debouncedKeyword, verification, visibility, kind, dataVerified, createdFrom, createdTo, sort, page]);
 
   useEffect(() => {
     void load();
@@ -161,13 +173,14 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
           verification: s || undefined,
           visibility: visibility || undefined,
           kind: kind || undefined,
+          dataVerified: dataVerified ? dataVerified === 'true' : undefined,
           createdFrom: createdFrom || undefined,
           createdTo: createdTo || undefined,
           page: 0,
           size: 1,
         })
       ).totalElements,
-    JSON.stringify([debouncedKeyword.trim(), visibility, kind, createdFrom, createdTo]),
+    JSON.stringify([debouncedKeyword.trim(), visibility, kind, dataVerified, createdFrom, createdTo]),
     reload,
   );
 
@@ -237,6 +250,24 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
     }
   };
 
+  /** Bật / tắt cờ "dữ liệu đã xác thực": lưu ngay (không cần lý do), cập nhật dòng và ngăn xem nhanh tại chỗ. */
+  const toggleDataVerified = async (place: AdminPlaceSummaryDto, next: boolean) => {
+    if (savingDataId !== null) return;
+    setSavingDataId(place.id);
+    try {
+      const updated = await adminService.updatePlaceDataVerified(place.id, { dataVerified: next });
+      setData((cur) => (cur ? { ...cur, content: cur.content.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)) } : cur));
+      setPreview((cur) => (cur && cur.id === updated.id ? { ...cur, ...updated } : cur));
+      // Không hiện hộp thoại thành công (nó chặn màn hình): chính công tắc đổi trạng thái là phản hồi. Chỉ báo khi lỗi.
+      // Đang lọc theo cờ này thì dòng không còn khớp bộ lọc: tải lại danh sách và số đếm.
+      if (dataVerified) setReload((n) => n + 1);
+    } catch (err: unknown) {
+      notify('error', getApiErrorMessage(err, 'Không thể cập nhật trạng thái xác thực dữ liệu.'));
+    } finally {
+      setSavingDataId(null);
+    }
+  };
+
   const ask = (action: PendingAction) => {
     setDialogError('');
     setPending(action);
@@ -259,6 +290,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
         <FilterSearch value={keyword} onChange={resetPage(setKeyword)} placeholder="Tìm theo tên, slug, địa chỉ hoặc nhà cung cấp..." />
         <CompactSelect label="Loại hình" value={kind} options={KIND_OPTIONS} onChange={resetPage(setKind)} />
         <CompactSelect label="Hiển thị" value={visibility} options={VISIBILITY_OPTIONS} onChange={resetPage(setVisibility)} />
+        <CompactSelect label="Dữ liệu" value={dataVerified} options={DATA_VERIFIED_OPTIONS} onChange={resetPage(setDataVerified)} />
         <CompactDateRange
           label="Ngày tạo"
           from={createdFrom}
@@ -333,6 +365,7 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
               <th className={th}>NCC / Khu vực</th>
               <th className={th}>Hiển thị</th>
               <th className={th}>Trạng thái</th>
+              <th className={th}>Xác thực dữ liệu</th>
               {canOperate && <th className={`${th} text-right`}>Thao tác</th>}
             </tr>
           </thead>
@@ -385,6 +418,23 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
                     <StatusBadge tone={VERIFICATION_TONE[place.verification]} pulse={place.verification === 'UNVERIFIED'}>
                       {VERIFICATION_LABEL[place.verification]}
                     </StatusBadge>
+                  </td>
+                  <td className={td} onClick={(e) => e.stopPropagation()}>
+                    {canOperate ? (
+                      <span title={DATA_VERIFIED_LABEL[place.dataVerified ? 'true' : 'false']} className="inline-flex">
+                        <ToggleSwitch
+                          checked={place.dataVerified}
+                          onChange={(next) => void toggleDataVerified(place, next)}
+                          label={`Xác thực dữ liệu ${place.name}`}
+                          showState={false}
+                          disabled={savingDataId === place.id}
+                        />
+                      </span>
+                    ) : (
+                      <StatusBadge tone={DATA_VERIFIED_TONE[place.dataVerified ? 'true' : 'false']}>
+                        {DATA_VERIFIED_LABEL[place.dataVerified ? 'true' : 'false']}
+                      </StatusBadge>
+                    )}
                   </td>
                   {canOperate && (
                   <td className={`${td} text-right`} onClick={(e) => e.stopPropagation()}>
@@ -464,6 +514,8 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
           onApprove={() => askVerify(preview, 'VERIFIED')}
           onRequestUpdate={() => askVerify(preview, 'NEEDS_UPDATE')}
           onToggleVisibility={() => askVisibility(preview)}
+          onToggleDataVerified={(next) => void toggleDataVerified(preview, next)}
+          savingDataVerified={savingDataId === preview.id}
         />
       )}
 

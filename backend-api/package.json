@@ -13,7 +13,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "migrate": "tsx --env-file-if-exists=.env.local src/db/migrateCli.ts"
+    "migrate": "tsx --env-file-if-exists=.env.local src/db/migrateCli.ts",
+    "import:data-chinh-thong": "tsx --env-file-if-exists=.env.local scripts/import-data-chinh-thong.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

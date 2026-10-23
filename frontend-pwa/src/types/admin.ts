@@ -230,6 +230,8 @@ export interface AdminPlaceSummaryDto {
   operationStatus: PlaceOperationStatus;
   verification: PlaceVerificationStatus;
   lastVerifiedAt?: string;
+  /** Cờ Admin "dữ liệu đã xác thực" (chính thống) — độc lập với `verification` là trạng thái duyệt nội dung. */
+  dataVerified: boolean;
   ratingAvg?: number;
   ratingCount: number;
   createdAt: string;
@@ -240,6 +242,7 @@ export interface PlaceSearchParams {
   keyword?: string;
   visibility?: PlaceVisibility;
   verification?: PlaceVerificationStatus;
+  dataVerified?: boolean;
   kind?: CategoryKind;
   providerId?: number;
   regionId?: number;
@@ -255,6 +258,11 @@ export type PlaceVerificationSummary = Record<PlaceVerificationStatus, number>;
 
 export interface UpdatePlaceVerificationRequest {
   verification: PlaceVerificationStatus;
+  reason?: string;
+}
+
+export interface UpdatePlaceDataVerifiedRequest {
+  dataVerified: boolean;
   reason?: string;
 }
 
@@ -320,6 +328,7 @@ export interface AdminPlaceDetailDto {
   operationStatus: PlaceOperationStatus;
   verification: PlaceVerificationStatus;
   lastVerifiedAt?: string | null;
+  dataVerified?: boolean;
   ratingAvg?: number | null;
   ratingCount?: number | null;
   /** Điểm Google Maps (0-5) từ dữ liệu đã xác thực; Admin chỉ xem. */

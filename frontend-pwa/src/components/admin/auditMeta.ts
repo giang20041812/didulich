@@ -13,6 +13,7 @@ export const AUDIT_ACTION: Record<string, { label: string; tone: StatusTone }> =
   UPDATE_PROVIDER_STATUS: { label: 'Đổi trạng thái đối tác', tone: 'warning' },
   UPDATE_PLACE_VERIFICATION: { label: 'Kiểm duyệt điểm đến', tone: 'success' },
   UPDATE_PLACE_VISIBILITY: { label: 'Đổi hiển thị điểm đến', tone: 'info' },
+  UPDATE_PLACE_DATA_VERIFIED: { label: 'Xác thực dữ liệu điểm đến', tone: 'success' },
   REFUND_APPROVED: { label: 'Duyệt hoàn tiền', tone: 'success' },
   REFUND_REJECTED: { label: 'Từ chối hoàn tiền', tone: 'danger' },
   AFFILIATE_LINK_CREATED: { label: 'Tạo liên kết affiliate', tone: 'brand' },

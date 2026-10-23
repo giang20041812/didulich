@@ -109,3 +109,6 @@ dist/
 
 # docx la LFS pointer, khong co noi dung that tren may nay
 docs/*.docx
+
+# Cache ảnh đã tải của script nhập DATA CHÍNH THỐNG (ops/import/data-chinh-thong) — chỉ có ý nghĩa trên máy chạy script
+ops/import/data-chinh-thong/.import-state/

@@ -117,6 +117,8 @@ export interface PlaceSummaryDto {
   highlights: string[] | null;
   durationText: string | null;
   contacts: ContactItemDto[];
+  /** Chỉ homestay: có loại phòng đang bán trực tuyến không (false = chỉ có thông tin tham khảo, khách liên hệ trực tiếp). */
+  hasOnlineRooms?: boolean;
   tiktokUrl: string | null;
   operationStatus: string;
   operationStatusReason: string | null;
@@ -266,6 +268,7 @@ export async function getPlaces(q: ListQuery): Promise<PageJson<PlaceSummaryDto>
       highlights: null,
       durationText: extrasSvc.durationText(extras),
       contacts: contactsBy.get(p.id) ?? [],
+      ...(p.kind === 'HOMESTAY' ? { hasOnlineRooms: (activeRoomsBy.get(p.id)?.length ?? 0) > 0 } : {}),
       tiktokUrl: null,
       operationStatus: p.operationStatus,
       operationStatusReason: p.operationNote,

@@ -35,6 +35,10 @@ export const VERIFICATION_TONE: Record<PlaceVerificationStatus, StatusTone> = {
   ARCHIVED: 'neutral',
 };
 
+/** Cờ "dữ liệu đã xác thực" (place.dataVerified): bật = chính thống, tắt = dữ liệu mới nhập chưa kiểm chứng. */
+export const DATA_VERIFIED_LABEL = { true: 'Đã xác thực', false: 'Chưa xác thực' } as const;
+export const DATA_VERIFIED_TONE: Record<'true' | 'false', StatusTone> = { true: 'success', false: 'warning' };
+
 export const VISIBILITY_LABEL: Record<PlaceVisibility, string> = {
   PUBLISHED: 'Công khai',
   UNPUBLISHED: 'Đã ẩn',

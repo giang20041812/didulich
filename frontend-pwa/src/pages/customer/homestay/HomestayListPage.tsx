@@ -255,7 +255,8 @@ export default function HomestayListPage() {
   const paginatedHomestays = [...homestays]
     .filter((hs) => !showSavedOnly || savedIds.includes(hs.id))
     .sort((a, b) => {
-      const score = (item: HomestayDto) => item.operationStatus === 'TEMPORARILY_CLOSED' || item.availableForSelectedDates === false ? 1 : 0;
+      const score = (item: HomestayDto) =>
+        item.operationStatus === 'TEMPORARILY_CLOSED' || item.availableForSelectedDates === false || item.hasOnlineRooms === false ? 1 : 0;
       return score(a) - score(b);
     });
   // Chỉ đánh marker homestay có tọa độ thực từ dữ liệu — không sinh tọa độ giả. useMemo: mảng ổn định giữa các lần vẽ
@@ -901,6 +902,8 @@ export default function HomestayListPage() {
                         badge={hs.isGenius ? <CompactCardBadge>Genius</CompactCardBadge> : undefined}
                         notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
                           <span className="text-[11px] font-bold text-amber-700">Tạm ngừng nhận đặt phòng</span>
+                        ) : hs.hasOnlineRooms === false ? (
+                          <span className="text-[11px] font-bold text-slate-500">Liên hệ trực tiếp để đặt</span>
                         ) : hs.availableForSelectedDates === false ? (
                           <span className="text-[11px] font-bold text-slate-500">Hết phòng ngày đã chọn</span>
                         ) : undefined}
