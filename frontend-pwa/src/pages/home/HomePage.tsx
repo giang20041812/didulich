@@ -520,7 +520,6 @@ export default function HomePage() {
               <SectionHeading
                 eyebrow="Khám phá theo mùa"
                 title="Hôm nay đi đâu"
-                description="Điểm đến đẹp ngay lúc này — gợi ý theo thời điểm vàng của từng vùng Tây Bắc."
                 action={<MobileSeeAll to="/destinations" />}
               />
             </Reveal>
@@ -545,23 +544,23 @@ export default function HomePage() {
 
           {/* Điểm đến: danh sách dạng lưới (list/grid) kèm hiệu ứng động khi chuột chạm đến */}
           <Reveal delay={140}>
-          {nearDestinations ? (
-            <NearMePanel kind="ATTRACTION" />
-          ) : filteredDestinations.length > 0 ? (
-            // Từ tablet: lưới 4 cột × 2 hàng (8 thẻ). Điện thoại: lướt từng thẻ như homestay (thẻ giữa + hai thẻ mờ hai bên).
-            <FramerSwipeCardStack
-              perPage={8}
-              gridClassName="grid grid-cols-4 gap-3 md:gap-4"
-              label="Điểm đến theo mùa"
-            >
-              {filteredDestinations.map((dest) => <DestinationCard key={dest.id} dest={dest} />)}
-            </FramerSwipeCardStack>
-          ) : (
-            <div className="py-12 flex flex-col items-center justify-center text-[#66716c] bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
-              <Mountain className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="font-medium text-sm text-slate-600">Chưa có dữ liệu điểm đến</p>
-            </div>
-          )}
+            {nearDestinations ? (
+              <NearMePanel kind="ATTRACTION" />
+            ) : filteredDestinations.length > 0 ? (
+              // Từ tablet: lưới 4 cột × 2 hàng (8 thẻ). Điện thoại: lướt từng thẻ như homestay (thẻ giữa + hai thẻ mờ hai bên).
+              <FramerSwipeCardStack
+                perPage={8}
+                gridClassName="grid grid-cols-4 gap-3 md:gap-4"
+                label="Điểm đến theo mùa"
+              >
+                {filteredDestinations.map((dest) => <DestinationCard key={dest.id} dest={dest} />)}
+              </FramerSwipeCardStack>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-[#66716c] bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+                <Mountain className="w-10 h-10 text-slate-300 mb-3" />
+                <p className="font-medium text-sm text-slate-600">Chưa có dữ liệu điểm đến</p>
+              </div>
+            )}
           </Reveal>
         </div>
       </section>
@@ -575,7 +574,7 @@ export default function HomePage() {
               <SectionHeading
                 eyebrow="Lưu trú bản địa"
                 title="Homestay & Nhà Nghỉ"
-                description="Chốn nghỉ sát ruộng bậc thang, giữ trọn hương vị đời sống Tây Bắc."
+
                 action={<MobileSeeAll to="/homestays" />}
               />
             </Reveal>
@@ -600,33 +599,33 @@ export default function HomePage() {
 
           {/* Homestay: từ tablet mỗi trang 8 thẻ (2 hàng × 4 cột), lướt / bấm ‹ › xem thêm; điện thoại vuốt từng thẻ */}
           <Reveal delay={100}>
-          {nearHomestays ? (
-            <NearMePanel kind="HOMESTAY" />
-          ) : displayedHomestays.length > 0 ? (
-            <FramerSwipeCardStack perPage={8} gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5" label="Homestay & nhà nghỉ">
-              {displayedHomestays.map((hs) => (
-                <CompactPlaceCard
-                  key={hs.id}
-                  to={`/homestays/${hs.id}`}
-                  name={hs.name}
-                  imageUrl={hs.coverImageUrl}
-                  location={hs.regionName}
-                  price={formatVnd(hs.priceRefMin, 'Liên hệ')}
-                  priceUnit={hs.priceRefMin ? 'đêm' : null}
-                  // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
-                  onIntent={() => prefetchHomestay(hs.id)}
-                  badge={hs.tagBadge ? <CompactCardBadge className="bg-[#0a7d64]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
-                  compact={true}
-                  frame="house"
-                />
-              ))}
-            </FramerSwipeCardStack>
-          ) : (
-            <div className="py-10 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
-              <Tent className="w-10 h-10 text-slate-300 mb-2" />
-              <p className="font-medium text-sm">Chưa có homestay bản địa nào</p>
-            </div>
-          )}
+            {nearHomestays ? (
+              <NearMePanel kind="HOMESTAY" />
+            ) : displayedHomestays.length > 0 ? (
+              <FramerSwipeCardStack perPage={8} gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5" label="Homestay & nhà nghỉ">
+                {displayedHomestays.map((hs) => (
+                  <CompactPlaceCard
+                    key={hs.id}
+                    to={`/homestays/${hs.id}`}
+                    name={hs.name}
+                    imageUrl={hs.coverImageUrl}
+                    location={hs.regionName}
+                    price={formatVnd(hs.priceRefMin, 'Liên hệ')}
+                    priceUnit={hs.priceRefMin ? 'đêm' : null}
+                    // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
+                    onIntent={() => prefetchHomestay(hs.id)}
+                    badge={hs.tagBadge ? <CompactCardBadge className="bg-[#0a7d64]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
+                    compact={true}
+                    frame="house"
+                  />
+                ))}
+              </FramerSwipeCardStack>
+            ) : (
+              <div className="py-10 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+                <Tent className="w-10 h-10 text-slate-300 mb-2" />
+                <p className="font-medium text-sm">Chưa có homestay bản địa nào</p>
+              </div>
+            )}
           </Reveal>
         </div>
       </section>
@@ -640,7 +639,6 @@ export default function HomePage() {
               <SectionHeading
                 eyebrow="Ẩm thực & quà tặng"
                 title="Đặc Sản Nổi Tiếng"
-                description="Đặc sản do người bản địa làm ra — mang hương vị Tây Bắc về làm quà."
                 action={<MobileSeeAll to="/specialties" />}
                 tone="text-amber-700"
               />
@@ -649,21 +647,21 @@ export default function HomePage() {
           </div>
 
           <Reveal delay={100}>
-          {displayedSpecialties.length > 0 ? (
-            // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ (thẻ vuông nên hẹp hơn thẻ điểm đến).
-            <FramerSwipeCardStack
-              perPage={10}
-              gridClassName="grid grid-cols-5 gap-3 md:gap-4"
-              label="Đặc sản nổi tiếng"
-            >
-              {displayedSpecialties.map((item) => <SpecialtyCard key={item.id} item={item} />)}
-            </FramerSwipeCardStack>
-          ) : (
-            <div className="py-12 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
-              <Tag className="w-10 h-10 text-slate-300 mb-2" />
-              <p className="font-medium text-sm">Chưa có đặc sản nào</p>
-            </div>
-          )}
+            {displayedSpecialties.length > 0 ? (
+              // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ (thẻ vuông nên hẹp hơn thẻ điểm đến).
+              <FramerSwipeCardStack
+                perPage={10}
+                gridClassName="grid grid-cols-5 gap-3 md:gap-4"
+                label="Đặc sản nổi tiếng"
+              >
+                {displayedSpecialties.map((item) => <SpecialtyCard key={item.id} item={item} />)}
+              </FramerSwipeCardStack>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+                <Tag className="w-10 h-10 text-slate-300 mb-2" />
+                <p className="font-medium text-sm">Chưa có đặc sản nào</p>
+              </div>
+            )}
           </Reveal>
         </div>
       </section>
@@ -682,9 +680,7 @@ export default function HomePage() {
             <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
               Tiện Ích Du Khách & Cam Kết Du Lịch
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm md:text-[15px] font-medium leading-relaxed text-slate-500">
-              Mọi tiện ích cần thiết để sẵn sàng khởi hành, gắn liền với 4 cam kết giá trị đồng hành cùng bạn trên mọi nẻo đường Tây Bắc.
-            </p>
+
           </Reveal>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
