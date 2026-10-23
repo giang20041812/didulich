@@ -133,7 +133,6 @@ export default function HomestayListPage() {
   };
   const [showMap, setShowMap] = useState(false);
 
-  const ITEMS_PER_PAGE = 12;
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
