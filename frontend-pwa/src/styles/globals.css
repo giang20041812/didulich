@@ -684,7 +684,7 @@
 /*
  * Trang chủ — chia thành từng "màn hình" (hero, điểm đến, homestay, đặc sản, tiện ích), lướt tới đâu tự căn khít vào đầu
  * màn hình đó. HomePage gắn .home-snap lên <html> khi mount và gỡ khi rời trang.
- * - Máy tính / tablet (>= 768px, cao >= 600px): snap BẮT BUỘC (mandatory) và mỗi phần cao tối thiểu đúng một màn hình
+ * - Màn hình đủ lớn (>= 1024px, cao >= 760px): snap BẮT BUỘC (mandatory) và mỗi phần cao tối thiểu đúng một màn hình
  *   (.home-screen, nội dung canh giữa) nên mỗi lần lướt là sang gọn một phần, cả lên lẫn xuống. Phần cao hơn màn hình vẫn
  *   cuộn tự do bên trong nó (trình duyệt cho phép khi vùng snap lớn hơn khung nhìn), rồi mới căn sang phần kế.
  * - Điện thoại: phần cao hơn nhiều so với màn hình nên chỉ dùng proximity (dừng gần mép panel nào thì căn vào đó).
@@ -701,7 +701,7 @@ html.home-snap .home-snap-panel {
 html.home-snap main + footer {
   scroll-snap-align: end;
 }
-@media (min-width: 768px) and (min-height: 600px) {
+@media (min-width: 1024px) and (min-height: 760px) {
   html.home-snap {
     scroll-snap-type: y mandatory;
   }

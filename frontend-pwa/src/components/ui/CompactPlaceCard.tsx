@@ -61,7 +61,7 @@ export default function CompactPlaceCard({
 
   const card = (
     <div
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#0b5a47] ring-1 ring-emerald-400/20 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#118066] ring-1 ring-emerald-400/20 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]"
       onPointerEnter={onIntent}
       onTouchStart={onIntent}
       onFocus={onIntent}
@@ -86,7 +86,7 @@ export default function CompactPlaceCard({
             <ImagePlaceholder Icon={FallbackIcon} label="Ảnh thực tế đang tải" />
           )}
           {/* Chân ảnh tan vào nền xanh rừng của phần thông tin, kèm quầng sáng ngọc lục bảo */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0b5a47] via-[#0b5a47]/70 via-35% to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#118066]/80 via-[#118066]/30 via-50% to-transparent" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-950/45 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           <span className="pointer-events-none absolute bottom-2 right-2 translate-y-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-emerald-800 opacity-0 shadow-md transition-[opacity,transform] duration-500 group-hover:translate-y-0 group-hover:opacity-100">
             Xem chi tiết →
@@ -102,7 +102,7 @@ export default function CompactPlaceCard({
           )}
         </div>
 
-        <div className={`flex flex-1 flex-col gap-1 bg-gradient-to-b from-[#0b5a47] to-[#06281f] bg-origin-border border-t-2 border-transparent transition-colors duration-500 group-hover:border-amber-400 ${compact ? 'p-2.5 sm:p-3' : 'p-3.5 md:p-4'}`}>
+        <div className={`flex flex-1 flex-col gap-1 bg-gradient-to-b from-[#118066] to-[#0b5c48] ${compact ? 'p-2.5 sm:p-3' : 'p-3.5 md:p-4'}`}>
           <h3
             className={`font-extrabold leading-snug text-white transition-colors group-hover:text-emerald-200 ${
               compact
