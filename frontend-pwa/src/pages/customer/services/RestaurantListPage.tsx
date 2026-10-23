@@ -24,8 +24,10 @@ import {
   Home
 } from 'lucide-react';
 import bannerRestaurants from '@/assets/photos/banner-restaurants.webp';
-import { ToolbarSkeleton, FilterPanelSkeleton } from '@/components/ui/ListPageSkeleton';
+import { ToolbarSkeleton, FilterPanelSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
 import { useFirstLoad } from '@/hooks/useFirstLoad';
+
+const SKELETON = LIST_SKELETON_SPECS.restaurants;
 
 const CUISINE_CATEGORIES = [
   'Đặc sản Tây Bắc',
@@ -288,7 +290,7 @@ export default function RestaurantListPage() {
         </div>
 
         {firstLoad ? (
-          <ToolbarSkeleton chips={5} />
+          <ToolbarSkeleton {...SKELETON.toolbar} />
         ) : (<>
         {/* BỘ LỌC BÊN TRÊN HIỆN ĐẠI (Top Filter Toolbar & Quick Filter Bar) */}
         <div className="relative overflow-hidden bg-white/90 backdrop-blur-md ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
@@ -525,7 +527,7 @@ export default function RestaurantListPage() {
 
           {/* Sidebar (Desktop) */}
           <aside className="hidden md:flex flex-col w-[300px] shrink-0 gap-4">
-            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton groups={3} /> : renderFilters()}</div>
+            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton {...SKELETON.filter} /> : renderFilters()}</div>
           </aside>
 
           {/* Main Content */}
@@ -533,7 +535,7 @@ export default function RestaurantListPage() {
 
             {/* List */}
             {loading ? (
-              <CardSkeleton count={6} layout="compact" />
+              <CardSkeleton count={SKELETON.count} layout="compact" />
             ) : (
               <div>
                 {paginatedRestaurants.length === 0 ? (

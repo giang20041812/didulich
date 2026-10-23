@@ -22,8 +22,10 @@ import {
   Ticket
 } from 'lucide-react';
 import bannerDestinations from '@/assets/photos/banner-destinations.webp';
-import { ToolbarSkeleton, FilterPanelSkeleton } from '@/components/ui/ListPageSkeleton';
+import { ToolbarSkeleton, FilterPanelSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
 import { useFirstLoad } from '@/hooks/useFirstLoad';
+
+const SKELETON = LIST_SKELETON_SPECS.destinations;
 
 const formatDayMonth = (dStr?: string) => {
   if (!dStr) return '';
@@ -263,7 +265,7 @@ export default function DestinationListPage() {
         </div>
 
         {firstLoad ? (
-          <ToolbarSkeleton chips={5} />
+          <ToolbarSkeleton {...SKELETON.toolbar} />
         ) : (<>
         {/* Top Filter Toolbar */}
         <div className="relative overflow-hidden bg-white/90 backdrop-blur-md ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
@@ -439,12 +441,12 @@ export default function DestinationListPage() {
           , document.body)}
 
           <aside className="hidden md:flex flex-col w-[300px] shrink-0 gap-4">
-            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton groups={3} /> : renderFilters()}</div>
+            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton {...SKELETON.filter} /> : renderFilters()}</div>
           </aside>
 
           <div className="flex-1 flex flex-col gap-4 relative min-h-[350px]">
             {loading ? (
-              <CardSkeleton count={ITEMS_PER_PAGE} layout="compact" />
+              <CardSkeleton count={SKELETON.count} layout="compact" />
             ) : paginatedDestinations.length === 0 ? (
               <div className="bg-white p-10 text-center rounded-2xl border border-slate-200/80 shadow-xs">
                 <p className="text-slate-500 font-medium">Không tìm thấy địa điểm nào phù hợp.</p>

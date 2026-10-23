@@ -3,6 +3,23 @@ import { COMPACT_GRID_FULL, COMPACT_GRID_WITH_SIDEBAR } from '@/lib/compactCard'
 
 const bar = 'bg-slate-200 opacity-100';
 
+type ToolbarSpec = { chips?: number; actions?: number; search?: boolean };
+type FilterSpec = { groups?: number[]; hasBudget?: boolean };
+
+/**
+ * Hình khung chờ của từng trang danh sách — trang (lần tải đầu) và khung chờ lúc tải mã trang (AppRoutes) dùng chung,
+ * để hai lớp chờ trông như một. groups = số dòng ô chọn của từng nhóm trong cột bộ lọc thật.
+ */
+export const LIST_SKELETON_SPECS = {
+  homestays: { toolbar: { chips: 6, search: true }, filter: { groups: [6] }, count: 12 },
+  destinations: { toolbar: { chips: 3 }, filter: { groups: [2, 6, 1], hasBudget: false }, count: 8 },
+  restaurants: { toolbar: { chips: 5 }, filter: { groups: [5, 4] }, count: 6 },
+  transport: { toolbar: { chips: 6, actions: 1 }, filter: { groups: [5], hasBudget: false }, count: 8 },
+  services: { toolbar: { chips: 0 }, count: 8 },
+  specialties: { count: 8 },
+  culture: { count: 8 },
+} satisfies Record<string, { toolbar?: ToolbarSpec; filter?: FilterSpec; count: number }>;
+
 /** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 16:10 + tên + địa điểm + giá, cùng bo góc / khoảng đệm với thẻ thật. */
 export function CompactCardSkeleton() {
   return (
@@ -31,9 +48,13 @@ function Chip({ w }: { w: string }) {
   return <Skeleton className={`${bar} h-8 shrink-0 rounded-full ${w}`} />;
 }
 
-/** Khung chờ thanh công cụ phía trên danh sách: tiêu đề + số kết quả, sắp xếp, hàng chip lọc nhanh. */
-export function ToolbarSkeleton({ chips = 5, showSort = true }: { chips?: number; showSort?: boolean }) {
+/**
+ * Khung chờ thanh công cụ phía trên danh sách: tiêu đề + số kết quả, các nút bên phải (sắp xếp, bản đồ),
+ * hàng chip lọc nhanh (chips = 0: trang không có hàng này) và ô tìm kiếm (search: trang Lưu trú).
+ */
+export function ToolbarSkeleton({ chips = 5, actions = 2, search = false }: { chips?: number; actions?: number; search?: boolean }) {
   const widths = ['w-24', 'w-28', 'w-20', 'w-32', 'w-24', 'w-28', 'w-20'];
+  const actionWidths = ['w-40', 'w-32'];
   return (
     <div
       role="status"
@@ -42,29 +63,44 @@ export function ToolbarSkeleton({ chips = 5, showSort = true }: { chips?: number
     >
       <span className="sr-only">Đang tải bộ lọc</span>
       <div aria-hidden="true">
-        <div className="flex flex-col justify-between gap-3 border-b border-slate-100 pb-3.5 sm:flex-row sm:items-center">
+        <div className={`flex flex-col justify-between gap-3 sm:flex-row sm:items-center ${chips > 0 || search ? 'border-b border-slate-100 pb-3.5' : ''}`}>
           <div className="flex items-center gap-2">
             <Skeleton className={`${bar} h-6 w-36`} />
             <Skeleton className={`${bar} h-6 w-24 rounded-full`} />
           </div>
-          {showSort && (
+          {actions > 0 && (
             <div className="flex items-center gap-2.5">
-              <Skeleton className={`${bar} h-9 w-40 rounded-xl`} />
-              <Skeleton className={`${bar} h-9 w-32 rounded-xl`} />
+              {Array.from({ length: actions }, (_, i) => (
+                <Skeleton key={i} className={`${bar} h-9 rounded-xl ${actionWidths[i % actionWidths.length]}`} />
+              ))}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 overflow-hidden pt-3.5">
-          <Skeleton className={`${bar} h-4 w-20 shrink-0`} />
-          {Array.from({ length: chips }, (_, i) => <Chip key={i} w={widths[i % widths.length]!} />)}
-        </div>
+        {chips > 0 && (
+          <div className="flex items-center gap-2 overflow-hidden pt-3.5">
+            <Skeleton className={`${bar} h-4 w-20 shrink-0`} />
+            {Array.from({ length: chips }, (_, i) => <Chip key={i} w={widths[i % widths.length]!} />)}
+          </div>
+        )}
+        {search && (
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <Skeleton className={`${bar} mb-3 h-4 w-36`} />
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Skeleton className={`${bar} h-11 flex-1 rounded-md`} />
+              <Skeleton className={`${bar} h-11 w-full rounded-md sm:w-32`} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-/** Khung chờ cột bộ lọc bên trái: tiêu đề + các nhóm (tên nhóm + vài dòng ô chọn) + thanh giá. */
-export function FilterPanelSkeleton({ groups = 3, className }: { groups?: number; className?: string }) {
+/**
+ * Khung chờ cột bộ lọc bên trái: tiêu đề + các nhóm ô chọn (groups = số dòng của từng nhóm, theo đúng bộ lọc thật)
+ * + thanh ngân sách ở cuối (hasBudget).
+ */
+export function FilterPanelSkeleton({ groups = [4, 4], hasBudget = true, className }: { groups?: number[]; hasBudget?: boolean; className?: string }) {
   return (
     <div
       role="status"
@@ -77,30 +113,35 @@ export function FilterPanelSkeleton({ groups = 3, className }: { groups?: number
           <Skeleton className={`${bar} h-4 w-4 rounded`} />
           <Skeleton className={`${bar} h-5 w-36`} />
         </div>
-        <div className="space-y-5 p-4">
-          <div className="space-y-3">
-            <Skeleton className={`${bar} h-4 w-24`} />
+        {groups.map((rows, g) => (
+          <div key={g} className="space-y-3 border-b border-slate-100 p-4 last:border-b-0">
+            <Skeleton className={`${bar} h-4 w-28`} />
+            {Array.from({ length: rows }, (_, r) => (
+              <div key={r} className="flex items-center gap-2.5">
+                <Skeleton className={`${bar} h-4 w-4 shrink-0 rounded`} />
+                <Skeleton className={`${bar} h-3.5 ${r % 2 ? 'w-2/5' : 'w-3/5'}`} />
+              </div>
+            ))}
+          </div>
+        ))}
+        {hasBudget && (
+          <div className="space-y-3 p-4">
+            <Skeleton className={`${bar} h-4 w-32`} />
             <Skeleton className={`${bar} h-2 w-full rounded-full`} />
             <div className="flex justify-between">
               <Skeleton className={`${bar} h-3 w-14`} />
               <Skeleton className={`${bar} h-3 w-14`} />
             </div>
           </div>
-          {Array.from({ length: groups }, (_, g) => (
-            <div key={g} className="space-y-3 border-t border-slate-100 pt-4">
-              <Skeleton className={`${bar} h-4 w-28`} />
-              {Array.from({ length: 4 }, (_, r) => (
-                <div key={r} className="flex items-center gap-2.5">
-                  <Skeleton className={`${bar} h-4 w-4 shrink-0 rounded`} />
-                  <Skeleton className={`${bar} h-3.5 ${r % 2 ? 'w-2/5' : 'w-3/5'}`} />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+        )}
       </div>
     </div>
   );
+}
+
+/** Nút "Lọc kết quả" chỉ hiện trên điện thoại (cột bộ lọc ẩn) — giữ chỗ cùng chiều cao. */
+export function MobileFilterButtonSkeleton({ className = 'md:hidden' }: { className?: string }) {
+  return <Skeleton aria-hidden="true" className={`${bar} mb-2 h-11 w-full rounded-xl ${className}`} />;
 }
 
 /** Hàng tab / chip ngang (mùa lễ hội, loại dịch vụ…). */

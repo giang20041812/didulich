@@ -1,4 +1,4 @@
-import { PlaceDetail } from '../types/homestay';
+import { PlaceContactItem, PlaceDetail } from '../types/homestay';
 import { cachedFetch, peekCache } from '@/lib/dataCache';
 import { apiOrigin } from '@/lib/apiBase';
 import {
@@ -144,6 +144,7 @@ interface PlaceSummaryApiItem {
   priceRefMin?: number | string | null;
   ratingAvg?: number | string | null;
   ratingCount?: number | null;
+  contacts?: PlaceContactItem[] | null;
 }
 
 /** Tối đa backend cho phép mỗi trang (PublicPlaceService.MAX_PAGE_SIZE). */
@@ -172,7 +173,7 @@ export const fetchMapOverviewPlaces = async (): Promise<MapOverviewPlace[]> => {
   });
 };
 
-/** Điểm đến / homestay có toạ độ cho "Gần tôi" ở trang chủ. */
+/** Địa điểm có toạ độ cho "Gần tôi" / "Gợi ý lúc này" ở trang chủ. */
 export interface NearMePlace {
   id: number;
   kind: string;
@@ -184,13 +185,17 @@ export interface NearMePlace {
   priceRefMin?: number;
   ratingAvg?: number;
   ratingCount?: number;
+  /** Liên hệ công khai — backend chỉ trả kèm danh sách cho quán ăn, nhà xe, dịch vụ. */
+  contacts?: PlaceContactItem[];
 }
 
+export type NearMeKind = 'ATTRACTION' | 'HOMESTAY' | 'RESTAURANT';
+
 /**
- * Mọi điểm đến / homestay công khai có toạ độ (≤ 100 mục mỗi loại, giới hạn của backend) — khoảng cách tới khách tính
+ * Mọi điểm đến / homestay / quán ăn công khai có toạ độ (≤ 100 mục mỗi loại, giới hạn của backend) — khoảng cách tới khách tính
  * ngay trên máy nên vị trí khách không gửi lên máy chủ và kéo bán kính không gọi lại API. Giữ trong tab 10 phút.
  */
-export const fetchNearMeCandidates = (kind: 'ATTRACTION' | 'HOMESTAY'): Promise<NearMePlace[]> =>
+export const fetchNearMeCandidates = (kind: NearMeKind): Promise<NearMePlace[]> =>
   cachedFetch(`nearme:${kind}`, 10 * 60_000, async () => {
     const params = new URLSearchParams({ kind, page: '0', size: String(MAP_OVERVIEW_PAGE_SIZE) });
     const data = (await getJson(`/api/public/places?${params}`, { priority: 'low' })) as { content?: PlaceSummaryApiItem[] };
@@ -209,6 +214,7 @@ export const fetchNearMeCandidates = (kind: 'ATTRACTION' | 'HOMESTAY'): Promise<
         priceRefMin: toNumberOrNull(item.priceRefMin) ?? undefined,
         ratingAvg: toNumberOrNull(item.ratingAvg) ?? undefined,
         ratingCount: item.ratingCount ?? undefined,
+        contacts: item.contacts?.filter((contact) => contact.isPublic !== false && contact.value) ?? undefined,
       }];
     });
   });
