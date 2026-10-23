@@ -139,11 +139,6 @@ export function FilterPanelSkeleton({ groups = [4, 4], hasBudget = true, classNa
   );
 }
 
-/** Nút "Lọc kết quả" chỉ hiện trên điện thoại (cột bộ lọc ẩn) — giữ chỗ cùng chiều cao. */
-export function MobileFilterButtonSkeleton({ className = 'md:hidden' }: { className?: string }) {
-  return <Skeleton aria-hidden="true" className={`${bar} mb-2 h-11 w-full rounded-xl ${className}`} />;
-}
-
 /** Hàng tab / chip ngang (mùa lễ hội, loại dịch vụ…). */
 export function TabsSkeleton({ count = 4, className }: { count?: number; className?: string }) {
   const widths = ['w-36', 'w-40', 'w-48', 'w-48'];

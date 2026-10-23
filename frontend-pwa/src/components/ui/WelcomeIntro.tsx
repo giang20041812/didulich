@@ -375,8 +375,19 @@ function Landscape() {
 export default function WelcomeIntro() {
   const [visible, setVisible] = useState(true);
   const [fly, setFly] = useState<Fly | null>(null);
+  /** Đã bay tới chỗ hero: gỡ màn chào và hiện bản của hero trong cùng một khung hình. */
+  const [landed, setLanded] = useState(false);
   const logoRef = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLSpanElement>(null);
+
+  // Trong lúc màn chào chạy, ẩn logo + "Du Lịch" của hero (xem .welcome-intro-active trong globals.css) để không có hai bản chồng nhau bị nhòe.
+  const hideHero = visible && !landed;
+  useLayoutEffect(() => {
+    if (!hideHero) return undefined;
+    const root = document.documentElement;
+    root.classList.add('welcome-intro-active');
+    return () => root.classList.remove('welcome-intro-active');
+  }, [hideHero]);
 
   useEffect(() => {
     let closeTimer: ReturnType<typeof setTimeout>;
@@ -384,7 +395,7 @@ export default function WelcomeIntro() {
       const measured = measureFly(logoRef.current, wordRef.current);
       if (measured) {
         setFly(measured);
-        closeTimer = setTimeout(() => setVisible(false), FLY_DURATION_S * 1000 + 50);
+        closeTimer = setTimeout(() => setLanded(true), FLY_DURATION_S * 1000 + 50);
       } else {
         closeTimer = setTimeout(() => setVisible(false), FALLBACK_DISMISS_MS - FLY_AT_MS);
       }
@@ -396,6 +407,9 @@ export default function WelcomeIntro() {
   }, []);
 
   const flyTransition = { duration: FLY_DURATION_S, ease: EASE };
+
+  // Đã bay tới hero: gỡ hẳn màn chào, KHÔNG mờ dần (AnimatePresence sẽ giữ bản chữ cũ đè lên chữ hero thành hai lớp nhòe).
+  if (landed) return null;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -426,7 +440,7 @@ export default function WelcomeIntro() {
                 animate={fly ? { ...fly.logo, opacity: 1, transition: flyTransition } : { scale: 1, opacity: 1 }}
                 transition={{ duration: 0.4, ease: EASE }}
                 style={{ originX: 0, originY: 0 }}
-                className="relative z-10 shrink-0"
+                className="relative z-10 shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]"
               >
                 <LogoMark size="clamp(96px, 26vw, 150px)" plate />
               </motion.div>
@@ -443,7 +457,7 @@ export default function WelcomeIntro() {
                   animate={fly ? { ...fly.word, transition: flyTransition } : { x: 0 }}
                   transition={{ delay: 0.35, duration: 0.5, ease: EASE }}
                   style={{ fontFamily: 'var(--font-brush)', originX: 0, originY: 0 }}
-                  className="whitespace-nowrap py-2 pl-4 pr-8 text-[clamp(3.25rem,15vw,5rem)] font-bold italic leading-tight text-sun sm:text-8xl"
+                  className="whitespace-nowrap py-2 pl-4 pr-8 text-[clamp(3.25rem,15vw,5rem)] font-bold italic leading-tight text-sun [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] sm:text-8xl"
                 >
                   <span ref={wordRef}>Du Lịch</span>
                 </motion.p>
