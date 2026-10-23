@@ -11,7 +11,7 @@ type Pt = readonly [number, number];
 const f = (n: number) => +n.toFixed(1);
 
 /** Điểm và góc tiếp tuyến (độ) trên đường cong bậc ba. */
-function cubicAt([p0, p1, p2, p3]: readonly Pt[], t: number): [number, number, number] {
+function cubicAt([p0, p1, p2, p3]: readonly [Pt, Pt, Pt, Pt], t: number): [number, number, number] {
   const u = 1 - t;
   const x = u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0];
   const y = u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1];
@@ -21,7 +21,7 @@ function cubicAt([p0, p1, p2, p3]: readonly Pt[], t: number): [number, number, n
 }
 
 /** Điểm trên đường cong bậc hai. */
-function quadAt([p0, p1, p2]: readonly Pt[], t: number): [number, number] {
+function quadAt([p0, p1, p2]: readonly [Pt, Pt, Pt], t: number): [number, number] {
   const u = 1 - t;
   return [f(u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0]), f(u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1])];
 }
@@ -66,7 +66,7 @@ const LEAF = 'M0 0 C 8 -9, 26 -9, 40 0 C 26 9, 8 9, 0 0 Z';
 const LEAF_VEINS = 'M3 0 H35 M12 0 l 5 -4 M20 0 l 5 -4 M28 0 l 4 -3 M12 0 l 5 4 M20 0 l 5 4 M28 0 l 4 3';
 
 /** Hạt lúa (hai bên thân) kèm râu, xếp dọc một đường cong bậc ba từ `from` tới ngọn. */
-function riceGrains(c: readonly Pt[], from: number, n: number, k = 1): ReactNode[] {
+function riceGrains(c: readonly [Pt, Pt, Pt, Pt], from: number, n: number, k = 1): ReactNode[] {
   const grain = (x: number, y: number, a: number, key: string) => (
     <g key={key} transform={`translate(${x} ${y}) rotate(${a}) scale(${k})`}>
       <ellipse cx="11" cy="0" rx="11" ry="4.5" />
