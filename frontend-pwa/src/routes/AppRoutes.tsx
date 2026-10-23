@@ -9,6 +9,10 @@ import TravelerRoute from '@/components/layout/TravelerRoute';
 import HomePage from '@/pages/home/HomePage';
 import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton, DetailSkeleton, DashboardSkeleton, FormSkeleton, ListPageFallback } from '@/components/ui/PageSkeleton';
+import {
+  ComboListFallback, CultureFallback, DestinationListFallback, HomestayListFallback, MapFallback, PlannerFallback, RestaurantListFallback,
+  SpecialtyListFallback, TransportListFallback, TravelGuideFallback, TripsHubFallback, UtilityListFallback,
+} from '@/components/ui/RouteSkeletons';
 
 type SkeletonKind = 'cards' | 'detail' | 'list' | 'dashboard' | 'form';
 
@@ -29,8 +33,12 @@ function RouteFallback() {
   return <DashboardSkeleton />;
 }
 
-/** Bọc một trang tải lười trong Suspense riêng để layout (sidebar, header) không bị gỡ khi chuyển trang. */
-function lazyPage(load: () => Promise<{ default: ComponentType }>, kind: SkeletonKind = 'cards') {
+/**
+ * Bọc một trang tải lười trong Suspense riêng để layout (sidebar, header) không bị gỡ khi chuyển trang.
+ * fallback: một dạng chung, hoặc khung riêng dựng đúng trang (RouteSkeletons) để nối liền với khung chờ của trang.
+ */
+function lazyPage(load: () => Promise<{ default: ComponentType }>, fallback: SkeletonKind | ComponentType = 'cards') {
+  const Fallback = typeof fallback === 'string' ? SKELETONS[fallback] : fallback;
   const Page = lazy(async () => {
     try {
       return await load();
@@ -44,37 +52,37 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>, kind: Skeleto
   });
   return function LazyPage() {
     return (
-      <Suspense fallback={SKELETONS[kind]()}>
+      <Suspense fallback={<Fallback />}>
         <Page />
       </Suspense>
     );
   };
 }
 
-const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'));
+const HomestayListPage = lazyPage(() => import('@/pages/customer/homestay/HomestayListPage'), HomestayListFallback);
 const HomestayDetailPage = lazyPage(() => import('@/pages/customer/homestay/HomestayDetailPage'), 'detail');
-const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'));
+const FullScreenMapPage = lazyPage(() => import('@/pages/customer/homestay/FullScreenMapPage'), MapFallback);
 const BookingPage = lazyPage(() => import('@/pages/customer/booking/BookingPage'), 'form');
 const UserBookingListPage = lazyPage(() => import('@/pages/customer/booking/UserBookingListPage'), 'list');
 const UserBookingDetailPage = lazyPage(() => import('@/pages/customer/booking/UserBookingDetailPage'), 'detail');
 const JourneyDetailPage = lazyPage(() => import('@/pages/customer/journey/JourneyDetailPage'), 'detail');
 const SharedJourneyPage = lazyPage(() => import('@/pages/customer/journey/SharedJourneyPage'), 'detail');
-const TripPlannerPage = lazyPage(() => import('@/pages/customer/trip/TripPlannerPage'));
-const TripsHubPage = lazyPage(() => import('@/pages/customer/trip/TripsHubPage'));
+const TripPlannerPage = lazyPage(() => import('@/pages/customer/trip/TripPlannerPage'), PlannerFallback);
+const TripsHubPage = lazyPage(() => import('@/pages/customer/trip/TripsHubPage'), TripsHubFallback);
 const QrCheckinPage = lazyPage(() => import('@/pages/customer/stay/QrCheckinPage'), 'form');
 const CheckinQrPosterPage = lazyPage(() => import('@/pages/portal/CheckinQrPosterPage'));
-const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'));
+const CultureFestivalPage = lazyPage(() => import('@/pages/customer/culture/CultureFestivalPage'), CultureFallback);
 const FestivalDetailPage = lazyPage(() => import('@/pages/customer/culture/FestivalDetailPage'), 'detail');
-const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'));
-const TravelGuidePage = lazyPage(() => import('@/pages/customer/guide/TravelGuidePage'));
+const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/DestinationListPage'), DestinationListFallback);
+const TravelGuidePage = lazyPage(() => import('@/pages/customer/guide/TravelGuidePage'), TravelGuideFallback);
 const PlaceDetailPage = lazyPage(() => import('@/pages/customer/culture/PlaceDetailPage'), 'detail');
-const RestaurantListPage = lazyPage(() => import('@/pages/customer/services/RestaurantListPage'));
-const SpecialtyListPage = lazyPage(() => import('@/pages/customer/services/SpecialtyListPage'));
+const RestaurantListPage = lazyPage(() => import('@/pages/customer/services/RestaurantListPage'), RestaurantListFallback);
+const SpecialtyListPage = lazyPage(() => import('@/pages/customer/services/SpecialtyListPage'), SpecialtyListFallback);
 const DishDetailPage = lazyPage(() => import('@/pages/customer/services/DishDetailPage'), 'detail');
-const TransportListPage = lazyPage(() => import('@/pages/customer/services/TransportListPage'));
-const ComboListPage = lazyPage(() => import('@/pages/customer/combo/ComboListPage'));
+const TransportListPage = lazyPage(() => import('@/pages/customer/services/TransportListPage'), TransportListFallback);
+const ComboListPage = lazyPage(() => import('@/pages/customer/combo/ComboListPage'), ComboListFallback);
 const ComboDetailPage = lazyPage(() => import('@/pages/customer/combo/ComboDetailPage'), 'detail');
-const UtilityListPage = lazyPage(() => import('@/pages/customer/services/UtilityListPage'));
+const UtilityListPage = lazyPage(() => import('@/pages/customer/services/UtilityListPage'), UtilityListFallback);
 const PhotoCreditsPage = lazyPage(() => import('@/pages/customer/PhotoCreditsPage'));
 const UnifiedAuthPage = lazyPage(() => import('@/pages/auth/UnifiedAuthPage'), 'form');
 const UserProfilePage = lazyPage(() => import('@/pages/customer/profile/UserProfilePage'), 'form');
@@ -84,14 +92,14 @@ const AdminDashboardPage = lazyPage(() => import('@/pages/admin/AdminDashboardPa
 const PartnerCalendarPage = lazyPage(() => import('@/pages/partner/PartnerCalendarPage'), 'dashboard');
 const PartnerDashboardPage = lazyPage(() => import('@/pages/partner/PartnerDashboardPage'), 'dashboard');
 const PartnerHomestaysPage = lazyPage(() => import('@/pages/partner/PartnerHomestaysPage'));
-const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'));
+const PartnerRoomsPage = lazyPage(() => import('@/pages/partner/PartnerRoomsPage'), 'list');
 const PartnerBookingsPage = lazyPage(() => import('@/pages/partner/PartnerBookingsPage'), 'list');
 const PartnerBookingProcessPage = lazyPage(() => import('@/pages/partner/PartnerBookingProcessPage'), 'detail');
 const PartnerReviewsPage = lazyPage(() => import('@/pages/partner/PartnerReviewsPage'), 'list');
-const PartnerExplorePlacesPage = lazyPage(() => import('@/pages/partner/PartnerExplorePlacesPage'));
-const PartnerListingsPage = lazyPage(() => import('@/pages/partner/PartnerListingsPage'));
-const PartnerNearbyOffersPage = lazyPage(() => import('@/pages/partner/PartnerNearbyOffersPage'));
-const PartnerCombosPage = lazyPage(() => import('@/pages/partner/PartnerCombosPage'));
+const PartnerExplorePlacesPage = lazyPage(() => import('@/pages/partner/PartnerExplorePlacesPage'), 'list');
+const PartnerListingsPage = lazyPage(() => import('@/pages/partner/PartnerListingsPage'), 'list');
+const PartnerNearbyOffersPage = lazyPage(() => import('@/pages/partner/PartnerNearbyOffersPage'), 'list');
+const PartnerCombosPage = lazyPage(() => import('@/pages/partner/PartnerCombosPage'), 'list');
 const PartnerServicesHomePage = lazyPage(() => import('@/pages/partner/PartnerServicesHomePage'), 'dashboard');
 const PartnerHome = lazyPage(() => import('@/pages/partner/PartnerHome'), 'dashboard');
 const PartnerHomestayEditPage = lazyPage(() => import('@/pages/partner/PartnerHomestayEditPage'), 'form');

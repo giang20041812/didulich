@@ -1,4 +1,4 @@
-import { Home, BedDouble, MapPin, UtensilsCrossed, Bus, Compass, Utensils, Layers, Route, Package, type LucideIcon } from 'lucide-react';
+import { Home, BedDouble, MapPin, UtensilsCrossed, Bus, Compass, Utensils, Layers, Route, type LucideIcon } from 'lucide-react';
 
 export interface CustomerNavItem {
   id: string;
@@ -20,8 +20,6 @@ export const CUSTOMER_NAV: CustomerNavItem[] = [
   { id: 'homestays', path: '/homestays', label: 'Lưu trú', Icon: BedDouble },
   // Lịch trình: tạo lịch trình + lịch trình du khách đăng công khai (/j/…) + lịch trình của tôi (/journeys/…).
   { id: 'trips', path: '/lich-trinh', label: 'Lịch trình', Icon: Route, alsoActiveOn: ['/j', '/journeys', '/trai-nghiem'] },
-  // Combo: trọn lịch trình + giá, ngay sau Lịch trình (cùng nhu cầu lên kế hoạch chuyến đi).
-  { id: 'combos', path: '/combo', label: 'Combo', Icon: Package, badge: 'Mới' },
   { id: 'destinations', path: '/destinations', label: 'Du lịch', Icon: MapPin, alsoActiveOn: ['/places'] },
   { id: 'specialties', path: '/specialties', label: 'Đặc sản', Icon: UtensilsCrossed },
   { id: 'transport', path: '/transport', label: 'Di chuyển', Icon: Bus },
