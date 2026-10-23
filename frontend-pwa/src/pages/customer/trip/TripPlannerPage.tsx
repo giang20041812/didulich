@@ -20,7 +20,7 @@ import { isDateKey } from '@/lib/roomAvailability';
 import { getCurrentCustomer } from '@/lib/currentCustomer';
 import { getApiErrorMessage } from '@/lib/apiError';
 import { installAxiosBoot } from '@/lib/axiosBoot';
-import { DetailSkeleton } from '@/components/ui/PageSkeleton';
+import { PlannerSkeleton } from '@/components/ui/RouteSkeletons';
 
 // Trang dùng axios (lưu lịch trình): cài cấu hình (hàng đợi / hedge / interceptor) trước request đầu tiên.
 installAxiosBoot();
@@ -311,11 +311,7 @@ function NewTrip() {
           <button type="button" onClick={loadCatalog} className="mt-4 inline-flex h-11 items-center rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Thử lại</button>
         </div>
       ) : !draft || !catalog ? (
-        <div className="mx-auto w-full max-w-6xl space-y-4 px-4 pt-6 sm:px-6" role="status" aria-label="Đang chuẩn bị lịch trình">
-          <div className="h-9 w-2/3 animate-pulse rounded-md bg-white/80" />
-          <div className="h-16 animate-pulse rounded-lg bg-white/80" />
-          <div className="h-80 animate-pulse rounded-lg bg-white/80" />
-        </div>
+        <PlannerSkeleton />
       ) : (
         <TripEditor
           draft={draft}
@@ -407,7 +403,7 @@ function EditTrip({ journeyId }: { journeyId: number }) {
           <Link to="/lich-trinh?tab=cua-toi" className="mt-4 inline-flex h-11 items-center rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Về lịch trình của tôi</Link>
         </div>
       ) : !draft ? (
-        <DetailSkeleton label="Đang tải lịch trình" />
+        <PlannerSkeleton label="Đang tải lịch trình" />
       ) : (
         <TripEditor
           draft={draft}

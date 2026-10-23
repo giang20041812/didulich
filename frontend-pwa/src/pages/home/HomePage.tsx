@@ -90,7 +90,6 @@ const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-gr
 /** Ảnh phủ kín thẻ. */
 const CARD_MEDIA = 'absolute inset-0 overflow-hidden bg-slate-100';
 const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]';
-const CARD_SHADE = 'absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent';
 
 /**
  * Các phần sau hero là những "tấm" vuông vức nối tiếp nhau (không bo góc), đổ bóng nhẹ ngược lên phần trước để có chiều

@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { MOTIFS, type MotifName } from '@/components/home/motifShapes';
 import DongSonDrum from '@/components/home/DongSonDrum';
 

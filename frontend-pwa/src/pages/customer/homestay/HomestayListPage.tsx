@@ -133,7 +133,6 @@ export default function HomestayListPage() {
   };
   const [showMap, setShowMap] = useState(false);
 
-  const ITEMS_PER_PAGE = 12;
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -545,14 +544,12 @@ export default function HomestayListPage() {
         {journeyContext && <JourneyContextBanner context={journeyContext} onDismiss={dismissJourney} className="mb-4" />}
 
         {/* Tiêu đề trang kiểu editorial — dẫn dắt trước khi vào bộ lọc */}
-        <Reveal>
-          <div className="mb-5">
-            <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#0a7d64] to-[#d97706] bg-clip-text text-transparent">
-              Chốn nghỉ giữa ruộng bậc thang
-            </h1>
-            <div className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
-          </div>
-        </Reveal>
+        <div className="mb-5">
+          <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#0a7d64] to-[#d97706] bg-clip-text text-transparent">
+            Chốn nghỉ giữa ruộng bậc thang
+          </h1>
+          <div className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
+        </div>
 
         <div className="hidden" aria-hidden="true">
           <span className="text-[var(--color-ink-deep)] font-semibold">Homestay & Chỗ nghỉ</span>
