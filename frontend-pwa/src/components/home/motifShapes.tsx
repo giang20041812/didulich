@@ -95,20 +95,24 @@ export const MOTIFS = {
       <path d="M118 220 C 122 150, 130 92, 176 30" />
       {Array.from({ length: 7 }, (_, i) => {
         const t = 0.3 + i * 0.1;
-        // điểm trên đường cong bậc ba (118,220) (122,150) (130,92) (176,30)
+        // điểm và hướng tiếp tuyến trên đường cong bậc ba (118,220) (122,150) (130,92) (176,30)
         const u = 1 - t;
         const x = u * u * u * 118 + 3 * u * u * t * 122 + 3 * u * t * t * 130 + t * t * t * 176;
         const y = u * u * u * 220 + 3 * u * u * t * 150 + 3 * u * t * t * 92 + t * t * t * 30;
+        const dx = 3 * u * u * (122 - 118) + 6 * u * t * (130 - 122) + 3 * t * t * (176 - 130);
+        const dy = 3 * u * u * (150 - 220) + 6 * u * t * (92 - 150) + 3 * t * t * (30 - 92);
+        const a = (Math.atan2(dy, dx) * 180) / Math.PI;
         return (
           <g key={i}>
-            {/* hạt mọc xen hai bên thân, mũi hướng lên */}
-            <ellipse cx="11" cy="0" rx="11" ry="4.5" transform={`translate(${x} ${y}) rotate(-125)`} />
-            <ellipse cx="11" cy="0" rx="11" ry="4.5" transform={`translate(${x} ${y}) rotate(-55)`} />
+            {/* hạt mọc xen hai bên thân, xoè đều quanh hướng thân để bông không bị lệch */}
+            <ellipse cx="11" cy="0" rx="11" ry="4.5" transform={`translate(${x} ${y}) rotate(${a - 32})`} />
+            <ellipse cx="11" cy="0" rx="11" ry="4.5" transform={`translate(${x} ${y}) rotate(${a + 32})`} />
           </g>
         );
       })}
-      <ellipse cx="11" cy="0" rx="11" ry="4.5" transform="translate(176 30) rotate(-75)" />
-      <path d="M120 214 C 90 190, 60 190, 30 206 M122 200 C 150 176, 180 178, 206 192" />
+      {/* hạt ngọn nối tiếp hướng thân ở đầu mút (tiếp tuyến tại t = 1: (46, -62)) */}
+      <ellipse cx="11" cy="0" rx="11" ry="4.5" transform="translate(176 30) rotate(-53)" />
+      <path d="M120 210 C 90 188, 60 190, 30 206 M120 210 C 150 188, 180 190, 210 206" />
     </>
   ),
   /** Quả ớt cong có cuống. */

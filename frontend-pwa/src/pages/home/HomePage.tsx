@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react"
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import SearchHub from "@/components/layout/SearchHub"
 import { Handshake, Tag, Headphones, ShieldCheck, Mountain, Tent, BookOpenText, PhoneCall, CalendarCheck, Smartphone, ChevronRight, MapPin, ArrowRight, Compass } from "lucide-react"
@@ -13,6 +13,7 @@ import FramerSwipeCardStack from "@/components/ui/FramerSwipeCardStack"
 const GoogleSignupDialog = lazy(() => import("@/components/auth/GoogleSignupDialog"));
 import NearMePanel from "@/components/home/NearMePanel"
 import NearMeToggle from "@/components/home/NearMeToggle"
+import TimelySuggestion from "@/components/home/TimelySuggestion"
 import { SakuraBlossomIcon } from "@/components/ui/SakuraBlossomIcon"
 import Reveal from "@/components/ui/Reveal"
 import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
@@ -81,14 +82,13 @@ const CARD =
   'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 shadow-[0_1px_2px_rgba(16,40,34,0.05),0_10px_24px_-14px_rgba(16,40,34,0.18)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(16,40,34,0.05),0_28px_48px_-18px_rgba(16,40,34,0.38)]';
 /** Màu viền: xanh rừng cho thẻ điểm đến / tiện ích (đặc sản dùng vàng hổ phách), có sẵn và đậm lên khi rê chuột. */
 const CARD_GREEN = `${CARD} ring-emerald-800/25 hover:ring-emerald-600/50`;
-/** Thẻ điểm đến / đặc sản: phần thông tin nền xanh rừng đậm (không trắng), chân ảnh tan vào nền kèm quầng sáng (CARD_GLOW). */
+/** Thẻ điểm đến / đặc sản: ảnh phủ kín cả thẻ, chữ nằm đè lên chân ảnh trên một lớp glow xanh (CARD_GLOW) — không còn phần nền xanh riêng. */
 const CARD_DARK =
-  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#0b5a47] ring-1 ring-emerald-400/20 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]';
-/** Chân ảnh tan vào #0b5a47 (xanh "glow"), cũng là màu đầu phần thông tin (CARD_INFO_BG) nên không lộ đường nối. */
-const CARD_FADE = 'pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0b5a47] via-[#0b5a47]/70 via-35% to-transparent';
-const CARD_INFO_BG = 'bg-gradient-to-b from-[#0b5a47] to-[#06281f]';
-/** Khung ảnh đầu thẻ: cắt theo bo góc trên bằng clip-path nên mép cong mịn cả khi ảnh đang phóng. */
-const CARD_MEDIA = 'clip-top-2xl relative w-full overflow-hidden bg-slate-100';
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]';
+/** Lớp glow xanh tan dần từ chân thẻ lên ảnh, nằm DƯỚI chữ (chữ ở lớp z-10 phía trên). */
+const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-gradient-to-t from-[#0b6a53]/95 via-[#139274]/55 via-50% to-transparent';
+/** Ảnh phủ kín thẻ. */
+const CARD_MEDIA = 'absolute inset-0 overflow-hidden bg-slate-100';
 const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]';
 const CARD_SHADE = 'absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent';
 
@@ -209,8 +209,8 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
   const src = mediaUrl(resolvePlacePhoto(dest.coverImageUrl), 640);
   return (
     <CardFrame kind="mountain">
-      <Link to={`/destinations/${dest.id}`} className={CARD_DARK}>
-        <div className={`${CARD_MEDIA} aspect-[4/3]`}>
+      <Link to={`/destinations/${dest.id}`} className={`${CARD_DARK} aspect-square`}>
+        <div className={CARD_MEDIA}>
           {src ? (
             <img src={src} alt={dest.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
           ) : (
@@ -218,34 +218,32 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
               <Mountain className="h-7 w-7" />
             </div>
           )}
-          <div className={CARD_SHADE} />
-          <div className={CARD_FADE} />
+        </div>
+        <div className={CARD_GLOW} aria-hidden />
 
-          {/* Tag mùa đẹp góc trên trái */}
-          <div className="absolute left-2 top-2 z-10 max-w-[calc(100%-1rem)] [&>span]:text-[10px]">
-            <SuitableTimeTag place={dest} />
-          </div>
-
-          {/* Địa phương góc dưới trái của ảnh */}
-          {dest.regionName && (
-            <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 text-[11px] font-semibold text-white/95 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-              <MapPin className="w-3 h-3 text-emerald-300 shrink-0" />
-              <span className="truncate">{dest.regionName}</span>
-            </div>
-          )}
+        {/* Tag mùa đẹp góc trên trái */}
+        <div className="absolute left-2 top-2 z-10 max-w-[calc(100%-1rem)] [&>span]:text-[10px]">
+          <SuitableTimeTag place={dest} />
         </div>
 
-        <div className={`flex flex-1 items-center justify-between gap-2 px-3 py-2.5 ${CARD_INFO_BG}`}>
+        {/* Chữ đè lên glow ở chân thẻ */}
+        <div className="relative z-10 mt-auto flex items-end justify-between gap-2 px-3 pb-3 pt-10">
           <div className="min-w-0">
-            <h3 className="text-sm font-extrabold text-white group-hover:text-emerald-200 transition-colors duration-300 line-clamp-1">
+            {dest.regionName && (
+              <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-100 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
+                <MapPin className="w-3 h-3 text-emerald-300 shrink-0" />
+                <span className="truncate">{dest.regionName}</span>
+              </p>
+            )}
+            <h3 className="mt-0.5 text-base font-extrabold leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
               {dest.name}
             </h3>
             {dest.description && (
-              <p className="mt-0.5 text-[11px] text-white/65 line-clamp-1">{dest.description}</p>
+              <p className="mt-0.5 text-[11px] text-white/80 line-clamp-1">{dest.description}</p>
             )}
           </div>
-          <span className="w-7 h-7 shrink-0 rounded-full bg-emerald-400/15 ring-1 ring-emerald-300/30 flex items-center justify-center text-emerald-200 transition-[background-color,color,transform] duration-300 group-hover:bg-emerald-400 group-hover:text-[#05241e] group-hover:translate-x-0.5">
-            <ArrowRight className="w-3.5 h-3.5" />
+          <span className="w-8 h-8 shrink-0 rounded-full bg-white/90 flex items-center justify-center text-[#0a7d64] transition-transform duration-300 group-hover:translate-x-0.5">
+            <ArrowRight className="w-4 h-4" />
           </span>
         </div>
       </Link>
@@ -259,8 +257,8 @@ function SpecialtyCard({ item }: { item: NonNullable<HomeResponseDto['specialtie
   const src = authenticUrl ? mediaUrl(authenticUrl, 640) : null;
   return (
     <CardFrame kind="specialty">
-      <Link to={placeDetailPath(item.kind, item.id)} className={CARD_DARK}>
-        <div className={`${CARD_MEDIA} aspect-square`}>
+      <Link to={placeDetailPath(item.kind, item.id)} className={`${CARD_DARK} aspect-[4/5]`}>
+        <div className={CARD_MEDIA}>
           {src ? (
             <img src={src} alt={item.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
           ) : (
@@ -268,37 +266,35 @@ function SpecialtyCard({ item }: { item: NonNullable<HomeResponseDto['specialtie
               <Tag className="h-6 w-6" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-          <div className={CARD_FADE} />
+        </div>
+        <div className={CARD_GLOW} aria-hidden />
 
-          {/* Tag đặc sản / món ngon */}
-          {item.tagBadge && (
-            <div className="absolute left-1.5 top-1.5 z-10 max-w-[calc(100%-0.75rem)]">
-              <span className="inline-flex max-w-full rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-amber-950 shadow-[0_4px_10px_-4px_rgba(180,83,9,0.7)]">
-                <span className="truncate">{item.tagBadge}</span>
-              </span>
-            </div>
-          )}
+        {/* Tag đặc sản / món ngon */}
+        {item.tagBadge && (
+          <div className="absolute left-1.5 top-1.5 z-10 max-w-[calc(100%-0.75rem)]">
+            <span className="inline-flex max-w-full rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-amber-950 shadow-[0_4px_10px_-4px_rgba(180,83,9,0.7)]">
+              <span className="truncate">{item.tagBadge}</span>
+            </span>
+          </div>
+        )}
 
-          {/* Địa phương */}
+        {/* Chữ đè lên glow ở chân thẻ */}
+        <div className="relative z-10 mt-auto px-2.5 pb-2.5 pt-8">
           {item.regionName && (
-            <div className="absolute bottom-1.5 left-2 right-2 z-10 flex items-center gap-0.5 text-[11px] font-semibold text-white/95 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
+            <p className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-100 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
               <MapPin className="w-3 h-3 text-amber-300 shrink-0" />
               <span className="truncate">{item.regionName}</span>
-            </div>
+            </p>
           )}
-        </div>
-
-        <div className={`flex flex-1 flex-col px-2.5 py-2 ${CARD_INFO_BG}`}>
-          <h3 className="text-[13px] font-extrabold text-white group-hover:text-emerald-200 transition-colors duration-300 line-clamp-1">
+          <h3 className="mt-0.5 text-[13px] font-extrabold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
             {item.name}
           </h3>
           {item.priceRefMin ? (
-            <p className="mt-0.5 truncate text-[11px] font-bold text-emerald-300">
+            <p className="mt-0.5 truncate text-[11px] font-bold text-emerald-200">
               Từ {formatVnd(item.priceRefMin)} {item.priceUnitNote ? `/ ${item.priceUnitNote}` : ''}
             </p>
           ) : (
-            <p className="mt-0.5 truncate text-[11px] text-white/65 font-medium">Thức quà truyền thống</p>
+            <p className="mt-0.5 truncate text-[11px] text-white/75 font-medium">Thức quà truyền thống</p>
           )}
         </div>
       </Link>
@@ -328,18 +324,6 @@ export default function HomePage() {
   useEffect(() => {
     void loadHomeData();
   }, [loadHomeData]);
-
-  // Lướt tới đâu tự căn vào đầu panel gần nhất (kéo sang panel kế tiếp) — chỉ bật khi đang ở trang chủ VÀ đã có nội dung:
-  // màn hình chờ chưa có panel nào, snap bắt buộc sẽ ép trang nhảy xuống chân trang.
-  // useLayoutEffect: khi rời trang chủ, class được gỡ ngay lúc gỡ DOM — TRƯỚC khi ScrollToTop cuộn trang mới về đầu. Gỡ
-  // bằng useEffect thì muộn hơn: lúc cuộn về 0, điểm snap "main + footer" vẫn còn hiệu lực và kéo trang mới xuống chân trang.
-  const hasContent = !loading && !!homeData;
-  useLayoutEffect(() => {
-    if (!hasContent) return undefined;
-    const root = document.documentElement;
-    root.classList.add('home-snap');
-    return () => root.classList.remove('home-snap');
-  }, [hasContent]);
 
 
   useEffect(() => {
@@ -503,7 +487,7 @@ export default function HomePage() {
             Mọi kích thước: ảnh phủ kín cả hero, header đè lên; điện thoại chỉ thu nhỏ lại và rút ngắn hero. */}
         <HeroBackdrop />
 
-        <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-hidden">
+        <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-clip">
           <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-12">
             <HeroTitle className="flex" />
             <p className="hero-rise hidden md:block [animation-delay:260ms] max-w-[640px] break-words [overflow-wrap:anywhere] text-lg sm:text-xl md:text-[22px] lg:text-[26px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
@@ -523,6 +507,10 @@ export default function HomePage() {
 
       {/* Các phần sau hero: TRẮNG → SƯƠNG CHÀM → LÚA CHÍN → TRẮNG, mỗi phần là một tấm vuông nối tiếp nhau (SHEET), nền
           có quầng màu tĩnh (globals.css: .home-glow-*) và họa tiết minh họa riêng cho từng phần (HomeMotifs), rồi tới chân trang. */}
+      {/* 2. Gần bạn: gợi ý theo giờ + vị trí khách (lấy mỗi lần mở trang), kèm cách đi và liên hệ xe. Chỉ hiện khi
+          quanh khách có chỗ — không có vị trí / không có gì gần thì không render. */}
+      <TimelySuggestion />
+
       {/* 3. Điểm Đến Thích Hợp Theo Mùa */}
       <section className="home-snap-panel home-screen relative isolate pt-14 pb-20 md:pt-16 md:pb-24 home-glow-mint">
         <HomeMotifs variant="destinations" />
@@ -561,10 +549,10 @@ export default function HomePage() {
           {nearDestinations ? (
             <NearMePanel kind="ATTRACTION" />
           ) : filteredDestinations.length > 0 ? (
-            // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ như homestay (thẻ giữa + hai thẻ mờ hai bên).
+            // Từ tablet: lưới 4 cột × 2 hàng (8 thẻ). Điện thoại: lướt từng thẻ như homestay (thẻ giữa + hai thẻ mờ hai bên).
             <FramerSwipeCardStack
-              perPage={10}
-              gridClassName="grid grid-cols-5 gap-3 md:gap-4"
+              perPage={8}
+              gridClassName="grid grid-cols-4 gap-3 md:gap-4"
               label="Điểm đến theo mùa"
             >
               {filteredDestinations.map((dest) => <DestinationCard key={dest.id} dest={dest} />)}

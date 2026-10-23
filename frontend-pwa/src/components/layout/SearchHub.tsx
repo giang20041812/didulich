@@ -4,7 +4,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowRight, Calendar, Check, ChevronLeft, ChevronRight, MapPin, Search, Users, X, type LucideIcon } from "lucide-react"
 import Stepper from "../ui/Stepper"
 import SearchCalendar from "./SearchCalendar"
-import { setHeaderSearchCompact, useHeaderSearchSlot } from "@/lib/headerSearch"
 import { foldVietnamese } from "@/lib/mapLink"
 import { addDaysKey, isDateKey, nightsBetween, parseDateKey, todayKey } from "@/lib/roomAvailability"
 import { tripPlannerPath } from "@/lib/tripLinks"
@@ -122,8 +121,9 @@ export default function SearchHub() {
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
   const [mountedTab, setMountedTab] = useState<Tab | null>(null);
 
-  // Khối tìm kiếm trên trang đã cuộn khuất dưới header (đang thu gọn vào header)
-  const [, setIsSticky] = useState(false);
+  // Khối tìm kiếm trên trang đã cuộn khuất dưới header: true thì hiện nút tìm kiếm nhỏ dính theo màn hình bên dưới
+  // (có độ trễ quanh mép, xem stickAtRef bên dưới — tránh nút nhấp nháy khi dừng cuộn đúng ngay mép header).
+  const [isSticky, setIsSticky] = useState(false);
   // Khối tìm kiếm gốc đang nằm khuất dưới đáy header hiện tại (ẩn nó đi để không lộ qua nền header trong mờ)
   const [blockUnderHeader, setBlockUnderHeader] = useState(false);
 
@@ -139,9 +139,6 @@ export default function SearchHub() {
   const [provinceSearch, setProvinceSearch] = useState('');
 
   const searchRef = useRef<HTMLDivElement>(null);
-
-  // Ô trống giữa header: khi khối tìm kiếm này cuộn khuất, thanh tìm kiếm thu gọn được đưa vào đó (kiểu Airbnb).
-  const headerSlot = useHeaderSearchSlot();
 
   // Đồng bộ với đường dẫn (quay lại / mở link kết quả tìm kiếm). Đường dẫn không có thì giữ giá trị mặc định đang có.
   useEffect(() => {
@@ -159,9 +156,9 @@ export default function SearchHub() {
     if (count) setGuests(count);
   }, [searchParams]);
 
-  // Thu gọn vào header khi khối tìm kiếm gốc đã cuộn khuất dưới đáy header thật. Có độ trễ (hysteresis): ghi lại đáy
-  // header lúc bắt đầu thu gọn và chỉ mở lại khi khối tìm kiếm trồi lên quá mốc đó — trên điện thoại header co lại khi thu
-  // gọn (hàng menu ẩn đi), nếu so với đáy hiện tại thì trạng thái sẽ bật/tắt liên tục quanh mép.
+  // Hiện nút tìm kiếm dính màn hình khi khối tìm kiếm gốc đã cuộn khuất dưới đáy header thật. Có độ trễ (hysteresis):
+  // ghi lại đáy header lúc bắt đầu thu gọn và chỉ ẩn nút lại khi khối tìm kiếm trồi lên quá mốc đó — trên điện thoại
+  // header co lại khi thu gọn (hàng menu ẩn đi), nếu so với đáy hiện tại thì trạng thái sẽ bật/tắt liên tục quanh mép.
   const stickAtRef = useRef<number | null>(null);
   useEffect(() => {
     const header = document.getElementById('app-header');
@@ -210,23 +207,18 @@ export default function SearchHub() {
     };
   }, []);
 
-  // Giữ nguyên thanh menu điều hướng chính trên header (như ảnh 2), không thay thế bằng thanh tìm kiếm thu gọn (ảnh 1)
-  const showCompactInHeader = false;
-  useEffect(() => {
-    setHeaderSearchCompact(false);
-  }, []);
-  useEffect(() => () => setHeaderSearchCompact(false), []);
-
   // Popover máy tính: mở từ thanh thu gọn trong header thì nằm dưới header (docked), mở từ khối trên trang thì bám dưới
   // khối đó — đo lại theo từng nhịp cuộn; khối cuộn khuất dưới header thì đóng popover (không để nó trôi đè lên header).
   const popoverOpen = activeTab !== null;
   const [popoverDocked, setPopoverDocked] = useState(false);
   const [popoverBounds, setPopoverBounds] = useState<DOMRect | null>(null);
-  const compactRef = useRef(showCompactInHeader);
-  useEffect(() => { compactRef.current = showCompactInHeader; }, [showCompactInHeader]);
+  // Popover mở từ nút sticky (khối gốc đã cuộn khuất) thì "chốt" ở chế độ docked ngay lúc mở — không đổi giữa chừng dù
+  // khách cuộn lên lại trong lúc popover đang mở.
+  const stickyAtOpenRef = useRef(false);
+  useEffect(() => { stickyAtOpenRef.current = isSticky; }, [isSticky]);
   useLayoutEffect(() => {
     if (!popoverOpen || !window.matchMedia('(min-width: 768px)').matches) return undefined;
-    const docked = compactRef.current;
+    const docked = stickyAtOpenRef.current;
     setPopoverDocked(docked);
     if (docked) return undefined;
     let frame = 0;
@@ -311,7 +303,7 @@ export default function SearchHub() {
       if (
         target.closest('.search-popover-panel') ||
         target.closest('.search-modal-portal') ||
-        target.closest('.search-sticky-bar') ||
+        target.closest('.search-fab') ||
         (searchRef.current && searchRef.current.contains(target))
       ) {
         return;
@@ -367,6 +359,8 @@ export default function SearchHub() {
 
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
   const toggleTab = (tab: Tab) => setActiveTab(activeTab === tab ? null : tab);
+  /** Nút tìm kiếm nhỏ dính theo màn hình: bấm mở lại từ bước điểm đến, bấm lần nữa thì đóng. */
+  const toggleSearch = () => setActiveTab(activeTab ? null : 'location');
 
   const region = useMemo(
     () => regions.find((r) => foldVietnamese(r.name) === foldVietnamese(province)) ?? null,
@@ -607,7 +601,7 @@ export default function SearchHub() {
         aria-label="Tìm homestay"
         onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
         className={`w-full overflow-hidden rounded-2xl bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
-          showCompactInHeader && blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
+          blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         {/* Điện thoại: một hàng — phần tóm tắt mở bảng chọn (điểm đến → thời gian → số người), nút tìm chạy tìm kiếm ngay */}
@@ -703,7 +697,7 @@ export default function SearchHub() {
 
       {/* Lối phụ: lên lịch trình trước (cùng tỉnh, ngày, số người) — ẩn khi đang chọn chỗ ở cho một lịch trình */}
       {!choosingForJourney && (
-        <div className={`mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${showCompactInHeader && blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
           <Link
             to={tripPath}
             onPointerEnter={prefetchTrip}
@@ -717,68 +711,35 @@ export default function SearchHub() {
         </div>
       )}
 
-      {/* ---------------- THANH TÌM KIẾM THU GỌN NẰM TRONG HEADER (KIỂU AIRBNB) ----------------
-          Khối tìm kiếm trên trang cuộn khuất thì thanh nhỏ này hiện ở giữa header (portal vào ô trống của header), không còn
-          thanh dính thứ hai bên dưới header. Mỗi ô (rộng bằng nhau) mở đúng bước của bộ lọc; nút tìm chạy tìm kiếm ngay. */}
-      {showCompactInHeader && headerSlot && createPortal(
-        <div className="search-sticky-bar flex h-11 w-full max-w-full items-center rounded-lg border border-gray-200 bg-white p-1 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-md md:h-12 md:w-[440px] lg:w-[560px]">
-          {/* Điện thoại: một nút mở bộ lọc, tóm tắt 2 dòng */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('location')}
-            aria-label={`Sửa tìm kiếm: ${summary}`}
-            className="flex min-w-0 flex-1 flex-col items-start justify-center rounded-lg px-3 text-left cursor-pointer md:hidden"
-          >
-            <span className="w-full truncate text-[13px] font-bold leading-tight text-[var(--color-ink-deep)]">{province}</span>
-            <span className="w-full truncate text-[11px] font-medium leading-tight text-slate-500">
-              {dateText} · {durationShort} · {guestText}
-            </span>
-          </button>
-
-          {/* Từ md: 3 ô bằng nhau Điểm đến | Thời gian | Số người */}
-          <div className="hidden min-w-0 flex-1 items-center md:flex">
-            {([
-              ['location', MapPin, province, 'font-bold text-[var(--color-ink-deep)]'],
-              ['dates', Calendar, `${dateText} · ${durationShort}`, 'font-semibold text-slate-600'],
-              ['guests', Users, guestText, 'font-semibold text-slate-600'],
-            ] as const).map(([tab, Icon, text, tone], index) => (
-              <React.Fragment key={tab}>
-                {index > 0 && <span aria-hidden className="h-6 w-px shrink-0 bg-gray-200" />}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  aria-haspopup="dialog"
-                  aria-expanded={activeTab === tab}
-                  className={`flex h-10 min-w-0 flex-1 basis-0 items-center gap-2 rounded-lg px-3 text-[13px] transition-colors cursor-pointer ${
-                    activeTab === tab ? 'bg-[var(--color-primary-50)] font-bold text-[#06604a]' : `${tone} hover:bg-gray-100`
-                  }`}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
-                  <span className="truncate tabular-nums">{text}</span>
-                </button>
-              </React.Fragment>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSearch();
-            }}
-            aria-label={ctaLabel}
-            title={ctaLabel}
-            className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] text-white shadow-xs transition-colors hover:bg-[#06604a] active:scale-95 cursor-pointer md:h-10 md:w-10 lg:w-auto lg:px-4"
-          >
-            <Search className="h-4 w-4 shrink-0" strokeWidth={2.6} aria-hidden />
-            <span className="hidden text-[13px] font-bold lg:inline">{ctaLabel}</span>
-          </button>
-        </div>,
-        headerSlot
+      {/* ---------------- NÚT TÌM KIẾM NHỎ, DÍNH THEO MÀN HÌNH ----------------
+          Khối tìm kiếm gốc cuộn khuất dưới header thì nút tròn gọn này hiện ra giữa đáy màn hình (tự né lên khi thanh cài
+          app PWA đang hiện — xem data-pwa-bar ở HeroPwaDownloadBanner); bấm mở lại đúng luồng 3 bước như khối gốc.
+          Portal thẳng ra body (như modal điện thoại bên dưới): bên trong cây DOM có div.hero-rise — animation của nó để lại
+          transform sau khi chạy xong (dù là ma trận đơn vị), biến div đó thành containing block cho mọi "fixed" lồng bên
+          trong, nên "fixed" sẽ bám theo div đang cuộn thay vì theo màn hình nếu không thoát ra ngoài bằng portal. */}
+      {typeof window !== 'undefined' && createPortal(
+        <button
+          type="button"
+          onClick={toggleSearch}
+          aria-haspopup="dialog"
+          aria-expanded={activeTab !== null}
+          aria-label={`Tìm homestay: ${summary}`}
+          className={`search-fab fixed left-1/2 z-40 flex h-11 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-[var(--color-ink-deep)]/95 py-0 pl-1.5 pr-4 text-sm font-bold text-white shadow-[0_10px_28px_-8px_rgba(4,36,29,0.6)] ring-1 ring-white/15 backdrop-blur transition-[opacity,transform] duration-300 cursor-pointer hover:bg-black active:scale-95 bottom-5 max-md:[html[data-pwa-bar]_&]:bottom-24 mb-[var(--safe-bottom)] ${
+            isSticky ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
+          }`}
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]">
+            <Search className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
+          </span>
+          <span className="min-w-0 truncate">{province} · {durationShort}</span>
+        </button>,
+        document.body
       )}
 
-      {/* ---------------- DESKTOP POPOVER 3 BƯỚC ---------------- */}
-      {activeTab && (
+      {/* ---------------- DESKTOP POPOVER 3 BƯỚC ----------------
+          Portal ra body (cùng lý do với nút sticky ở trên): nếu để tại chỗ, popover "fixed" sẽ vô tình bám theo
+          div.hero-rise thay vì màn hình thật — định vị sai hẳn khi khối tìm kiếm gốc đã cuộn xa khỏi tầm nhìn. */}
+      {activeTab && typeof window !== 'undefined' && createPortal(
         <div
           style={popoverStyle}
           role="dialog"
@@ -861,7 +822,8 @@ export default function SearchHub() {
               </div>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ---------------- MOBILE MODAL (ĐIỂM ĐẾN, THỜI GIAN, SỐ NGƯỜI) ---------------- */}

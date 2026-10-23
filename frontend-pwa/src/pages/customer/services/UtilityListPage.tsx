@@ -17,8 +17,10 @@ import {
   Bike
 } from 'lucide-react';
 import bannerUtilities from '@/assets/photos/banner-utilities.webp';
-import { ToolbarSkeleton } from '@/components/ui/ListPageSkeleton';
+import { ToolbarSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
 import { useFirstLoad } from '@/hooks/useFirstLoad';
+
+const SKELETON = LIST_SKELETON_SPECS.services;
 
 export default function UtilityListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -173,7 +175,7 @@ export default function UtilityListPage() {
         </div>
 
         {firstLoad ? (
-          <ToolbarSkeleton chips={3} />
+          <ToolbarSkeleton {...SKELETON.toolbar} />
         ) : (<>
         {/* Top Filter Bar */}
         <div className="relative overflow-hidden bg-white/90 backdrop-blur-md ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
@@ -246,7 +248,7 @@ export default function UtilityListPage() {
         {/* Content List */}
         <div>
           {loading ? (
-            <CardSkeleton count={8} layout="compact-full" />
+            <CardSkeleton count={SKELETON.count} layout="compact-full" />
           ) : (
             <div>
               {paginatedServices.length === 0 ? (

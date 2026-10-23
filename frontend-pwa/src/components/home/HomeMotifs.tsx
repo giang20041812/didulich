@@ -184,30 +184,12 @@ function Motif({ children, className, together, sectionDrawn, order }: { childre
 
 export default function HomeMotifs({ variant, className = 'inset-0' }: { variant: MotifVariant; className?: string }) {
   const { tone, drum, items } = LAYOUT[variant];
-  const ref = useRef<HTMLDivElement>(null);
-  // Cùng điều kiện với snap từng màn hình (globals.css, .home-screen): mỗi phần vừa một màn hình nên vẽ cả bộ cùng lúc.
-  const together = useMediaQuery('(min-width: 1024px) and (min-height: 760px)');
-  const [sectionDrawn, setSectionDrawn] = useState(false);
 
-  // Phần "tới" khi mép trên của nó lên khỏi đường 65% chiều cao màn hình. Đầu trang luôn cao đúng một màn hình nên lúc mới mở
-  // trang mép trên của phần đầu tiên nằm ở đáy màn hình — chưa kích hoạt, khách không bỏ lỡ lần vẽ.
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !together || !('IntersectionObserver' in window)) return undefined;
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      setSectionDrawn(true);
-      observer.disconnect();
-    }, { rootMargin: '0px 0px -35% 0px' });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [together]);
-
+  // Mỗi phần cao theo nội dung (không còn một phần = một màn hình), nên trống và từng họa tiết tự vẽ khi lướt tới nó.
   return (
-    <div ref={ref} aria-hidden className={`pointer-events-none absolute -z-10 overflow-hidden ${className}`} style={{ color: tone }}>
+    <div aria-hidden className={`pointer-events-none absolute -z-10 overflow-hidden ${className}`} style={{ color: tone }}>
       {drum && (
         <DongSonDrum
-          draw={together && sectionDrawn}
           className={`h-[240px] w-[240px] md:h-[450px] md:w-[450px] -translate-y-1/2 ${drum.at} ${drum.side === 'left' ? 'left-0 -translate-x-[42%]' : 'right-0 translate-x-[42%]'}`}
         />
       )}
@@ -215,8 +197,8 @@ export default function HomeMotifs({ variant, className = 'inset-0' }: { variant
         <Motif
           key={i}
           order={i}
-          together={together}
-          sectionDrawn={sectionDrawn}
+          together={false}
+          sectionDrawn={false}
           className={`absolute h-[127px] w-[150px] md:h-[220px] md:w-[260px] ${side === 'left' ? 'left-0' : 'right-0'} ${at} ${mirror ? '-scale-x-100' : ''}`}
         >
           {MOTIFS[motif]()}

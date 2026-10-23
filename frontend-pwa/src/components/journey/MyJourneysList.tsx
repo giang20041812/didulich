@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Compass, Route } from 'lucide-react';
 import JourneyCard from '@/components/journey/JourneyCard';
+import { MyJourneysSkeleton } from '@/components/experience/FeedCardSkeleton';
 import type { JourneyView } from '@/types/journey';
 import { journeyPhase, journeyRange } from '@/lib/journey';
 import { fetchMyJourneys } from '@/services/journeyService';
@@ -30,13 +31,7 @@ export default function MyJourneysList({ onExplore }: { onExplore?: () => void }
   }, []);
 
   if (error) return <p className="rounded-2xl bg-rose-50 p-4 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">{error}</p>;
-  if (!journeys) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2" role="status" aria-label="Đang tải lịch trình">
-        {[0, 1].map((i) => <div key={i} className="h-64 animate-pulse rounded-3xl bg-white ring-1 ring-slate-200" />)}
-      </div>
-    );
-  }
+  if (!journeys) return <MyJourneysSkeleton />;
   if (journeys.length === 0) {
     return (
       <div className="rounded-2xl bg-white px-6 py-10 text-center ring-1 ring-slate-200">

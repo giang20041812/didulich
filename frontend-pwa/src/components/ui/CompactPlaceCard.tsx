@@ -61,17 +61,13 @@ export default function CompactPlaceCard({
 
   const card = (
     <div
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-[#118066] ring-1 ring-emerald-400/20 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]"
       onPointerEnter={onIntent}
       onTouchStart={onIntent}
       onFocus={onIntent}
     >
-      <Link to={to} className="flex flex-1 flex-col">
-        <div
-          className={`clip-top-2xl relative w-full shrink-0 overflow-hidden bg-slate-100 ${
-            compact ? 'aspect-[16/10]' : 'aspect-[4/3]'
-          }`}
-        >
+      <Link to={to} className={`relative flex flex-1 flex-col ${compact ? 'aspect-square' : 'aspect-[4/5]'}`}>
+        <div className="absolute inset-0 overflow-hidden bg-slate-100">
           {src ? (
             <img
               src={src}
@@ -85,35 +81,32 @@ export default function CompactPlaceCard({
           ) : (
             <ImagePlaceholder Icon={FallbackIcon} label="Ảnh thực tế đang tải" />
           )}
-          {/* Chân ảnh tan vào nền xanh rừng của phần thông tin, kèm quầng sáng ngọc lục bảo */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#118066]/80 via-[#118066]/30 via-50% to-transparent" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-950/45 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          <span className="pointer-events-none absolute bottom-2 right-2 translate-y-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-emerald-800 opacity-0 shadow-md transition-[opacity,transform] duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-            Xem chi tiết →
-          </span>
-          {badge && (
-            <div
-              className={`absolute left-2 top-2 ${
-                action ? 'max-w-[calc(100%-2.5rem)]' : 'max-w-[calc(100%-0.8rem)]'
-              }`}
-            >
-              {badge}
-            </div>
-          )}
         </div>
+        {/* Chỉ một lớp glow xanh tan dần từ chân thẻ lên ảnh; chữ nằm đè lên trên, không còn phần nền xanh riêng */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-gradient-to-t from-[#0b6a53]/95 via-[#139274]/55 via-50% to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-emerald-950/30 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+        {badge && (
+          <div
+            className={`absolute left-2 top-2 z-10 ${
+              action ? 'max-w-[calc(100%-2.5rem)]' : 'max-w-[calc(100%-0.8rem)]'
+            }`}
+          >
+            {badge}
+          </div>
+        )}
 
-        <div className={`flex flex-1 flex-col gap-1 bg-gradient-to-b from-[#118066] to-[#0b5c48] ${compact ? 'p-2.5 sm:p-3' : 'p-3.5 md:p-4'}`}>
+        <div className={`relative z-10 mt-auto flex flex-col gap-1 ${compact ? 'p-2.5 pt-8 sm:p-3 sm:pt-10' : 'p-3.5 pt-10 md:p-4 md:pt-12'}`}>
           <h3
-            className={`font-extrabold leading-snug text-white transition-colors group-hover:text-emerald-200 ${
+            className={`font-extrabold leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] ${
               compact
                 ? 'line-clamp-1 text-xs sm:text-sm'
-                : 'line-clamp-2 min-h-[2.5rem] text-sm md:text-[15px]'
+                : 'line-clamp-2 text-sm md:text-[15px]'
             }`}
           >
             {name}
           </h3>
           {location && (
-            <p className="flex min-w-0 items-center gap-1 text-[11px] sm:text-xs font-medium text-white/65">
+            <p className="flex min-w-0 items-center gap-1 text-[11px] sm:text-xs font-medium text-white/85 [text-shadow:0_1px_4px_rgba(0,0,0,0.45)]">
               <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-emerald-300" />
               <span className="truncate">{location}</span>
             </p>
@@ -126,7 +119,7 @@ export default function CompactPlaceCard({
               {amenities.slice(0, compact ? 2 : 4).map((item) => (
                 <li
                   key={item}
-                  className="max-w-full truncate rounded-md bg-white/10 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold leading-tight text-emerald-100 border border-white/15 transition-colors duration-300 group-hover:border-emerald-300/50 group-hover:bg-white/15"
+                  className="max-w-full truncate rounded-md bg-white/15 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold leading-tight text-emerald-50 border border-white/20"
                 >
                   {item}
                 </li>
@@ -136,13 +129,13 @@ export default function CompactPlaceCard({
           {notice}
           {price && (
             <p
-              className={`mt-auto pt-1 font-black leading-tight text-emerald-300 ${
+              className={`pt-0.5 font-black leading-tight text-emerald-200 ${
                 compact ? 'text-xs sm:text-sm' : 'text-sm md:text-base'
               }`}
             >
               {price}
               {priceUnit && (
-                <span className="text-[10px] sm:text-[11px] font-normal text-white/55">
+                <span className="text-[10px] sm:text-[11px] font-normal text-white/70">
                   {' '}
                   /{priceUnit}
                 </span>

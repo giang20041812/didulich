@@ -586,6 +586,9 @@
   opacity: var(--drum-alpha);
 }
 .drum-spin {
+  /* will-change: mỗi lớp được vẽ thành ảnh một lần rồi chỉ xoay ảnh đó, không vẽ lại SVG mỗi khung hình (mẫu gạch chỉ còn
+     ở mái nhà, còn lại là khối tô đặc nên vẽ một lần rất nhẹ). */
+  will-change: transform;
   animation: drumSpin var(--spin, 120s) linear infinite;
 }
 .dongson .drum-ink {
@@ -605,6 +608,10 @@
 }
 .dongson.is-drawn .drum-fill {
   fill-opacity: 0.45;
+}
+/* Khối hình người, thú, chim (đúc nổi đặc) và khối khắc gạch: tô gần đậm hẳn như hình trên mặt trống thật. */
+.dongson.is-drawn .drum-mass {
+  fill-opacity: 0.9;
 }
 .drum-glow {
   position: absolute;
@@ -679,38 +686,6 @@
 .motif[data-ink][data-drawn] path[fill-opacity] {
   fill-opacity: 0.4;
   transition: stroke-dashoffset var(--dur, 1600ms) cubic-bezier(0.45, 0, 0.2, 1) var(--delay, 0ms), fill-opacity 1600ms ease 1400ms;
-}
-
-/*
- * Trang chủ — chia thành từng "màn hình" (hero, điểm đến, homestay, đặc sản, tiện ích), lướt tới đâu tự căn khít vào đầu
- * màn hình đó. HomePage gắn .home-snap lên <html> khi mount và gỡ khi rời trang.
- * - Màn hình đủ lớn (>= 1024px, cao >= 760px): snap BẮT BUỘC (mandatory) và mỗi phần cao tối thiểu đúng một màn hình
- *   (.home-screen, nội dung canh giữa) nên mỗi lần lướt là sang gọn một phần, cả lên lẫn xuống. Phần cao hơn màn hình vẫn
- *   cuộn tự do bên trong nó (trình duyệt cho phép khi vùng snap lớn hơn khung nhìn), rồi mới căn sang phần kế.
- * - Điện thoại: phần cao hơn nhiều so với màn hình nên chỉ dùng proximity (dừng gần mép panel nào thì căn vào đó).
- * scroll-padding PHẢI cố định: --app-header-offset đổi theo cuộn (header thu gọn khi scrollY > 20) sẽ làm điểm dừng dịch
- * chuyển và kẹt khi lướt lên, nên dùng --app-header-height (chiều cao lúc ở đầu trang).
- */
-html.home-snap {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: var(--app-header-height, 0px);
-}
-html.home-snap .home-snap-panel {
-  scroll-snap-align: start;
-}
-html.home-snap main + footer {
-  scroll-snap-align: end;
-}
-@media (min-width: 1024px) and (min-height: 760px) {
-  html.home-snap {
-    scroll-snap-type: y mandatory;
-  }
-  .home-screen {
-    display: flex;
-    min-height: calc(100dvh - var(--app-header-height, 0px));
-    flex-direction: column;
-    justify-content: center;
-  }
 }
 
 @layer utilities {
@@ -910,4 +885,21 @@ html.home-snap main + footer {
 }
 @media (prefers-reduced-motion: reduce) {
   .heart-pop { animation: none; }
+}
+
+/*
+ * Khung lướt ngang các trang thẻ: đẩy lên lớp GPU riêng để lướt chỉ dịch lớp đã vẽ sẵn, không vẽ lại ảnh + bóng + gradient của
+ * hàng chục thẻ mỗi khung hình. Đang lướt thì tắt bóng đổ lớn và hiệu ứng nhấc thẻ (hai thứ đắt nhất khi vẽ lại).
+ */
+.card-pages {
+  will-change: scroll-position;
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+.card-pages * {
+  transition-duration: 0s !important;
+}
+.card-pages a,
+.card-pages article {
+  box-shadow: none !important;
 }
