@@ -79,3 +79,51 @@ export function BlockSkeleton({ label = 'Đang tải', lines = 3, className }: {
     </Status>
   );
 }
+
+/** Khung chờ trang tổng quan (Admin / NCC): hàng số liệu + biểu đồ + bảng. */
+export function DashboardSkeleton({ label = 'Đang tải' }: { label?: string }) {
+  return (
+    <Status label={label} className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <Skeleton className={`${bar} h-7 w-1/4`} />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-slate-200/80">
+            <Skeleton className={`${bar} h-3 w-1/2`} />
+            <Skeleton className={`${bar} h-7 w-2/3`} />
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <Skeleton className={`${bar} h-64 w-full rounded-2xl`} />
+        <Skeleton className={`${bar} h-64 w-full rounded-2xl`} />
+      </div>
+      <ListSkeleton rows={3} label={label} />
+    </Status>
+  );
+}
+
+/** Khung chờ trang biểu mẫu / đăng nhập / hồ sơ: tiêu đề + vài ô nhập + nút. */
+export function FormSkeleton({ label = 'Đang tải' }: { label?: string }) {
+  return (
+    <Status label={label} className="mx-auto w-full max-w-md space-y-5 px-4 py-10 sm:px-6">
+      <Skeleton className={`${bar} mx-auto h-8 w-1/2`} />
+      {Array.from({ length: 3 }, (_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className={`${bar} h-3 w-24`} />
+          <Skeleton className={`${bar} h-11 w-full rounded-xl`} />
+        </div>
+      ))}
+      <Skeleton className={`${bar} h-11 w-full rounded-xl`} />
+    </Status>
+  );
+}
+
+/** Khung chờ trang danh sách dòng có tiêu đề (đơn đặt, đánh giá…). */
+export function ListPageFallback({ label = 'Đang tải' }: { label?: string }) {
+  return (
+    <div className="mx-auto w-full max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+      <Skeleton className={`${bar} h-7 w-1/3`} />
+      <ListSkeleton rows={6} label={label} />
+    </div>
+  );
+}
