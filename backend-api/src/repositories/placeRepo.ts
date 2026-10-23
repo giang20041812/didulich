@@ -57,6 +57,8 @@ export interface PlaceRow {
   coordVerifiedBy: number | null;
   approvalStatus: PlaceApprovalStatus;
   rejectReason: string | null;
+  /** Cờ Admin: dữ liệu đã được xác thực (chính thống). Địa điểm tạo mới mặc định chưa xác thực. */
+  dataVerified: boolean;
 }
 
 export interface PlaceWithRegion extends PlaceRow {
@@ -179,6 +181,7 @@ export async function insertPlace(data: Partial<PlaceRow> & Pick<PlaceRow, 'slug
     sourceType: 'PUBLIC_TRUSTED',
     verification: 'UNVERIFIED',
     coordVerified: false,
+    dataVerified: false,
     approvalStatus: 'APPROVED',
     createdAt: now,
     updatedAt: now,
@@ -470,9 +473,12 @@ function publicWhere(f: PublicListFilter): { where: string; params: unknown[] } 
     }
   }
 
-  // Khoảng giá: chỉ chỗ nghỉ có loại phòng đang bán, có giá.
+  // Khoảng giá: chỉ chỗ nghỉ có loại phòng đang bán, có giá. Riêng danh sách homestay (không lọc giá) còn liệt kê cả chỗ nghỉ CHƯA CÓ
+  // loại phòng nào — thông tin tham khảo do Admin nhập, khách liên hệ trực tiếp (chi tiết hiện "chưa mở bán phòng trực tuyến").
   if (f.kind === 'HOMESTAY' || f.minPrice != null || f.maxPrice != null) {
-    parts.push(`EXISTS (SELECT 1 FROM room_type x WHERE x.place_id = p.id AND x.status = 'ACTIVE' AND x.base_price IS NOT NULL)`);
+    const priced = `EXISTS (SELECT 1 FROM room_type x WHERE x.place_id = p.id AND x.status = 'ACTIVE' AND x.base_price IS NOT NULL)`;
+    const infoOnly = `NOT EXISTS (SELECT 1 FROM room_type x WHERE x.place_id = p.id)`;
+    parts.push(f.minPrice == null && f.maxPrice == null ? `(${priced} OR ${infoOnly})` : priced);
     if (f.minPrice != null) {
       parts.push(
         `NOT EXISTS (SELECT 1 FROM room_type x WHERE x.place_id = p.id AND x.status = 'ACTIVE' AND x.base_price IS NOT NULL AND x.base_price < ${add(f.minPrice)})`,
@@ -485,10 +491,11 @@ function publicWhere(f: PublicListFilter): { where: string; params: unknown[] } 
     }
   }
 
-  // Sức chứa cho cả đoàn: tổng số khách các loại phòng đang bán, có giá.
+  // Sức chứa cho cả đoàn: tổng số khách các loại phòng đang bán, có giá. Chỗ nghỉ chưa có loại phòng nào không biết sức chứa nên không bị loại.
   if (f.guests != null && f.guests > 1) {
     parts.push(
-      `(SELECT sum(x.max_occupancy::bigint * x.total_room_count) FROM room_type x WHERE x.place_id = p.id AND x.status = 'ACTIVE' AND x.base_price IS NOT NULL) >= ${add(f.guests)}`,
+      `((SELECT sum(x.max_occupancy::bigint * x.total_room_count) FROM room_type x WHERE x.place_id = p.id AND x.status = 'ACTIVE' AND x.base_price IS NOT NULL) >= ${add(f.guests)}
+        OR NOT EXISTS (SELECT 1 FROM room_type x WHERE x.place_id = p.id))`,
     );
   }
 

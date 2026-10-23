@@ -246,6 +246,46 @@ describe('places', () => {
   });
 });
 
+describe('places data-verified flag', () => {
+  it('defaults to unverified, toggles independently of verification, filters and audits', async () => {
+    const root = await createAdmin(1);
+    const a = await createPlace({ name: 'Homestay cờ dữ liệu' });
+    const b = await createPlace({ name: 'Điểm cờ dữ liệu', kind: 'ATTRACTION', providerId: null });
+
+    const list = await request(app).get('/api/v1/admin/places').set(bearer(root.token));
+    expect(list.body.content.every((p: { dataVerified: boolean }) => p.dataVerified === false)).toBe(true);
+
+    const on = await request(app).patch(`/api/v1/admin/places/${a}/data-verified`).set(bearer(root.token)).send({ dataVerified: true });
+    expect(on.status).toBe(200);
+    expect(on.body).toMatchObject({ id: a, dataVerified: true, verification: 'UNVERIFIED' });
+
+    const verifiedOnly = await request(app).get('/api/v1/admin/places?dataVerified=true').set(bearer(root.token));
+    expect(verifiedOnly.body.content.map((p: { id: number }) => p.id)).toEqual([a]);
+    const unverifiedOnly = await request(app).get('/api/v1/admin/places?dataVerified=false').set(bearer(root.token));
+    expect(unverifiedOnly.body.content.map((p: { id: number }) => p.id)).toEqual([b]);
+    expect((await request(app).get(`/api/v1/admin/places/${a}`).set(bearer(root.token))).body).toMatchObject({ dataVerified: true });
+
+    // Duyệt nội dung không đụng tới cờ dữ liệu.
+    const verification = await request(app).patch(`/api/v1/admin/places/${b}/verification`).set(bearer(root.token)).send({ verification: 'VERIFIED' });
+    expect(verification.body).toMatchObject({ verification: 'VERIFIED', dataVerified: false });
+
+    const off = await request(app).patch(`/api/v1/admin/places/${a}/data-verified`).set(bearer(root.token)).send({ dataVerified: false, reason: 'Phát hiện sai giá' });
+    expect(off.body).toMatchObject({ dataVerified: false });
+    const logs = await query<{ action: string; reason: string | null }>(
+      `SELECT action, reason FROM audit_log WHERE action = 'UPDATE_PLACE_DATA_VERIFIED' AND entity_id = $1 ORDER BY id`,
+      [a],
+    );
+    expect(logs.map((l) => l.reason)).toEqual(['Admin xác thực dữ liệu điểm đến', 'Phát hiện sai giá']);
+
+    // Đặt lại đúng giá trị hiện tại thì không ghi thêm nhật ký.
+    await request(app).patch(`/api/v1/admin/places/${a}/data-verified`).set(bearer(root.token)).send({ dataVerified: false });
+    expect(await query(`SELECT 1 FROM audit_log WHERE action = 'UPDATE_PLACE_DATA_VERIFIED' AND entity_id = $1`, [a])).toHaveLength(2);
+
+    expect((await request(app).patch(`/api/v1/admin/places/${a}/data-verified`).set(bearer(root.token)).send({})).status).toBe(400);
+    expect((await request(app).patch('/api/v1/admin/places/999999/data-verified').set(bearer(root.token)).send({ dataVerified: true })).status).toBe(400);
+  });
+});
+
 describe('bookings, finance, reports, dashboard', () => {
   it('handles a booking end to end with refunds, reports and dashboard counters', async () => {
     const root = await createAdmin(1);

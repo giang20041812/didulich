@@ -46,6 +46,7 @@ function summaryOf(p: JoinedPlace) {
     operationStatus: p.operationStatus,
     verification: p.verification,
     lastVerifiedAt: p.lastVerifiedAt,
+    dataVerified: p.dataVerified,
     ratingAvg: p.ratingAvg,
     ratingCount: p.ratingCount,
     createdAt: p.createdAt,
@@ -64,6 +65,7 @@ export interface PlaceFilter {
   keyword?: string;
   visibility?: PlaceVisibility;
   verification?: PlaceVerificationStatus;
+  dataVerified?: boolean;
   kind?: CategoryKind;
   providerId?: number;
   regionId?: number;
@@ -76,6 +78,7 @@ function filterWhere(f: PlaceFilter): Where {
   where.and('p.is_deleted = FALSE');
   if (f.visibility) where.and('p.visibility = ?', f.visibility);
   if (f.verification) where.and('p.verification = ?', f.verification);
+  if (f.dataVerified != null) where.and('p.data_verified = ?', f.dataVerified);
   if (f.kind) where.and('p.kind = ?', f.kind);
   if (f.providerId != null) where.and('p.provider_id = ?', f.providerId);
   if (f.regionId != null) where.and('p.region_id = ?', f.regionId);
@@ -140,6 +143,7 @@ export async function getPlaceById(id: number) {
     operationStatus: place.operationStatus,
     verification: place.verification,
     lastVerifiedAt: place.lastVerifiedAt,
+    dataVerified: place.dataVerified,
     ratingAvg: place.ratingAvg,
     ratingCount: place.ratingCount,
     googleRating: place.googleRating,
@@ -171,6 +175,27 @@ export function updateVerification(id: number, request: { verification: PlaceVer
       { verification: oldStatus },
       { verification: request.verification },
     );
+    return summaryOf((await joined(id))!);
+  });
+}
+
+/** Bật / tắt cờ "dữ liệu đã xác thực" của một địa điểm (độc lập với trạng thái kiểm duyệt nội dung); ghi nhật ký khi có thay đổi. */
+export function updateDataVerified(id: number, request: { dataVerified: boolean; reason?: string | null }, callerAccountId: number | null) {
+  return tx(async () => {
+    const place = await joined(id);
+    if (!place) throw notFound(id);
+    if (place.dataVerified !== request.dataVerified) {
+      await placeRepo.updatePlace(place, { dataVerified: request.dataVerified });
+      await audit.record(
+        callerAccountId,
+        'UPDATE_PLACE_DATA_VERIFIED',
+        'Place',
+        id,
+        request.reason ?? (request.dataVerified ? 'Admin xác thực dữ liệu điểm đến' : 'Admin bỏ xác thực dữ liệu điểm đến'),
+        { dataVerified: place.dataVerified },
+        { dataVerified: request.dataVerified },
+      );
+    }
     return summaryOf((await joined(id))!);
   });
 }

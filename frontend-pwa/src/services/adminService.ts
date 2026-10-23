@@ -24,6 +24,7 @@ import type {
   UpdateProviderRequest,
   UpdateProviderStatusRequest,
   AdminPlaceSummaryDto,
+  UpdatePlaceDataVerifiedRequest,
   UpdatePlaceVerificationRequest,
   UpdatePlaceVisibilityRequest,
   AdminDashboardSummaryDto,
@@ -580,6 +581,12 @@ export const adminService = {
 
   async updatePlaceVerification(id: number, data: UpdatePlaceVerificationRequest): Promise<AdminPlaceSummaryDto> {
     const res = await axios.patch<AdminPlaceSummaryDto>(`${API_BASE}/places/${id}/verification`, data, getAuthHeaders());
+    return res.data;
+  },
+
+  /** Bật / tắt cờ "dữ liệu đã xác thực" — độc lập với trạng thái duyệt nội dung. */
+  async updatePlaceDataVerified(id: number, data: UpdatePlaceDataVerifiedRequest): Promise<AdminPlaceSummaryDto> {
+    const res = await axios.patch<AdminPlaceSummaryDto>(`${API_BASE}/places/${id}/data-verified`, data, getAuthHeaders());
     return res.data;
   },
 

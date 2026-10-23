@@ -146,6 +146,7 @@ const updateProvider = z.object({
 });
 const updateProviderStatus = z.object({ status: z.enum(PROVIDER_STATUSES, notNull('Trạng thái không được để trống')), reason: strOrNull });
 const updatePlaceVerification = z.object({ verification: z.enum(PLACE_VERIFICATION_STATUSES, notNull('Trạng thái xác thực không được để trống')), reason: strOrNull });
+const updatePlaceDataVerified = z.object({ dataVerified: z.boolean(notNull('Trạng thái xác thực dữ liệu không được để trống')), reason: strOrNull });
 const updatePlaceVisibility = z.object({ visibility: z.enum(PLACE_VISIBILITIES, notNull('Trạng thái hiển thị không được để trống')), reason: strOrNull });
 const bulkVerification = z.object({ ids: idList, verification: z.enum(PLACE_VERIFICATION_STATUSES).nullish(), reason: strOrNull });
 const deletePlaces = z.object({ ids: idList, reason: strOrNull });
@@ -589,6 +590,7 @@ adminRouter.get(PLACES, local, async (req, res) => {
         keyword: strParam(req.query.keyword),
         visibility: enumParam(req.query.visibility, PLACE_VISIBILITIES),
         verification: enumParam(req.query.verification, PLACE_VERIFICATION_STATUSES),
+        dataVerified: boolParam(req.query.dataVerified),
         kind: enumParam(req.query.kind, CATEGORY_KINDS),
         providerId: intParam(req.query.providerId),
         regionId: intParam(req.query.regionId),
@@ -632,6 +634,11 @@ adminRouter.get(`${PLACES}/:id`, local, async (req, res) => {
 
 adminRouter.patch(`${PLACES}/:id/verification`, local, async (req, res) => {
   res.json(await placesAdmin.updateVerification(pathId(req), parseBody(updatePlaceVerification, req.body), callerId(req)));
+});
+
+/** Bật / tắt cờ "dữ liệu đã xác thực" (độc lập với /verification là quy trình duyệt nội dung). */
+adminRouter.patch(`${PLACES}/:id/data-verified`, local, async (req, res) => {
+  res.json(await placesAdmin.updateDataVerified(pathId(req), parseBody(updatePlaceDataVerified, req.body), callerId(req)));
 });
 
 adminRouter.patch(`${PLACES}/:id/visibility`, local, async (req, res) => {

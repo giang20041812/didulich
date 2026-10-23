@@ -5,7 +5,8 @@ import { useAdminPermission } from '@/hooks/useAdminPermission';
 import { getApiErrorMessage } from '@/lib/apiError';
 import type { AdminPlaceDetailDto, AdminPlaceSummaryDto, PlaceShowcase } from '@/types/admin';
 import { StatusBadge } from './StatusBadge';
-import { kindMeta, VERIFICATION_LABEL, VERIFICATION_TONE, VISIBILITY_LABEL, VISIBILITY_TONE } from './placeMeta';
+import { DATA_VERIFIED_LABEL, DATA_VERIFIED_TONE, kindMeta, VERIFICATION_LABEL, VERIFICATION_TONE, VISIBILITY_LABEL, VISIBILITY_TONE } from './placeMeta';
+import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import OverlayPortal from './OverlayPortal';
 import PlaceShowcaseSections from './PlaceShowcaseSections';
 
@@ -16,6 +17,9 @@ interface PlaceQuickPreviewProps {
   onApprove: () => void;
   onRequestUpdate: () => void;
   onToggleVisibility: () => void;
+  /** Bật / tắt cờ "dữ liệu đã xác thực" của địa điểm. */
+  onToggleDataVerified: (next: boolean) => void;
+  savingDataVerified?: boolean;
 }
 
 const vnd = (n?: number | null) => (n == null ? null : new Intl.NumberFormat('vi-VN').format(n) + 'đ');
@@ -25,7 +29,7 @@ const CONTACT_LABEL: Partial<Record<string, string>> = {
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString('vi-VN') : '—');
 
 /** Ngăn xem nhanh bên phải: Admin đọc chi tiết điểm đến và Duyệt / Yêu cầu bổ sung ngay. */
-export default function PlaceQuickPreview({ place, onClose, onApprove, onRequestUpdate, onToggleVisibility }: PlaceQuickPreviewProps) {
+export default function PlaceQuickPreview({ place, onClose, onApprove, onRequestUpdate, onToggleVisibility, onToggleDataVerified, savingDataVerified = false }: PlaceQuickPreviewProps) {
   // Admin cấp 3 chỉ xem: không hiện nút duyệt / yêu cầu bổ sung / ẩn.
   const canOperate = useAdminPermission().can('operate');
   const [detail, setDetail] = useState<AdminPlaceDetailDto | null>(null);
@@ -100,6 +104,7 @@ export default function PlaceQuickPreview({ place, onClose, onApprove, onRequest
                 {VERIFICATION_LABEL[p.verification]}
               </StatusBadge>
               <StatusBadge tone={VISIBILITY_TONE[p.visibility]}>{VISIBILITY_LABEL[p.visibility]}</StatusBadge>
+              <StatusBadge tone={DATA_VERIFIED_TONE[place.dataVerified ? 'true' : 'false']}>{DATA_VERIFIED_LABEL[place.dataVerified ? 'true' : 'false']}</StatusBadge>
               <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold ${kind.tone}`}>{kind.label}</span>
             </div>
           </div>
@@ -114,6 +119,26 @@ export default function PlaceQuickPreview({ place, onClose, onApprove, onRequest
               <AlertTriangle className="h-4 w-4" /> {error}
             </div>
           )}
+
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border bg-canvas/60 px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">Xác thực dữ liệu</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-ink">
+                {place.dataVerified
+                  ? 'Thông tin đã được đối chiếu và xác thực (dữ liệu chính thống).'
+                  : 'Dữ liệu mới nhập, chưa đối chiếu thực tế. Bật sau khi kiểm tra tên, giá, liên hệ, vị trí và hình ảnh.'}
+              </p>
+            </div>
+            {canOperate && (
+              <ToggleSwitch
+                checked={place.dataVerified}
+                onChange={onToggleDataVerified}
+                label={`Xác thực dữ liệu ${p.name}`}
+                showState={false}
+                disabled={savingDataVerified}
+              />
+            )}
+          </div>
 
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
             <Field label="Nhà cung cấp">{p.providerName || 'Hệ thống du lịch'}</Field>
