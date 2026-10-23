@@ -73,40 +73,62 @@ function curve(pts: readonly Pt[], move = true): string {
   return d;
 }
 
-/** Vùng tô từ đường sống núi xuống đáy, kéo hai đầu ra ngoài khung để không có vách đứng. */
+/** Làm mượt đường đo tay (trung bình trọng số 1-2-1, giữ hai đầu) để nét không bị gợn lăn tăn mà vẫn bám đúng hình trong ảnh. */
+const smooth = (pts: readonly Pt[], passes = 2): Pt[] => {
+  let out: Pt[] = [...pts];
+  for (let n = 0; n < passes; n += 1) {
+    out = out.map((p, i) => {
+      const a = out[i - 1];
+      const b = out[i + 1];
+      return a && b ? ([(a[0] + 2 * p[0] + b[0]) / 4, (a[1] + 2 * p[1] + b[1]) / 4] as Pt) : p;
+    });
+  }
+  return out;
+};
+
+/**
+ * Vùng tô từ đường sống núi thẳng xuống đáy. Đầu nào của dãy núi nằm trong khung thì không kéo ngang ra mép nữa (trước đây
+ * tạo vạch ngang cứng giữa cảnh) mà để FadeX làm tan dần.
+ */
 const below = (pts: readonly Pt[]) => {
-  const full: Pt[] = [[-40, pts[0][1]], ...pts, [W + 40, pts[pts.length - 1][1]]];
-  return `${curve(full)}L${W + 40} ${H + BELOW}L-40 ${H + BELOW}Z`;
+  const first = pts[0];
+  const last = pts[pts.length - 1];
+  return `${curve(pts)}L${last[0]} ${H + BELOW}L${first[0]} ${H + BELOW}Z`;
+};
+
+/** Khoảng tan dần (đơn vị khung 1280) ở đầu một nét / vùng dừng giữa cảnh. */
+const FADE = 170;
+
+/**
+ * Mặt nạ làm mờ dần theo chiều ngang trong [x0, x1]: đầu nào nằm trong khung thì tan trong khoảng FADE, đầu chạm mép giữ nguyên.
+ * Dùng chung cho núi và ruộng bậc thang để không còn chỗ nào bị cắt cụt.
+ */
+function FadeX({ id, x0, x1 }: { id: string; x0: number; x1: number }) {
+  const span = x1 - x0;
+  const a = x0 > 0 ? Math.min(0.45, FADE / span) : 0;
+  const b = x1 < W ? Math.max(0.55, 1 - FADE / span) : 1;
+  return (
+    <mask id={id} maskUnits="userSpaceOnUse" x="-80" y="-400" width={W + 160} height={H + BELOW + 480}>
+      <linearGradient id={`${id}-g`} x1={x0} x2={x1} y1="0" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stopColor="#fff" stopOpacity={a ? 0 : 1} />
+        <stop offset={a} stopColor="#fff" />
+        <stop offset={b} stopColor="#fff" />
+        <stop offset="1" stopColor="#fff" stopOpacity={b < 1 ? 0 : 1} />
+      </linearGradient>
+      <rect x="-80" y="-400" width={W + 160} height={H + BELOW + 480} fill={`url(#${id}-g)`} />
+    </mask>
+  );
+}
+
+const xRange = (lines: readonly (readonly Pt[])[]) => {
+  const xs = lines.flatMap((l) => l.map((p) => p[0]));
+  return [Math.min(...xs), Math.max(...xs)] as const;
 };
 
 /** Dải giữa hai đường bờ ruộng liên tiếp. */
 const bandBetween = (a: readonly Pt[], b: readonly Pt[]) => {
   const back = [...b].reverse();
   return `${curve(a)}L${back[0][0]} ${back[0][1]}${curve(back, false)}Z`;
-};
-
-/** Lấy mẫu lại đường gấp khúc thành `n` điểm cách đều theo chỉ số. */
-const resample = (pts: readonly Pt[], n: number): Pt[] =>
-  Array.from({ length: n }, (_, i) => {
-    const f = (i / (n - 1)) * (pts.length - 1);
-    const i0 = Math.floor(f);
-    const i1 = Math.min(i0 + 1, pts.length - 1);
-    const t = f - i0;
-    return [pts[i0][0] + (pts[i1][0] - pts[i0][0]) * t, pts[i0][1] + (pts[i1][1] - pts[i0][1]) * t] as Pt;
-  });
-
-/** Chèn thêm đường bờ ruộng ở giữa mỗi cặp đường liền kề để bậc ruộng dày và mịn hơn. */
-const densify = (lines: readonly Pt[][]): Pt[][] => {
-  const out: Pt[][] = [];
-  lines.forEach((line, i) => {
-    out.push([...line]);
-    const next = lines[i + 1];
-    if (!next) return;
-    const a = resample(line, 14);
-    const b = resample(next, 14);
-    out.push(a.map((p, k) => [(p[0] + b[k][0]) / 2, (p[1] + b[k][1]) / 2] as Pt));
-  });
-  return out;
 };
 
 /** Nội suy `n` đường bờ ruộng nằm giữa đường trên `top` và đường dưới `bottom` (cùng số điểm). */
@@ -117,24 +139,6 @@ const contours = (top: readonly Pt[], bottom: readonly Pt[], n: number): Pt[][] 
   });
 
 const SUN = { x: 1103, y: 210 };
-
-/** Tia nắng toả đủ một vòng 360° quanh mặt trời: mỗi tia gồm 3 lớp nêm chồng nhau (rộng → hẹp) để mép mờ dần, không bị cứng. */
-const SHAFT_COUNT = 24;
-const SHAFT_LAYERS = [
-  { widen: 2.4, opacity: 0.35 },
-  { widen: 1.5, opacity: 0.5 },
-  { widen: 0.8, opacity: 0.7 },
-];
-const shaftPath = (layer: number) =>
-  Array.from({ length: SHAFT_COUNT }, (_, i) => {
-    const mid = (Math.PI * 2 * i) / SHAFT_COUNT + Math.PI / 18;
-    const base = (Math.PI * (i % 2 ? 2.2 : 3.4)) / 180;
-    const half = base * SHAFT_LAYERS[layer].widen;
-    const r = i % 3 === 0 ? 640 : i % 2 ? 420 : 520;
-    const at = (a: number, d: number) => `${(SUN.x + Math.cos(a) * d).toFixed(1)} ${(SUN.y + Math.sin(a) * d).toFixed(1)}`;
-    return `M${at(mid, 30)}L${at(mid - half, r)}L${at(mid + half, r)}Z`;
-  }).join('');
-const SHAFT_PATHS = SHAFT_LAYERS.map((_, k) => shaftPath(k));
 
 /** Núi xa phía sau, sườn dốc bên phải chạy lên chỗ mặt trời, đồi xanh bên trái và giữa thung lũng. */
 const FAR_RIDGE: Pt[] = [[-10, 188], [40, 185], [80, 174], [110, 180], [170, 168], [215, 169], [250, 178], [300, 195], [340, 200], [400, 198], [430, 197], [470, 208], [520, 210], [580, 205], [620, 212], [670, 225], [700, 235], [740, 225], [790, 220], [830, 232], [880, 230], [930, 240], [1010, 243], [1050, 250]];
@@ -159,100 +163,27 @@ const FRONT_BASE: Pt[][] = [
   [[700, 690], [800, 700], [900, 702], [1000, 700], [1090, 690], [1170, 668], [1225, 640], [1262, 612], [1290, 598]],
 ];
 
-/** Kéo dài hai đầu bờ ruộng theo hướng đoạn cuối ra tới mép (và quá mép) màn hình, để bậc thang không dừng giữa chừng. */
-const extend = (line: readonly Pt[]): Pt[] => {
-  const out: Pt[] = [...line];
-  const run = (from: Pt, prev: Pt, front: boolean) => {
-    const dx = from[0] - prev[0];
-    const dy = from[1] - prev[1];
-    const len = Math.hypot(dx, dy) || 1;
-    const ux = dx / len;
-    const uy = dy / len;
-    const pts: Pt[] = [];
-    for (let t = 160; t <= 1600; t += 160) {
-      const x = from[0] + ux * t;
-      const y = from[1] + uy * t;
-      pts.push([x, y]);
-      if (x < -120 || x > W + 120 || y > H + 160) break;
-    }
-    if (front) out.unshift(...pts.reverse());
-    else out.push(...pts);
-  };
-  run(line[0], line[1], true);
-  run(line[line.length - 1], line[line.length - 2], false);
-  return out;
-};
+const UPPER = contours(UPPER_TOP, UPPER_BOTTOM, 4).map((l) => smooth(l, 1));
+const MID = contours(MID_TOP, MID_BOTTOM, 4).map((l) => smooth(l, 1));
+const FRONT = FRONT_BASE.map((l) => smooth(l, 1));
 
-const UPPER = densify(contours(UPPER_TOP, UPPER_BOTTOM, 4).map(extend));
-const MID = densify(contours(MID_TOP, MID_BOTTOM, 4).map(extend));
-const FRONT = densify(FRONT_BASE.map(extend));
+/** Vài cánh chim nhỏ bay về phía mặt trời. */
+const BIRDS: Pt[] = [[930, 120], [968, 98], [1010, 130]];
 
-/** Cụm tán cây theo ảnh: rừng bên trái, hàng cây dọc sườn giữa, tán lớn quanh nhà sàn. Mỗi phần tử: x, y, bán kính. */
-const TREES: Pt[] = [
-  [1068, 418, 30], [1112, 404, 19], [1240, 300, 34], [1258, 332, 22], [1252, 470, 30], [1232, 440, 22], [1180, 420, 14],
-  [980, 420, 16], [940, 432, 14], [872, 446, 14], [760, 472, 18], [730, 492, 22], [690, 516, 20], [660, 542, 18],
-  [60, 420, 26], [112, 442, 22], [162, 416, 20], [222, 456, 24], [282, 470, 20], [332, 500, 18], [402, 500, 22], [472, 530, 26], [524, 546, 20],
-];
-
-/** Bông lúa phía trước: gốc ở đáy khung, ngọn nghiêng tới vị trí bông lúa trong ảnh. */
-const STALKS: Pt[] = [[28, 548], [120, 552], [188, 628], [64, 600], [300, 676], [236, 672], [14, 650], [380, 640], [150, 690], [450, 700], [20, 700], [96, 664]];
-
-/** Chim bay nhỏ gần mặt trời và đom đóm / hạt sáng bay lên. */
-const BIRDS: Pt[] = [[930, 120], [968, 98], [1010, 130], [880, 90]];
-const MOTES = Array.from({ length: 12 }, (_, i) => ({
-  x: (i * 173 + 90) % W,
-  y: 240 + ((i * 97) % 440),
-  r: 1.6 + (i % 3) * 0.9,
-  d: 1.8 + (i % 5) * 0.5,
-}));
-
-/** Nhà sàn mái cong mềm: mái võng nhẹ vút hai đầu, thân bo góc, cột tròn đầu, cửa sổ toả ánh đèn ấm. Đặt theo hộp (x, y, rộng) của căn nhà trong ảnh. */
-function StiltHouse({ x, y, w }: { x: number; y: number; w: number }) {
-  const h = w * 0.62;
-  const sw = Math.max(1.4, w * 0.026);
-  const win = (cx: number, o: number) => (
-    <g key={cx}>
-      <circle cx={cx} cy={h * 0.45} r={w * 0.13} fill="url(#intro-window-glow)" opacity={o} />
-      <rect x={cx - w * 0.07} y={h * 0.385} width={w * 0.14} height={h * 0.13} rx={w * 0.04} fill="#f2d4a0" opacity={o} />
-    </g>
-  );
+/** Ruộng bậc thang: dải tô xen vàng lúa chín / xanh mạ, mỗi bờ chỉ một nét mảnh đều nhau. */
+function Terraces({ id, lines }: { id: string; lines: Pt[][] }) {
+  const [x0, x1] = xRange(lines);
   return (
-    <g transform={`translate(${x} ${y})`}>
-      <g fill="currentColor" opacity="0.72">
-        {/* Thân nhà bo góc */}
-        <rect x={w * 0.07} y={h * 0.3} width={w * 0.86} height={h * 0.3} rx={w * 0.05} opacity="0.8" />
-        {/* Mái võng nhẹ, hai đầu vút lên */}
-        <path d={`M${-w * 0.12} ${h * 0.2}C${w * 0.02} ${h * 0.36} ${w * 0.12} ${h * 0.24} ${w * 0.2} ${h * 0.06}C${w * 0.4} ${-h * 0.02} ${w * 0.6} ${-h * 0.02} ${w * 0.8} ${h * 0.06}C${w * 0.88} ${h * 0.24} ${w * 0.98} ${h * 0.36} ${w * 1.12} ${h * 0.2}C${w * 1.02} ${h * 0.42} ${w * 0.9} ${h * 0.4} ${w * 0.5} ${h * 0.4}C${w * 0.1} ${h * 0.4} ${-w * 0.02} ${h * 0.42} ${-w * 0.12} ${h * 0.2}Z`} />
-        <path d={`M${w * 0.1} ${h * 0.6}V${h}M${w * 0.5} ${h * 0.6}V${h}M${w * 0.9} ${h * 0.6}V${h}`} fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" />
-      </g>
-      {/* Nét sáng mảnh dọc sống mái, đón ánh nắng */}
-      <path d={`M${w * 0.22} ${h * 0.05}C${w * 0.4} ${-h * 0.01} ${w * 0.6} ${-h * 0.01} ${w * 0.78} ${h * 0.05}`} fill="none" stroke="#ecd2a8" strokeOpacity="0.4" strokeWidth={sw * 0.8} strokeLinecap="round" />
-      {win(w * 0.28, 0.85)}
-      {win(w * 0.7, 0.6)}
-    </g>
-  );
-}
-
-/** Ruộng bậc thang: dải tô xen vàng lúa chín / xanh mạ, bờ sáng, bóng mờ dưới mỗi bờ. */
-function Terraces({ lines, fillOpacity = 1 }: { lines: Pt[][]; fillOpacity?: number }) {
-  return (
-    <g>
+    <g mask={`url(#${id})`}>
+      <FadeX id={id} x0={x0} x1={x1} />
       {lines.slice(0, -1).map((line, k) => (
-        <path key={`f${k}`} d={bandBetween(line, lines[k + 1])} fill={k % 2 ? 'url(#intro-paddy-green)' : 'url(#intro-paddy-gold)'} opacity={fillOpacity} />
+        <path key={`f${k}`} d={bandBetween(line, lines[k + 1])} fill={k % 2 ? 'url(#intro-paddy-green)' : 'url(#intro-paddy-gold)'} />
       ))}
-      {lines.map((line, k) => (
-        <g key={`l${k}`}>
-          <path d={curve(line.map(([x, y]) => [x, y + 4] as Pt))} fill="none" stroke="#04180d" strokeOpacity="0.22" strokeWidth="3" strokeLinecap="round" />
-          <path
-            d={curve(line)}
-            fill="none"
-            stroke={k % 2 ? '#9fc07a' : '#e2cd92'}
-            strokeOpacity={k % 2 ? 0.45 : 0.6}
-            strokeWidth={k % 2 ? 1.5 : 2.2}
-            strokeLinecap="round"
-          />
-        </g>
-      ))}
+      <g fill="none" stroke="#e6d39c" strokeOpacity="0.32" strokeWidth="1.2" strokeLinecap="round">
+        {lines.map((line, k) => (
+          <path key={`l${k}`} d={curve(line)} />
+        ))}
+      </g>
     </g>
   );
 }
@@ -267,7 +198,7 @@ interface Box {
 /**
  * Hộp ảnh hero như khi trang chủ đã dựng xong: hero phủ kín màn hình, ảnh 16:9 phủ-kín căn giữa (đúng công thức của `.hero-stage`
  * trong globals.css). Không đo DOM hero vì lúc màn chào chạy hero chưa đủ cao, đo ra sẽ lệch lên trên. Màn dọc (điện thoại):
- * hero dời tâm ảnh sang phải để thấy nắng và nhà sàn, giống `--hero-focus-x`. Điện thoại: xem chú thích bên dưới.
+ * hero dời tâm ảnh sang phải để thấy nắng, giống `--hero-focus-x`. Điện thoại: xem chú thích bên dưới.
  */
 function heroBox(): Box {
   const vw = window.innerWidth;
@@ -275,7 +206,7 @@ function heroBox(): Box {
   const width = Math.max(vw, (vh * 16) / 9);
   const height = (width * 9) / 16;
   // Điện thoại (< md): ảnh hero chỉ là thẻ 3:2 chứ không phủ cả màn hình, nên không thể trùng khít. Phóng cảnh cao đúng bằng màn hình
-  // và dời sang phải để mặt trời nằm ở ~72% chiều ngang, thấy cả nhà sàn và ruộng bậc thang.
+  // và dời sang phải để mặt trời nằm ở ~72% chiều ngang, thấy rõ ruộng bậc thang.
   if (vw < 768) {
     const h = vh;
     const w = Math.max((h * 16) / 9, vw);
@@ -286,13 +217,15 @@ function heroBox(): Box {
   return { left: vw / 2 + shift, top: (vh - height) / 2, width, height };
 }
 
-/** Sống núi tô gradient (sáng ở đỉnh, tan vào sương phía dưới) + nét sáng ánh nắng ở sườn hướng mặt trời. */
+/** Sống núi tô gradient (sáng ở đỉnh, tan vào sương phía dưới) + một nét viền mảnh, sáng hơn ở sườn hướng mặt trời. */
 function Ridge({ pts, top, bottom, rim = 0 }: { pts: Pt[]; top: string; bottom: string; rim?: number }) {
+  const s = smooth(pts);
+  const id = `intro-ridge-${pts[0][0]}-${pts[0][1]}`;
   return (
-    <g>
-      <path d={below(pts)} fill={`url(#${top}-${bottom})`} />
-      <path d={curve(pts)} fill="none" stroke="#fde9a8" strokeOpacity={rim} strokeWidth="2.4" strokeLinecap="round" />
-      <path d={curve(pts)} fill="none" stroke="#bff0c8" strokeOpacity="0.28" strokeWidth="1.4" strokeLinecap="round" />
+    <g mask={`url(#${id})`}>
+      <FadeX id={id} x0={s[0][0]} x1={s[s.length - 1][0]} />
+      <path d={below(s)} fill={`url(#${top}-${bottom})`} />
+      <path d={curve(s)} fill="none" stroke="#f6dfa8" strokeOpacity={0.12 + rim * 0.6} strokeWidth="1.4" strokeLinecap="round" />
     </g>
   );
 }
@@ -300,7 +233,8 @@ function Ridge({ pts, top, bottom, rim = 0 }: { pts: Pt[]; top: string; bottom: 
 /**
  * Cảnh vẽ đúng toạ độ của ảnh banner hero: đặt trùng khít lên khung ảnh nên mặt trời nằm đúng chỗ mặt trời thật, các bờ ruộng
  * bậc thang chạy đúng theo bậc ruộng trong ảnh. Khi nền mờ đi để lộ ảnh, các nét vẫn dính vào đúng chi tiết.
- * Phong cách tranh màu nước mềm: gradient, sương, tia nắng, mây hồng, chim, hạt sáng. Tĩnh (không filter / animation lặp) để không giật.
+ * Phong cách phẳng, sạch: đường đo tay được làm mượt, mỗi bờ ruộng / sống núi chỉ một nét mảnh, gradient + sương + mây hồng.
+ * Tĩnh (không filter / animation lặp) để không giật.
  */
 function Landscape() {
   const [box, setBox] = useState<Box | null>(null);
@@ -334,18 +268,9 @@ function Landscape() {
           <stop offset="0" stopColor="#cfe3d3" stopOpacity="1" />
           <stop offset="1" stopColor="#cfe3d3" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="intro-tree">
-          <stop offset="0" stopColor="#5aa879" stopOpacity="0.55" />
-          <stop offset="0.7" stopColor="#5aa879" stopOpacity="0.28" />
-          <stop offset="1" stopColor="#5aa879" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="intro-tree-hi">
-          <stop offset="0" stopColor="#a9c27c" stopOpacity="0.4" />
-          <stop offset="1" stopColor="#a9c27c" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="intro-window-glow">
-          <stop offset="0" stopColor="#e8b676" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#e8b676" stopOpacity="0" />
+        <radialGradient id="intro-sun-halo">
+          <stop offset="0.4" stopColor="#fbe6b8" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#fbe6b8" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="intro-sun-glow">
           <stop offset="0" stopColor="#f6dcae" stopOpacity="0.55" />
@@ -353,11 +278,6 @@ function Landscape() {
           <stop offset="0.4" stopColor="#dba468" stopOpacity="0.16" />
           <stop offset="0.7" stopColor="#cd8a4a" stopOpacity="0.05" />
           <stop offset="1" stopColor="#cd8a4a" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="intro-shaft" cx={SUN.x} cy={SUN.y} r="640" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#f6dcae" stopOpacity="0.55" />
-          <stop offset="0.45" stopColor="#e9c088" stopOpacity="0.22" />
-          <stop offset="1" stopColor="#dcc27a" stopOpacity="0" />
         </radialGradient>
         {/* Gradient núi: xa nhạt như sương, gần đậm hơn */}
         <linearGradient id="far-haze" x1="0" y1="0" x2="0" y2="1">
@@ -384,7 +304,8 @@ function Landscape() {
           <stop offset="1" stopColor="#86b560" stopOpacity="0.2" />
         </linearGradient>
         <linearGradient id="intro-ground" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#9cbf6a" stopOpacity="0.26" />
+          <stop offset="0" stopColor="#9cbf6a" stopOpacity="0" />
+          <stop offset="0.3" stopColor="#7fa95c" stopOpacity="0.18" />
           <stop offset="1" stopColor="#3f7f4c" stopOpacity="0.2" />
         </linearGradient>
       </defs>
@@ -401,30 +322,22 @@ function Landscape() {
 
       {/* Núi xa → sườn nắng */}
       <Ridge pts={FAR_RIDGE} top="far" bottom="haze" rim={0.12} />
-      {/* Quầng nắng + tia nắng toả xuống sườn núi */}
+      {/* Quầng nắng mềm quanh mặt trời */}
       <circle cx={SUN.x} cy={SUN.y} r="380" fill="url(#intro-sun-glow)" style={{ mixBlendMode: 'screen' }} />
-      {SHAFT_PATHS.map((d, k) => (
-        <path key={k} d={d} fill="url(#intro-shaft)" opacity={SHAFT_LAYERS[k].opacity * 0.3} style={{ mixBlendMode: 'screen' }} />
-      ))}
       <Ridge pts={SUN_SLOPE} top="mid" bottom="green" rim={0.5} />
-      <circle cx={SUN.x} cy={SUN.y} r="26" fill="#f6e4c4" opacity="0.5" />
-      <circle cx={SUN.x} cy={SUN.y} r="16" fill="#f8ecd6" opacity="0.88" />
+      <circle cx={SUN.x} cy={SUN.y} r="34" fill="url(#intro-sun-halo)" />
+      <circle cx={SUN.x} cy={SUN.y} r="16" fill="#fbefd6" />
       <Ridge pts={RIGHT_HILL} top="mid" bottom="green" rim={0.3} />
       <Ridge pts={MID_HILL} top="mid" bottom="green" rim={0.2} />
       <Ridge pts={LEFT_HILL} top="near" bottom="green" rim={0.15} />
 
       {/* Bậc ruộng nhỏ trên sườn đồi trái, chạy song song với sống đồi */}
-      {[1, 2, 3, 4, 5].map((k) => (
-        <path
-          key={k}
-          d={curve(LEFT_HILL.map(([x, y]) => [x + k * 6, y + k * 30] as Pt))}
-          fill="none"
-          stroke="#9fc07a"
-          strokeOpacity={0.24 - k * 0.025}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      ))}
+      <g mask="url(#intro-left-terr)" fill="none" stroke="#9fc07a" strokeWidth="1.1" strokeLinecap="round">
+        <FadeX id="intro-left-terr" x0={-10} x1={340} />
+        {[1, 2, 3, 4].map((k) => (
+          <path key={k} d={curve(smooth(LEFT_HILL.map(([x, y]) => [x + k * 6, y + k * 30] as Pt)))} strokeOpacity={0.16 - k * 0.025} />
+        ))}
+      </g>
 
       {/* Biển sương giữa thung lũng, nhiều lớp mờ */}
       <g>
@@ -435,151 +348,26 @@ function Landscape() {
         <ellipse cx="900" cy="396" rx="150" ry="26" fill="url(#intro-puff-warm)" opacity="0.16" />
       </g>
 
-      <Terraces lines={UPPER} />
-      <Terraces lines={MID} />
-      <Terraces lines={FRONT} />
-
-      {/* Rừng cây: hai lớp tán, lớp sáng lệch về phía mặt trời */}
-      <g>
-        {TREES.map(([x, y, r]) => (
-          <g key={`${x}-${y}`}>
-            <circle cx={x} cy={y} r={r * 1.2} fill="url(#intro-tree)" />
-            <circle cx={x + r * 0.25} cy={y - r * 0.25} r={r * 0.7} fill="url(#intro-tree-hi)" />
-          </g>
-        ))}
-      </g>
-
-      {/* Nhà sàn đúng chỗ trong ảnh */}
-      <StiltHouse x={1068} y={424} w={150} />
-      <StiltHouse x={790} y={503} w={52} />
-      <StiltHouse x={994} y={403} w={40} />
-      <StiltHouse x={1192} y={322} w={42} />
+      <Terraces id="intro-terr-upper" lines={UPPER} />
+      <Terraces id="intro-terr-mid" lines={MID} />
+      <Terraces id="intro-terr-front" lines={FRONT} />
 
       {/* Nền ruộng lúa kéo dài xuống tận đáy màn hình, phía dưới khung ảnh hero */}
-      <rect x="-40" y={H - 4} width={W + 80} height={BELOW} fill="url(#intro-ground)" />
-
-      {/* Bông lúa chín phía trước,  */}
-      <g fill="none" strokeLinecap="round">
-        {STALKS.map(([x, y], i) => {
-          const lean = 10 + (i % 4) * 5;
-          const baseX = x - 14 - (i % 3) * 8;
-          return (
-            <g key={i}>
-              <path d={`M${baseX} ${H + 6}Q${baseX + 4} ${(H + y) / 2} ${x} ${y}`} stroke="#86b560" strokeOpacity="0.6" strokeWidth="3.2" />
-              <path d={`M${baseX + 3} ${H - 30}Q${baseX - 22} ${H - 70} ${baseX - 30 - lean} ${H - 92}`} stroke="#7fcf6a" strokeOpacity="0.5" strokeWidth="2.4" />
-              <path d={`M${baseX + 5} ${H - 60}Q${baseX + 28} ${H - 100} ${baseX + 36 + lean} ${H - 120}`} stroke="#7fcf6a" strokeOpacity="0.45" strokeWidth="2.2" />
-              {[0, 1, 2, 3, 4].map((g) => (
-                <ellipse
-                  key={g}
-                  cx={x + (g % 2 ? 4 : -2) + g * 0.8}
-                  cy={y - 4 - g * 9}
-                  rx="3.6"
-                  ry="8"
-                  fill="#cdb877"
-                  stroke="none"
-                  opacity={0.78 - g * 0.06}
-                  transform={`rotate(${(g % 2 ? 14 : -10) + lean} ${x} ${y - g * 9})`}
-                />
-              ))}
-            </g>
-          );
-        })}
-      </g>
+      <rect x="-40" y={H - 90} width={W + 80} height={BELOW + 90} fill="url(#intro-ground)" />
 
       {/* Chim bay về phía mặt trời */}
-      {BIRDS.map(([x, y], i) => (
-        <path
-          key={i}
-          d={`M${x - 10} ${y}Q${x - 5} ${y - 7} ${x} ${y}Q${x + 5} ${y - 7} ${x + 10} ${y}`}
-          fill="none"
-          stroke="#fde9c0"
-          strokeOpacity="0.7"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-      ))}
-
-      {/* Hạt sáng như đom đóm */}
-      {MOTES.map((m, i) => (
-        <circle key={i} cx={m.x} cy={m.y} r={m.r * 1.6} fill="#fff0a8" opacity={0.25 + (i % 3) * 0.12} />
-      ))}
+      <g fill="none" stroke="#fde9c0" strokeOpacity="0.55" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+        {BIRDS.map(([x, y], i) => (
+          <path key={i} d={`M${x - 8} ${y - 2}Q${x - 4} ${y - 5} ${x} ${y}Q${x + 4} ${y - 5} ${x + 8} ${y - 2}`} />
+        ))}
+      </g>
     </motion.svg>
-  );
-}
-
-/** Gió: vài đường uốn lượn kết thúc bằng vòng xoáy, vẽ dần từ trái sang phải. */
-const WIND = [
-  { d: 'M0 30C60 30 90 10 150 12c40 2 50 26 28 30-18 3-24-16-4-18', top: '14%', left: '8%', w: 190, delay: 0.05, o: 0.5 },
-  { d: 'M0 22C50 22 80 40 140 36c46-3 60-26 36-30-20-3-28 16-8 20', top: '24%', left: '62%', w: 180, delay: 0.25, o: 0.4 },
-  { d: 'M0 16C40 16 70 4 110 6c30 2 38 18 20 20-12 1-16-10-4-12', top: '36%', left: '70%', w: 130, delay: 0.45, o: 0.3 },
-  { d: 'M0 16C40 16 70 28 110 26c30-2 38-18 20-20-12-1-16 10-4 12', top: '70%', left: '4%', w: 130, delay: 0.35, o: 0.28 },
-];
-
-function Wind() {
-  return (
-    <>
-      {WIND.map((w) => (
-        <svg
-          key={w.top + w.left}
-          aria-hidden="true"
-          viewBox="0 0 190 50"
-          className="pointer-events-none absolute text-[#5aa879]"
-          style={{ top: w.top, left: w.left, width: w.w, maxWidth: '40vw' }}
-        >
-          <motion.path
-            d={w.d}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: w.o }}
-            transition={{ delay: w.delay, duration: 0.9, ease: 'easeOut' }}
-          />
-        </svg>
-      ))}
-    </>
-  );
-}
-
-/** La bàn và đám mây nhỏ ở hai góc trên. */
-function Corners() {
-  return (
-    <>
-      <motion.svg
-        aria-hidden="true"
-        viewBox="0 0 48 48"
-        initial={{ opacity: 0, rotate: -90 }}
-        animate={{ opacity: 0.4, rotate: 0 }}
-        transition={{ duration: 1, ease: EASE }}
-        className="pointer-events-none absolute left-5 top-[max(1.25rem,var(--safe-top-min,0px))] h-10 w-10 text-sun sm:left-10 sm:h-14 sm:w-14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      >
-        <circle cx="24" cy="24" r="20" />
-        <path d="M24 4v4M24 40v4M4 24h4M40 24h4" />
-        <path d="M24 12l5 12-5 12-5-12z" fill="currentColor" fillOpacity="0.35" />
-      </motion.svg>
-      <motion.svg
-        aria-hidden="true"
-        viewBox="0 0 64 24"
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 0.25, x: 0 }}
-        transition={{ duration: 1.2, ease: EASE }}
-        className="pointer-events-none absolute right-5 top-[max(1.5rem,var(--safe-top-min,0px))] h-6 w-16 text-canvas sm:right-10 sm:h-8 sm:w-24"
-        fill="currentColor"
-      >
-        <path d="M8 20a8 8 0 0 1 4-14 11 11 0 0 1 21-2 9 9 0 0 1 14 6 7 7 0 0 1 9 10z" />
-      </motion.svg>
-    </>
   );
 }
 
 /**
  * Màn chào thương hiệu mỗi lần tải / tải lại trang: biểu tượng "Đi" hiện giữa màn hình, rồi gạt sang trái để chữ "Du Lịch"
- * (nét bút lông của hero trang chủ) lộ ra bên phải, ghép thành "Đi Du Lịch". Nền vẽ đúng toạ độ ảnh banner (mặt trời, núi, bậc ruộng trùng khít với ảnh), cùng gió và la bàn.
+ * (nét bút lông của hero trang chủ) lộ ra bên phải, ghép thành "Đi Du Lịch". Nền vẽ đúng toạ độ ảnh banner (mặt trời, núi, bậc ruộng trùng khít với ảnh).
  * Xong thì biểu tượng và chữ bay về đúng vị trí logo + "Đi Du Lịch" ở hero trang chủ (nếu đang ở trang chủ), nền mờ đi.
  * Tự đóng sau khoảng 1,6 giây hoặc khi khách chạm vào màn hình.
  * Chỉ để trang trí nên ẩn với trình đọc màn hình; khách bật "giảm chuyển động" chỉ thấy hiện / mờ dần.
@@ -628,8 +416,6 @@ export default function WelcomeIntro() {
               className="absolute inset-0 bg-[#04180d]"
               style={{ backgroundImage: BACKDROP }}
             >
-              <Corners />
-              <Wind />
               <Landscape />
             </motion.div>
 

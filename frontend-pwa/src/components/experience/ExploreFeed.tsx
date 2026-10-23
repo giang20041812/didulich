@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ChevronDown, Loader2, RefreshCw, Share2 } from 'lucide-react';
-import FeedCard, { FeedCardSkeleton } from '@/components/experience/FeedCard';
+import FeedCard from '@/components/experience/FeedCard';
+import { FeedListSkeleton } from '@/components/experience/FeedCardSkeleton';
 import ShareJourneySheet from '@/components/experience/ShareJourneySheet';
 import { useHelpfulVotes } from '@/components/experience/useHelpfulVotes';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -133,11 +134,7 @@ export default function ExploreFeed() {
       </div>
     );
   } else if (!feed) {
-    content = (
-      <div className="divide-y divide-slate-200/80 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80" role="status" aria-label="Đang tải lịch trình du khách">
-        {Array.from({ length: 4 }, (_, i) => <FeedCardSkeleton key={i} />)}
-      </div>
-    );
+    content = <FeedListSkeleton />;
   } else if (feed.items.length === 0) {
     content = (
       <div className="flex flex-col items-center rounded-2xl bg-white px-6 py-12 text-center ring-1 ring-slate-200/80">

@@ -38,8 +38,10 @@ import {
 } from 'lucide-react';
 import VietmapView from '@/components/map/VietmapView';
 import { getFavoriteIds, toggleFavorite, onFavoritesChange } from '@/lib/favorites';
-import { ToolbarSkeleton, FilterPanelSkeleton } from '@/components/ui/ListPageSkeleton';
+import { ToolbarSkeleton, FilterPanelSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
 import { useFirstLoad } from '@/hooks/useFirstLoad';
+
+const SKELETON = LIST_SKELETON_SPECS.homestays;
 
 // Chip "Lọc nhanh": chỉ hiện khi mã tiện ích có trong danh mục đang dùng (GET /api/public/places/amenities).
 const QUICK_AMENITY_ICONS: [string, LucideIcon][] = [
@@ -557,7 +559,7 @@ export default function HomestayListPage() {
         </div>
 
         {firstLoad ? (
-          <ToolbarSkeleton chips={6} />
+          <ToolbarSkeleton {...SKELETON.toolbar} />
         ) : (<>
         {/* BỘ LỌC BÊN TRÊN HIỆN ĐẠI (Top Filter Toolbar & Quick Filter Bar) */}
         <div className="relative overflow-hidden bg-white/90 backdrop-blur-md border border-white ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
@@ -804,7 +806,7 @@ export default function HomestayListPage() {
 
           {/* Sidebar (Desktop) */}
           <aside className="hidden w-[300px] shrink-0 flex-col gap-4 md:flex">
-            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton groups={3} /> : renderFilters()}</div>
+            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton {...SKELETON.filter} /> : renderFilters()}</div>
           </aside>
 
           {/* Main List */}
@@ -839,7 +841,7 @@ export default function HomestayListPage() {
 
             <div className="relative flex min-h-0 flex-1 flex-col gap-4 md:min-h-full">
               {loading ? (
-                <CardSkeleton count={ITEMS_PER_PAGE} layout="compact" />
+                <CardSkeleton count={SKELETON.count} layout="compact" />
               ) : error ? (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
                   <p className="font-semibold text-red-700">{error}</p>

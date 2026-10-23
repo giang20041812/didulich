@@ -5,13 +5,13 @@ import type { ReactNode } from 'react';
  * - house (homestay): mái nhà sàn cong, đôi sừng chéo ở đỉnh; cột sàn dưới chân.
  * - mountain (điểm đến): dãy núi nhô sau thẻ; ruộng bậc thang dưới chân.
  * - food (nhà hàng): khói nghi ngút bốc lên; đế bát dưới chân.
- * - specialty (đặc sản, quà): nơ buộc quà trên đầu thẻ.
+ * - specialty (đặc sản, quà): ba bông lúa trên đầu thẻ.
  * - transport (di chuyển): đường đi nét đứt tới ghim vị trí; mặt đường dưới chân.
  * - service (dịch vụ, cắm trại): mái lều có cờ; cọc lều hai góc.
  * - culture (lễ hội, trải nghiệm): dây đèn lồng; dải hoa văn thổ cẩm dưới chân.
  *
  * Hình kéo giãn theo bề ngang thẻ (preserveAspectRatio="none") giữ nét đều nhờ non-scaling-stroke; chi tiết không được
- * méo (khói, nơ, đèn, cờ, ghim) là SVG cỡ cố định đặt theo %. Rê chuột: thẻ và khung cùng nhấc lên.
+ * méo (khói, bông lúa, đèn, cờ, ghim) là SVG cỡ cố định đặt theo %. Rê chuột: thẻ và khung cùng nhấc lên.
  */
 export type CardFrameKind = 'house' | 'mountain' | 'food' | 'specialty' | 'transport' | 'service' | 'culture';
 
@@ -98,12 +98,27 @@ const FRAMES: Record<CardFrameKind, { tone: string; pad: string; top: ReactNode;
     tone: 'text-[#a8641a]',
     pad: 'pt-[22px]',
     top: (
-      <svg viewBox="0 0 48 30" className={`pointer-events-none absolute left-1/2 top-0 z-10 h-[30px] w-12 -translate-x-1/2 overflow-visible ${LIFT}`}>
+      <svg viewBox="0 0 60 30" className={`pointer-events-none absolute left-1/2 top-0 z-10 h-[30px] w-[60px] -translate-x-1/2 overflow-visible ${LIFT}`}>
+        {/* Ba bông lúa / cốm — đặc sản Tây Bắc */}
         <g {...STROKE} strokeOpacity="0.6">
-          <path d="M24 16 C 14 3, 1 7, 5 16 C 1 25, 14 27, 24 16 Z" fill="currentColor" fillOpacity="0.14" />
-          <path d="M24 16 C 34 3, 47 7, 43 16 C 47 25, 34 27, 24 16 Z" fill="currentColor" fillOpacity="0.14" />
-          <circle cx="24" cy="16" r="3" fill="currentColor" fillOpacity="0.3" />
-          <path d="M22 19 L 17 29 M26 19 L 31 29" fill="none" />
+          <g transform="translate(30 2)"><>
+            <path d="M0 30 V 8" fill="none" />
+            <path d="M0 8 q -3 -3 0 -8 q 3 5 0 8 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 15 q -5 -1 -5 -7 q 5 0 5 7 Z M0 15 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 22 q -5 -1 -5 -7 q 5 0 5 7 Z M0 22 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+          </></g>
+          <g transform="translate(15 8) rotate(-20)"><>
+            <path d="M0 30 V 8" fill="none" />
+            <path d="M0 8 q -3 -3 0 -8 q 3 5 0 8 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 15 q -5 -1 -5 -7 q 5 0 5 7 Z M0 15 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 22 q -5 -1 -5 -7 q 5 0 5 7 Z M0 22 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+          </></g>
+          <g transform="translate(45 8) rotate(20)"><>
+            <path d="M0 30 V 8" fill="none" />
+            <path d="M0 8 q -3 -3 0 -8 q 3 5 0 8 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 15 q -5 -1 -5 -7 q 5 0 5 7 Z M0 15 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+            <path d="M0 22 q -5 -1 -5 -7 q 5 0 5 7 Z M0 22 q 5 -1 5 -7 q -5 0 -5 7 Z" fill="currentColor" fillOpacity="0.2" />
+          </></g>
         </g>
       </svg>
     ),

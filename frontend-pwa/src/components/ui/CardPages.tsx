@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CardPagesProps {
@@ -16,7 +16,7 @@ const ARROW = 'flex h-10 w-10 items-center justify-center rounded-full bg-white 
 
 /**
  * Thẻ chia trang: mỗi trang tối đa `perPage` thẻ (lưới pageClassName), vuốt ngang / cuộn ngang bằng touchpad hoặc bấm ‹ ›,
- * chấm trang để sang trang sau. Khung cao đúng bằng trang đang xem (trang cuối ít thẻ không để trống một khoảng lớn). Chỉ
+ * chấm trang để sang trang sau. Khung giữ nguyên chiều cao (cao bằng trang đầy nhất), không co lại khi sang trang ít hàng hơn — co khung gây giật. Chỉ
  * một trang thì không có thanh điều khiển.
  */
 export default function CardPages({ children, perPage, pageClassName, label }: CardPagesProps) {
@@ -29,22 +29,6 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
   const scrollerRef = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
   const [page, setPage] = useState(0);
-  const [height, setHeight] = useState<number | null>(null);
-
-  // Cao theo trang đang xem (+ lề 8px trên dưới của khung cuộn); đổi cỡ màn hình thì đo lại.
-  useLayoutEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return undefined;
-    const measure = () => {
-      const current = el.children[page] as HTMLElement | undefined;
-      if (current) setHeight(current.offsetHeight + 16);
-    };
-    measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    Array.from(el.children).forEach((child) => observer.observe(child));
-    return () => observer.disconnect();
-  }, [page, count]);
 
   /** Khoảng cách giữa hai trang liền nhau (bề rộng trang + khe). */
   const stepOf = (el: HTMLDivElement) => {
@@ -82,8 +66,7 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
       <div
         ref={scrollerRef}
         onScroll={onScroll}
-        style={height ? { height } : undefined}
-        className="scrollbar-hide -m-2 flex snap-x snap-mandatory scroll-px-2 items-start gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain p-2 transition-[height] duration-300 ease-out"
+        className="card-pages scrollbar-hide -m-2 flex snap-x snap-mandatory scroll-px-2 items-start gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain p-2"
       >
         {pages.map((cards, index) => (
           <div

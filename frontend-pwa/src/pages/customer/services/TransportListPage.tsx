@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
 import { fetchTransports, TransportDto, TransportFilterParams } from '@/services/transportService';
 import { Button } from '@/components/ui/button';
+import { CardSkeleton } from '@/components/ui/CardSkeleton';
 import Reveal from '@/components/ui/Reveal';
 import HomeMotifs from '@/components/home/HomeMotifs';
 import CompactPlaceCard, { CompactCardBadge } from '@/components/ui/CompactPlaceCard';
@@ -20,6 +21,10 @@ import {
   Navigation2
 } from 'lucide-react';
 import bannerTransport from '@/assets/photos/banner-transport.webp';
+import { ToolbarSkeleton, FilterPanelSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
+import { useFirstLoad } from '@/hooks/useFirstLoad';
+
+const SKELETON = LIST_SKELETON_SPECS.transport;
 
 const CATEGORY_GROUPS = [
   { id: 'LOCAL_MOTO', label: 'Xe ôm bản địa vượt dốc', desc: 'Đồi Móng Ngựa, Mâm Xôi, Rừng Trúc, Ngã 3' },
@@ -34,6 +39,7 @@ export default function TransportListPage() {
 
   const [transports, setTransports] = useState<TransportDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const firstLoad = useFirstLoad(loading);
   const [sortBy, setSortBy] = useState<'recommended' | 'price_asc' | 'price_desc'>('recommended');
 
   const [filters, setFilters] = useState<TransportFilterParams>(() => {
@@ -182,6 +188,9 @@ export default function TransportListPage() {
           <span className="text-[var(--color-ink-deep)] font-semibold">Dịch vụ di chuyển</span>
         </div>
 
+        {firstLoad ? (
+          <ToolbarSkeleton {...SKELETON.toolbar} />
+        ) : (<>
         <div className="relative overflow-hidden bg-white/90 backdrop-blur-md ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
@@ -255,11 +264,12 @@ export default function TransportListPage() {
           </div>
         </div>
 
+        </>)}
         {/* Layout with Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Desktop Filter Sidebar */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-24">{renderFilters()}</div>
+            <div className="sticky top-24">{firstLoad ? <FilterPanelSkeleton {...SKELETON.filter} /> : renderFilters()}</div>
           </div>
 
           {/* Mobile Filter Button */}
@@ -313,16 +323,7 @@ export default function TransportListPage() {
           {/* List Area */}
           <div className="lg:col-span-3">
             {loading ? (
-              <div className="grid auto-rows-max items-start grid-cols-1 gap-5 md:grid-cols-2">
-                {[1, 2, 3, 4].map(n => (
-                  <div key={n} className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs animate-pulse h-80">
-                    <div className="w-full h-44 bg-slate-100 rounded-xl mb-3"></div>
-                    <div className="h-4 bg-slate-100 rounded-sm w-3/4 mb-2"></div>
-                    <div className="h-3 bg-slate-100 rounded-sm w-1/2 mb-4"></div>
-                    <div className="h-8 bg-slate-100 rounded-xl w-full"></div>
-                  </div>
-                ))}
-              </div>
+              <CardSkeleton count={SKELETON.count} layout="compact" />
             ) : (
               <div>
                 {paginatedTransports.length === 0 ? (
