@@ -48,6 +48,7 @@ import * as dashboard from '../services/adminDashboardService.js';
 import * as finance from '../services/adminFinanceService.js';
 import * as homestayViews from '../services/adminHomestayViewService.js';
 import * as placesAdmin from '../services/adminPlaceService.js';
+import * as adminMedia from '../services/adminMediaService.js';
 import * as providersAdmin from '../services/adminProviderService.js';
 import * as reports from '../services/adminReportService.js';
 import * as reviewsAdmin from '../services/adminReviewService.js';
@@ -643,6 +644,35 @@ adminRouter.patch(`${PLACES}/:id/data-verified`, local, async (req, res) => {
 
 adminRouter.patch(`${PLACES}/:id/visibility`, local, async (req, res) => {
   res.json(await placesAdmin.updateVisibility(pathId(req), parseBody(updatePlaceVisibility, req.body), callerId(req)));
+});
+
+// ---- Ảnh điểm đến (admin) -----------------------------------------------------------------------------------------------------
+
+const attachMediaInput = z.object({
+  imageId: z.string().min(1).max(500),
+  url: z.string().min(1).max(1000),
+  caption: z.string().max(500).nullish(),
+});
+
+adminRouter.post(`${BASE}/media/upload-config`, local, async (_req, res) => {
+  res.json(adminMedia.uploadConfig());
+});
+
+adminRouter.get(`${PLACES}/:id/media`, local, async (req, res) => {
+  res.json(await adminMedia.listMedia(pathId(req)));
+});
+
+adminRouter.post(`${PLACES}/:id/media`, local, async (req, res) => {
+  const body = parseBody(attachMediaInput, req.body);
+  res.json(await adminMedia.attachMedia(pathId(req), body.imageId, body.url, body.caption));
+});
+
+adminRouter.delete(`${PLACES}/:id/media/:mediaId`, local, async (req, res) => {
+  res.json(await adminMedia.removeMedia(pathId(req), pathId(req, 'mediaId')));
+});
+
+adminRouter.patch(`${PLACES}/:id/media/:mediaId/cover`, local, async (req, res) => {
+  res.json(await adminMedia.setCover(pathId(req), pathId(req, 'mediaId')));
 });
 
 // ---- Lịch phòng ----------------------------------------------------------------------------------------------------------------

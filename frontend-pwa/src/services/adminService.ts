@@ -53,6 +53,8 @@ import type {
   TravelerSearchParams,
   AdminNotificationFeed,
   UpdateAdminLevelRequest,
+  AdminMediaDto,
+  AdminUploadConfig,
 } from '../types/admin';
 import type { CashflowReport, CashflowSearchParams } from '../types/cashflow';
 import type { AuditLogItem, AuditLogSearchParams } from '../types/auditLog';
@@ -499,11 +501,33 @@ export const adminService = {
     return res.data;
   },
 
+  async getMediaUploadConfig(): Promise<AdminUploadConfig> {
+    const res = await axios.post<AdminUploadConfig>(`${API_BASE}/media/upload-config`, null, getAuthHeaders());
+    return res.data;
+  },
+  async getPlaceMedia(placeId: number): Promise<AdminMediaDto[]> {
+    const res = await axios.get<AdminMediaDto[]>(`${API_BASE}/places/${placeId}/media`, getAuthHeaders());
+    return res.data;
+  },
+  async attachPlaceMedia(placeId: number, imageId: string, url: string, caption?: string): Promise<AdminMediaDto[]> {
+    const res = await axios.post<AdminMediaDto[]>(`${API_BASE}/places/${placeId}/media`, { imageId, url, caption }, getAuthHeaders());
+    return res.data;
+  },
+  async removePlaceMedia(placeId: number, mediaId: number): Promise<AdminMediaDto[]> {
+    const res = await axios.delete<AdminMediaDto[]>(`${API_BASE}/places/${placeId}/media/${mediaId}`, getAuthHeaders());
+    return res.data;
+  },
+  async setPlaceCover(placeId: number, mediaId: number): Promise<AdminMediaDto[]> {
+    const res = await axios.patch<AdminMediaDto[]>(`${API_BASE}/places/${placeId}/media/${mediaId}/cover`, null, getAuthHeaders());
+    return res.data;
+  },
+
   /** Hình ảnh, tiện nghi, chính sách lưu trú của điểm đến (màn Duyệt điểm đến). */
   async getPlaceShowcase(id: number): Promise<PlaceShowcase> {
     const res = await axios.get<PlaceShowcase>(`${API_BASE}/places/${id}/showcase`, getAuthHeaders());
     return res.data;
   },
+
 
   async getPlaces(params?: PlaceSearchParams): Promise<PageResponse<AdminPlaceSummaryDto>> {
     const res = await axios.get<PageResponse<AdminPlaceSummaryDto>>(`${API_BASE}/places`, {

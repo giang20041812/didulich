@@ -30,6 +30,7 @@ import { useUrlStatus } from '@/hooks/useUrlStatus';
 import { useStatusCounts } from '@/hooks/useStatusCounts';
 import { actionButtonClass } from './statusStyles';
 import PlaceQuickPreview from './PlaceQuickPreview';
+import AdminPlaceMediaPanel from './AdminPlaceMediaPanel';
 import { DATA_VERIFIED_LABEL, DATA_VERIFIED_TONE, KIND_META, kindMeta, VERIFICATION_LABEL, VERIFICATION_TONE, VISIBILITY_LABEL, VISIBILITY_TONE } from './placeMeta';
 
 interface PlacesPanelProps {
@@ -103,6 +104,8 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
   const [dialogError, setDialogError] = useState('');
   /** Địa điểm đang lưu cờ dữ liệu xác thực — khóa công tắc để không gửi chồng yêu cầu. */
   const [savingDataId, setSavingDataId] = useState<number | null>(null);
+  /** Địa điểm đang mở panel quản lý ảnh — null = panel đóng. */
+  const [mediaPlace, setMediaPlace] = useState<AdminPlaceSummaryDto | null>(null);
 
   const debouncedKeyword = useDebouncedValue(keyword);
   const activeCount = [debouncedKeyword, visibility, kind, dataVerified, createdFrom || createdTo].filter(Boolean).length;
@@ -516,6 +519,14 @@ export default function PlacesPanel({ notify }: PlacesPanelProps) {
           onToggleVisibility={() => askVisibility(preview)}
           onToggleDataVerified={(next) => void toggleDataVerified(preview, next)}
           savingDataVerified={savingDataId === preview.id}
+          onAddMedia={() => setMediaPlace(preview)}
+        />
+      )}
+
+      {mediaPlace && (
+        <AdminPlaceMediaPanel
+          place={mediaPlace}
+          onClose={() => setMediaPlace(null)}
         />
       )}
 

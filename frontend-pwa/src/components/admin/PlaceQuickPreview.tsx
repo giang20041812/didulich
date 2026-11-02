@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { AlertTriangle, CheckCircle2, Eye, EyeOff, FilePenLine, MapPin, Star, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Eye, EyeOff, FilePenLine, Images, MapPin, Star, UserCog, X } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import { useAdminPermission } from '@/hooks/useAdminPermission';
 import { getApiErrorMessage } from '@/lib/apiError';
@@ -20,6 +20,8 @@ interface PlaceQuickPreviewProps {
   /** Bật / tắt cờ "dữ liệu đã xác thực" của địa điểm. */
   onToggleDataVerified: (next: boolean) => void;
   savingDataVerified?: boolean;
+  /** Admin tự thêm ảnh vào điểm đến — mở panel quản lý media. */
+  onAddMedia?: () => void;
 }
 
 const vnd = (n?: number | null) => (n == null ? null : new Intl.NumberFormat('vi-VN').format(n) + 'đ');
@@ -29,13 +31,14 @@ const CONTACT_LABEL: Partial<Record<string, string>> = {
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString('vi-VN') : '—');
 
 /** Ngăn xem nhanh bên phải: Admin đọc chi tiết điểm đến và Duyệt / Yêu cầu bổ sung ngay. */
-export default function PlaceQuickPreview({ place, onClose, onApprove, onRequestUpdate, onToggleVisibility, onToggleDataVerified, savingDataVerified = false }: PlaceQuickPreviewProps) {
+export default function PlaceQuickPreview({ place, onClose, onApprove, onRequestUpdate, onToggleVisibility, onToggleDataVerified, savingDataVerified = false, onAddMedia }: PlaceQuickPreviewProps) {
   // Admin cấp 3 chỉ xem: không hiện nút duyệt / yêu cầu bổ sung / ẩn.
   const canOperate = useAdminPermission().can('operate');
   const [detail, setDetail] = useState<AdminPlaceDetailDto | null>(null);
   const [error, setError] = useState('');
   const [showcase, setShowcase] = useState<PlaceShowcase | null>(null);
   const [showcaseError, setShowcaseError] = useState('');
+  const [requestExpanded, setRequestExpanded] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -260,14 +263,45 @@ export default function PlaceQuickPreview({ place, onClose, onApprove, onRequest
               <CheckCircle2 className="h-4 w-4" /> Duyệt
             </button>
           )}
-          {p.verification !== 'NEEDS_UPDATE' && (
+          {p.verification !== 'NEEDS_UPDATE' && !requestExpanded && (
             <button
               type="button"
-              onClick={onRequestUpdate}
+              onClick={() => setRequestExpanded(true)}
               className="flex min-h-11 min-w-[10rem] flex-1 items-center justify-center gap-1.5 rounded-md border border-sun/60 bg-white px-3 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-sun/10 sm:min-h-9 sm:text-xs"
             >
               <FilePenLine className="h-4 w-4" /> Yêu cầu bổ sung
             </button>
+          )}
+          {requestExpanded && (
+            <div className="flex min-w-[10rem] flex-1 flex-col gap-1.5">
+              <p className="text-center text-[10px] font-semibold uppercase tracking-wide text-muted">Chọn cách bổ sung</p>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setRequestExpanded(false); onRequestUpdate(); }}
+                  className="flex min-h-9 flex-1 items-center justify-center gap-1 rounded-md border border-sun/60 bg-white px-2 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-sun/10"
+                >
+                  <UserCog className="h-3.5 w-3.5" /> Yêu cầu nhà CC
+                </button>
+                {onAddMedia && (
+                  <button
+                    type="button"
+                    onClick={() => { setRequestExpanded(false); onAddMedia(); }}
+                    className="flex min-h-9 flex-1 items-center justify-center gap-1 rounded-md border border-primary/40 bg-white px-2 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary-50"
+                  >
+                    <Images className="h-3.5 w-3.5" /> Admin thêm ảnh
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setRequestExpanded(false)}
+                  aria-label="Đóng"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-muted hover:bg-hover hover:text-ink"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           )}
           <button
             type="button"
