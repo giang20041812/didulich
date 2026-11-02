@@ -344,6 +344,27 @@ export interface AdminPlaceDetailDto {
 }
 
 // ─────────────────────────────────────────────
+// Admin media
+// ─────────────────────────────────────────────
+export interface AdminMediaDto {
+  mediaId: number;
+  url: string | null;
+  role: 'COVER' | 'GALLERY';
+  caption: string | null;
+  sortOrder: number;
+}
+
+export interface AdminUploadConfig {
+  provider: 'CLOUDINARY' | 'SUPABASE';
+  cloudName?: string;
+  apiKey?: string;
+  timestamp?: number;
+  signature?: string;
+  uploadUrl?: string;
+  maxFileBytes?: number;
+}
+
+// ─────────────────────────────────────────────
 // Hình ảnh / tiện nghi / chính sách lưu trú ở màn chi tiết Admin (khớp PlaceShowcaseDtos)
 // ─────────────────────────────────────────────
 export interface PlaceShowcaseImage {
