@@ -18,6 +18,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ThumbsUp,
   AlertCircle,
   Lightbulb,
@@ -87,6 +88,51 @@ const BOOKED_DATES_REFRESH_GAP_MS = 3000;
  * khoảng trắng — "TP. Yên Bái", "1.200 m" giữ nguyên); câu kiểu liệt kê ngắn ("nhà gỗ…, view…, có bữa tối…") tách tiếp ở
  * ", " ("1,5 km" giữ nguyên). Văn xuôi dài giữ nguyên câu. Dưới 2 ý thì trả null để hiện đoạn văn như cũ.
  */
+interface NearbyPointItem {
+  name: string;
+  distanceKm: number;
+  distanceText: string;
+}
+
+/**
+ * Tách và sắp xếp điểm vui chơi / danh thắng lân cận theo thứ tự khoảng cách tăng dần (km ngắn đến dài).
+ */
+function parseAndSortNearbyAttractions(content: string | null | undefined): NearbyPointItem[] {
+  if (!content?.trim()) return [];
+  // Tách theo dấu chấm giữa (·), dấu phẩy, chấm phẩy, hoặc xuống dòng
+  const parts = content.split(/[·,\n;]+/).map((s) => s.trim()).filter(Boolean);
+
+  const items: NearbyPointItem[] = parts.map((part) => {
+    // Trích xuất số km hoặc m: vd "2km", "2.5 km", "500m", "10 km"
+    const match = part.match(/(\d+(?:[.,]\d+)?)\s*(km|m)\b/i);
+    let distanceKm = 999999;
+    let distanceText = '';
+    let name = part;
+
+    if (match && match[1] && match[2]) {
+      const val = parseFloat(match[1].replace(',', '.'));
+      const unit = match[2].toLowerCase();
+      distanceKm = unit === 'm' ? val / 1000 : val;
+      distanceText = `${val} ${unit}`;
+      // Lấy tên điểm vui chơi (bỏ phần khoảng cách và dấu gạch đầu dòng cũ nếu có)
+      name = part
+        .replace(match[0], '')
+        .replace(/^[-\s:–—•(]+|[-\s:–—•)]+$/g, '')
+        .trim();
+      if (!name) name = part;
+    }
+
+    return {
+      name,
+      distanceKm,
+      distanceText: distanceText || match?.[0] || '',
+    };
+  });
+
+  // Ưu tiên từ số km ngắn đến dài
+  return items.sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
 function descriptionPoints(text: string | null | undefined): string[] | null {
   if (!text?.trim()) return null;
   const sentences = text
@@ -107,8 +153,6 @@ function descriptionPoints(text: string | null | undefined): string[] | null {
 
 /** Số ý mô tả hiện trước khi bấm "Xem thêm". */
 const DESCRIPTION_POINTS_SHOWN = 6;
-/** Số tiện nghi hiện trước khi bấm "Xem tất cả" (3 hàng trên máy tính). */
-const AMENITIES_SHOWN = 9;
 
 type SuggestTab = 'trip' | 'nearby';
 /** Hai "bảng nhỏ" của khung "Gợi ý cho chuyến đi". */
@@ -183,7 +227,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [exploreAvailable, setExploreAvailable] = useState(false);
   const [suggestTab, setSuggestTab] = useState<SuggestTab>('trip');
   const [copiedLink, setCopiedLink] = useState(false);
@@ -558,6 +601,33 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     [homestay],
   );
 
+  const nearbyAttractions = homestay?.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
+  const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
+  const nearestAttraction = parsedNearbyList[0] as NearbyPointItem | undefined;
+  const otherAttractions = useMemo(() => parsedNearbyList.slice(1), [parsedNearbyList]);
+  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
+  const nearbyDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!nearbyDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (nearbyDropdownRef.current && !nearbyDropdownRef.current.contains(e.target as Node)) {
+        setNearbyDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNearbyDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [nearbyDropdownOpen]);
+
   if (loading) {
     return <HomestayDetailSkeleton />;
   }
@@ -691,8 +761,8 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-1">
                 {[
                   { id: 'booking', label: 'Đặt phòng' },
-                  { id: 'about', label: 'Tổng quan' },
-                  { id: 'amenities', label: 'Tiện nghi' },
+                  { id: 'about', label: 'Giới thiệu' },
+                  { id: 'amenities', label: 'Tiện ích' },
                   ...(activeServices.length > 0 ? [{ id: 'services', label: 'Dịch vụ' }] : []),
                   ...(showSuggest ? [{ id: 'suggest', label: 'Gợi ý' }] : []),
                   { id: 'reviews', label: 'Đánh giá' },
@@ -827,13 +897,100 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 <span className="text-slate-300" aria-hidden>·</span>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('about')}
+                  onClick={() => scrollToSection('amenities')}
                   className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-200/80 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
                   <span>Chi tiết tiện nghi & dịch vụ</span>
                 </button>
               </div>
+
+              {nearestAttraction ? (
+                <div className="relative pt-1 text-xs" ref={nearbyDropdownRef}>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-slate-700">
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <Navigation className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden />
+                      <span className="text-slate-600">Điểm vui chơi:</span>
+                      <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                      <span className="font-bold text-slate-900">{nearestAttraction.name}{nearestAttraction.distanceText ? ':' : ''}</span>
+                      {nearestAttraction.distanceText && (
+                        <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs">
+                          {nearestAttraction.distanceText}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-slate-400 font-medium">(gần nhất)</span>
+                    </div>
+
+                    {otherAttractions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setNearbyDropdownOpen((prev) => !prev)}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer border ${
+                          nearbyDropdownOpen
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-400/20 shadow-xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs'
+                        }`}
+                        aria-expanded={nearbyDropdownOpen}
+                      >
+                        <span>+{otherAttractions.length} điểm khác</span>
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                            nearbyDropdownOpen ? 'rotate-180 text-emerald-700' : 'text-slate-500'
+                          }`}
+                        />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Dropdown menu xổ xuống cho các điểm còn lại */}
+                  <AnimatePresence>
+                    {nearbyDropdownOpen && otherAttractions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="absolute left-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-2xl bg-white p-3.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 backdrop-blur-md"
+                      >
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            Các điểm vui chơi khác
+                          </span>
+                          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">
+                            từ gần đến xa
+                          </span>
+                        </div>
+                        <ul className="space-y-2">
+                          {otherAttractions.map((item, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-center justify-between gap-2 rounded-lg p-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                            >
+                              <span className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                                <span className="font-medium text-slate-800 truncate">{item.name}</span>
+                              </span>
+                              {item.distanceText && (
+                                <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs shrink-0">
+                                  {item.distanceText}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : nearbyAttractions ? (
+                <p className="flex items-start gap-1.5 text-xs text-slate-500">
+                  <Navigation className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden />
+                  <span>
+                    <span className="font-medium text-slate-600">Điểm vui chơi: </span>
+                    {nearbyAttractions}
+                  </span>
+                </p>
+              ) : null}
             </div>
 
             {/* Actions: Chia sẻ & Yêu thích */}
@@ -886,6 +1043,39 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
         {/* ── 2. THƯ VIỆN ẢNH (VỚI PARALLAX NHẸ TRÊN DESKTOP) ── */}
         <HomestayGallery images={authenticImages} name={homestay.name} onOpen={setLightboxIndex} />
 
+        {/* ── TIỆN ÍCH (ngay dưới ảnh, trước grid 2 cột) ── */}
+        {(amenityNames.length > 0 || otherAmenities) && (
+          <section
+            id="amenities"
+            className="mt-6 scroll-mt-24 rounded-2xl border border-slate-100 bg-slate-50/60 px-5 py-4"
+          >
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+              <h2 className="text-base font-bold tracking-tight text-slate-900">Tiện ích</h2>
+              <span className="text-xs font-medium text-slate-400">
+                {amenityNames.length + 1} tiện ích
+              </span>
+            </div>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 lg:grid-cols-4">
+              <li className="flex items-start gap-2 text-sm text-slate-700">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                <span>Đầy đủ tiện nghi vệ sinh khép kín</span>
+              </li>
+              {amenityNames.map((name) => (
+                <li key={name} className="flex items-start gap-2 text-sm text-slate-700">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                  <span>{name}</span>
+                </li>
+              ))}
+            </ul>
+            {otherAmenities && (
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-600">
+                <span className="font-semibold text-slate-700">Tiện ích khác: </span>
+                {otherAmenities}
+              </p>
+            )}
+          </section>
+        )}
+
         {/* ── 3. KHUNG NỘI DUNG CHÍNH (2 CỘT TRÊN MÁY TÍNH) ── */}
         <div className="mt-8 lg:grid lg:grid-cols-[1fr_360px] lg:gap-10">
           {/* CỘT TRÁI: Nội dung chi tiết */}
@@ -918,7 +1108,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
                 <button
                   type="button"
-                  onClick={() => scrollToSection('about')}
+                  onClick={() => scrollToSection('amenities')}
                   className="self-start sm:self-center inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/70 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-100 hover:border-emerald-600/50 transition cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
@@ -992,7 +1182,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </div>
             </motion.section>
 
-            {/* ── 2. TỔNG QUAN CHỖ NGHỈ ── */}
+            {/* ── 2. GIỚI THIỆU CHỖ NGHỈ ── */}
             <motion.section
               id="about"
               initial="hidden"
@@ -1001,7 +1191,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               variants={sectionVariants}
               className="scroll-mt-28 space-y-4 pt-8 border-t border-slate-200"
             >
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Tổng quan chỗ nghỉ</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Giới thiệu chỗ nghỉ</h2>
 
               {descPoints ? (
                 <div>
@@ -1082,53 +1272,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </motion.div>
             )}
 
-            {/* Tiện nghi — danh sách đánh dấu gọn, không khung từng ô */}
-            {(amenityNames.length > 0 || otherAmenities) && (
-              <motion.section
-                id="amenities"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-40px' }}
-                variants={sectionVariants}
-                className="scroll-mt-28 space-y-3 pt-6 border-t border-slate-100"
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="text-xl font-bold tracking-tight text-slate-900">Tiện nghi sẵn có</h2>
-                  {amenityNames.length > 0 && (
-                    <span className="text-xs font-medium text-slate-400">{amenityNames.length} tiện nghi</span>
-                  )}
-                </div>
-
-                {amenityNames.length > 0 && (
-                  <ul className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-                    {(showAllAmenities ? amenityNames : amenityNames.slice(0, AMENITIES_SHOWN)).map((name) => (
-                      <li key={name} className="flex items-start gap-2 text-sm text-slate-700">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
-                        <span>{name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* "Tiện ích khác" chủ nhà tự gõ khi tạo homestay */}
-                {otherAmenities && (
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">
-                    <span className="font-semibold text-slate-700">Tiện ích khác: </span>
-                    {otherAmenities}
-                  </p>
-                )}
-
-                {amenityNames.length > AMENITIES_SHOWN && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllAmenities((open) => !open)}
-                    className="text-sm font-semibold text-[var(--color-primary)] hover:underline cursor-pointer"
-                  >
-                    {showAllAmenities ? 'Thu gọn' : `Xem tất cả ${amenityNames.length} tiện nghi`}
-                  </button>
-                )}
-              </motion.section>
-            )}
 
             {/* Dịch vụ tại chỗ — một bảng giá gọn */}
             {activeServices.length > 0 && (

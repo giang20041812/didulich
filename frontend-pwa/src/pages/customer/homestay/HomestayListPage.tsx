@@ -892,20 +892,26 @@ export default function HomestayListPage() {
                         name={hs.name}
                         imageUrl={hs.coverImageUrl}
                         location={hs.district || 'Yên Bái'}
+                        description={hs.roomType ? `${hs.roomType}${hs.bedInfo ? ' · ' + hs.bedInfo : ''}` : undefined}
                         price={formatVnd(hs.price, 'Liên hệ')}
                         priceUnit={hs.price ? 'đêm' : null}
                         amenities={hs.amenities ?? []}
-                        frame="house"
-                        compact
+                        ctaText="Khám phá ngay"
                         // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
                         onIntent={() => prefetchHomestay(hs.id)}
-                        badge={hs.isGenius ? <CompactCardBadge>Genius</CompactCardBadge> : undefined}
+                        badge={
+                          hs.isGenius ? (
+                            <CompactCardBadge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold shadow-sm">
+                              Genius
+                            </CompactCardBadge>
+                          ) : undefined
+                        }
                         notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
-                          <span className="text-[11px] font-bold text-amber-700">Tạm ngừng nhận đặt phòng</span>
+                          <span className="text-[11px] font-bold text-amber-300">Tạm ngừng nhận đặt phòng</span>
                         ) : hs.hasOnlineRooms === false ? (
-                          <span className="text-[11px] font-bold text-slate-500">Liên hệ trực tiếp để đặt</span>
+                          <span className="text-[11px] font-bold text-slate-300">Liên hệ trực tiếp để đặt</span>
                         ) : hs.availableForSelectedDates === false ? (
-                          <span className="text-[11px] font-bold text-slate-500">Hết phòng ngày đã chọn</span>
+                          <span className="text-[11px] font-bold text-slate-300">Hết phòng ngày đã chọn</span>
                         ) : undefined}
                         action={
                           // Lưu homestay yêu thích (tại thiết bị này)

@@ -12,7 +12,7 @@ type FilterSpec = { groups?: number[]; hasBudget?: boolean };
  */
 export const LIST_SKELETON_SPECS = {
   homestays: { toolbar: { chips: 6, search: true }, filter: { groups: [6] }, count: 12 },
-  destinations: { toolbar: { chips: 3 }, filter: { groups: [2, 6, 1], hasBudget: false }, count: 8 },
+  destinations: { toolbar: { chips: 3 }, filter: { groups: [2, 6, 1], hasBudget: false }, count: 9 },
   restaurants: { toolbar: { chips: 5 }, filter: { groups: [5, 4] }, count: 6 },
   transport: { toolbar: { chips: 6, actions: 1 }, filter: { groups: [5], hasBudget: false }, count: 8 },
   services: { toolbar: { chips: 0 }, count: 8 },
@@ -23,12 +23,18 @@ export const LIST_SKELETON_SPECS = {
 /** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 16:10 + tên + địa điểm + giá, cùng bo góc / khoảng đệm với thẻ thật. */
 export function CompactCardSkeleton() {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-xs">
-      <Skeleton className={`${bar} aspect-[16/10] w-full shrink-0 rounded-none`} />
-      <div className="flex flex-1 flex-col gap-2 p-2.5 sm:p-3">
-        <Skeleton className={`${bar} h-3.5 w-4/5 sm:h-4`} />
-        <Skeleton className={`${bar} h-3 w-1/2 opacity-70`} />
-        <Skeleton className={`${bar} mt-auto h-4 w-1/3`} />
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/10 ring-1 ring-slate-200/80 shadow-xs aspect-square relative p-3.5 sm:p-4 justify-between">
+      <div className="flex justify-between items-center">
+        <Skeleton className={`${bar} h-5 w-20 rounded-full`} />
+        <Skeleton className={`${bar} h-5 w-16 rounded-full`} />
+      </div>
+      <div className="space-y-2 mt-auto">
+        <Skeleton className={`${bar} h-4 w-3/4`} />
+        <Skeleton className={`${bar} h-3 w-full opacity-70`} />
+        <div className="flex justify-between items-center pt-2 border-t border-slate-200/50">
+          <Skeleton className={`${bar} h-3.5 w-16`} />
+          <Skeleton className={`${bar} h-3.5 w-20`} />
+        </div>
       </div>
     </div>
   );
