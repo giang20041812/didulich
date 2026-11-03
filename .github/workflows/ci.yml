@@ -107,10 +107,15 @@ jobs:
 
       - name: Khởi động lại — container nguội thấy schema đã cập nhật
         run: |
+          since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           docker restart api
           bash .github/scripts/wait-healthy.sh http://127.0.0.1:8080/api/public/health 240
-          docker logs api 2>&1 | grep -F "[Migrate] Schema đã cập nhật" \
-            || { echo "::error::Lần khởi động thứ hai vẫn chạy lại migration"; docker logs api 2>&1 | tail -n 80; exit 1; }
+          # Changeset có precondition onFail:CONTINUE (v2-009-suggested-journeys) cố ý chờ tới khi danh mục có dữ liệu,
+          # nên DB trống của CI không bao giờ "đã cập nhật" hoàn toàn. Điều cần chứng minh: lần khởi động thứ hai
+          # KHÔNG áp dụng lại changeset nào đã chạy.
+          if docker logs --since "$since" api 2>&1 | grep -F "[Migrate] Đã áp dụng"; then
+            echo "::error::Lần khởi động thứ hai vẫn chạy lại migration"; docker logs --since "$since" api 2>&1 | tail -n 80; exit 1
+          fi
 
       - name: Log container khi lỗi
         if: failure()
