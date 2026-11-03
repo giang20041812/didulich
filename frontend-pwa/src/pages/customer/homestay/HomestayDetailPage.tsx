@@ -18,6 +18,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ThumbsUp,
   AlertCircle,
   Lightbulb,
@@ -639,6 +640,30 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
   const otherAmenities = profile?.otherAmenities?.trim() || null;
   const nearbyAttractions = homestay.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
   const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
+  const nearestAttraction = parsedNearbyList[0] as NearbyPointItem | undefined;
+  const otherAttractions = useMemo(() => parsedNearbyList.slice(1), [parsedNearbyList]);
+  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
+  const nearbyDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!nearbyDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (nearbyDropdownRef.current && !nearbyDropdownRef.current.contains(e.target as Node)) {
+        setNearbyDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNearbyDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [nearbyDropdownOpen]);
 
   // Tổng quan gọn: mô tả thành gạch đầu dòng + các thông tin chính mỗi thứ một dòng có biểu tượng.
   const descPoints = descriptionPoints(homestay.description);
@@ -879,25 +904,82 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 </button>
               </div>
 
-              {parsedNearbyList.length > 0 ? (
-                <div className="pt-2 text-xs">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-700 mb-2">
-                    <Navigation className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden />
-                    <span>Khoảng cách đến các điểm vui chơi:</span>
+              {nearestAttraction ? (
+                <div className="relative pt-1 text-xs" ref={nearbyDropdownRef}>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-slate-700">
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <Navigation className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden />
+                      <span className="text-slate-600">Điểm vui chơi:</span>
+                      <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                      <span className="font-bold text-slate-900">{nearestAttraction.name}{nearestAttraction.distanceText ? ':' : ''}</span>
+                      {nearestAttraction.distanceText && (
+                        <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs">
+                          {nearestAttraction.distanceText}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-slate-400 font-medium">(gần nhất)</span>
+                    </div>
+
+                    {otherAttractions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setNearbyDropdownOpen((prev) => !prev)}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer border ${
+                          nearbyDropdownOpen
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-400/20 shadow-xs'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs'
+                        }`}
+                        aria-expanded={nearbyDropdownOpen}
+                      >
+                        <span>+{otherAttractions.length} điểm khác</span>
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                            nearbyDropdownOpen ? 'rotate-180 text-emerald-700' : 'text-slate-500'
+                          }`}
+                        />
+                      </button>
+                    )}
                   </div>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-slate-600 pl-1">
-                    {parsedNearbyList.map((item, idx) => (
-                      <li key={idx} className="flex items-baseline gap-1.5 text-slate-700">
-                        <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
-                        <span className="font-medium text-slate-800">{item.name}{item.distanceText ? ':' : ''}</span>
-                        {item.distanceText && (
-                          <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs">
-                            {item.distanceText}
+
+                  {/* Dropdown menu xổ xuống cho các điểm còn lại */}
+                  <AnimatePresence>
+                    {nearbyDropdownOpen && otherAttractions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className="absolute left-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-2xl bg-white p-3.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 backdrop-blur-md"
+                      >
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            Các điểm vui chơi khác
                           </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">
+                            từ gần đến xa
+                          </span>
+                        </div>
+                        <ul className="space-y-2">
+                          {otherAttractions.map((item, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-center justify-between gap-2 rounded-lg p-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                            >
+                              <span className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                                <span className="font-medium text-slate-800 truncate">{item.name}</span>
+                              </span>
+                              {item.distanceText && (
+                                <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs shrink-0">
+                                  {item.distanceText}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ) : nearbyAttractions ? (
                 <p className="flex items-start gap-1.5 text-xs text-slate-500">
