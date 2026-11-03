@@ -1,199 +1,163 @@
 -- ══════════════════════════════════════════════════════════════════════════════
--- Insert ảnh từ Google Drive vào media_asset + place_media
--- URL format: https://lh3.googleusercontent.com/d/{FILE_ID}
--- Safe: bỏ qua nếu home đã có ảnh rồi
+-- Insert ảnh CHUẨN CLOUDINARY vào media_asset + place_media
+-- Cloudinary Account: rf7zlbah
+-- Tổng số ảnh: 64 ảnh cho 16 homestay ĐiMCC
 -- ══════════════════════════════════════════════════════════════════════════════
 
 BEGIN;
 
--- Bước 1: Insert media_asset (ảnh mới, chưa tồn tại)
+-- Bước 1: Insert media_asset với storage_key và public_url chuẩn Cloudinary
 INSERT INTO media_asset (storage_key, public_url, mime_type, created_at)
 SELECT
-  'drive:' || v.file_id,
-  'https://lh3.googleusercontent.com/d/' || v.file_id,
+  v.storage_key,
+  v.public_url,
   'image/jpeg',
   now() AT TIME ZONE 'Asia/Ho_Chi_Minh'
 FROM (VALUES
-  -- homestay-anh-tuc (5 ảnh)
-  ('homestay-anh-tuc', '1a2RDQLveeRde6v60ox06IMm1-GSX_h5Z', 0),
-  ('homestay-anh-tuc', '1ZC6DAxM1SVqYYR4CHGYfGQczwyZ3d8c-', 1),
-  ('homestay-anh-tuc', '1d1BJGzpkrv8f8Dw3gzLcBK0ojP3ENjzI', 2),
-  ('homestay-anh-tuc', '1kCKZs_ErUc3iPamM4wX6jEJM3PhR6xXS', 3),
-  ('homestay-anh-tuc', '1Eos-PisGrm9wHd2x9bZyL2m3mwqw_Rx2', 4),
-
-  -- new-highland-hotel (3 ảnh)
-  ('new-highland-hotel', '1rXdFz7id7_LjuE82HsZgs1d6WP1yBZ7e', 0),
-  ('new-highland-hotel', '1hCPH6NJ-CVShxScvI2GfgJJE9A0uWwpD', 1),
-  ('new-highland-hotel', '1WbxLIeVJXwUwJeaf1GuKBfSmzbkaAup9', 2),
-
-  -- hoa-son-tra-hotel (1 ảnh)
-  ('hoa-son-tra-hotel', '1W06k1RNvz4WMsQeaVqzgo7NE2DdRO0yy', 0),
-
-  -- nha-nghi-duy-vu (1 ảnh)
-  ('nha-nghi-duy-vu', '19z2eXqhiJLVybIAvFSkwmzNEeeK2YjvV', 0),
-
-  -- homestay-hoa-thao (5 ảnh)
-  ('homestay-hoa-thao', '1ZOAXyVpSMUP8PWvRyCHyIPysMw5QGpbj', 0),
-  ('homestay-hoa-thao', '1RG52lcn_qsd89qF6YIw2kPI3HFUd8xQH', 1),
-  ('homestay-hoa-thao', '1GEbayd0E2YRKBCDSc-5Crurzwxo6DWNr', 2),
-  ('homestay-hoa-thao', '1-McYaeXy9cR8qmmyFCFMFft7eNj1ORB0', 3),
-  ('homestay-hoa-thao', '1fF4Buif01tARjK2fH-a7DfY-m-lNhHt8', 4),
-
-  -- homestay-cuong-tu (5 ảnh)
-  ('homestay-cuong-tu', '1jC_uyQ531C-H98BwSDwB2vEtr4cYqo8n', 0),
-  ('homestay-cuong-tu', '1JKArE_9VZd_34rCXS7r4YBs-W3T2OdHJ', 1),
-  ('homestay-cuong-tu', '1Fw032VIDv3-Z25ve2FUAhcLfncrECcxx', 2),
-  ('homestay-cuong-tu', '1nXLtV6tOK_nPeSAOZ3lM0jfgFTDA7qgw', 3),
-  ('homestay-cuong-tu', '1tqmvGW9r0j1H_IvhIG8Ho1WM1ADm790_', 4),
-
-  -- homestay-bao-lan (4 ảnh)
-  ('homestay-bao-lan', '15rf-cPK4nku-1pdwHgf225WuQVHZzOiG', 0),
-  ('homestay-bao-lan', '1qrdtH_rZXgRPvG-WTpvlN3jUPOkHjGAZ', 1),
-  ('homestay-bao-lan', '1311JCRLcm3f-YP2HWIkrA93qKP_3mjEU', 2),
-  ('homestay-bao-lan', '1_FakTmA84bqJ_W9t6AW-7MZlOvS9G51g', 3),
-
-  -- win-homestay (4 ảnh drone)
-  ('win-homestay', '1zYMr9S6xMzsPV4uy7JQUc3V6oYXKMFuQ', 0),
-  ('win-homestay', '1quFOSUoNHU-w7UhZHSZa6fIZSy6kZwi7', 1),
-  ('win-homestay', '1WJpu0gnM0cBstD1EGaUtbxsW-ivdXkky', 2),
-  ('win-homestay', '1WG9mGAtpaRCAi0QFXLdbrOTCHzvEJ7zP', 3),
-
-  -- pu-nhu-house (5 ảnh)
-  ('pu-nhu-house', '19OzuU8-8fPqW04JABT1LR_WSkC8p8wT2', 0),
-  ('pu-nhu-house', '1kfMoXspypBHum7p8bSuithI8J0vOUXu-', 1),
-  ('pu-nhu-house', '1Xn691lCbK3DIK4HS7L8pDsHroVlHbkg-', 2),
-  ('pu-nhu-house', '1d8-h3f-bJPj_xcCFlCmtWXkOTTiQCSBF', 3),
-  ('pu-nhu-house', '1qdrliMepxRuDIwvGBx81NFTyLVEL0TRv', 4),
-
-  -- co-gai-thai-homestay (5 ảnh)
-  ('co-gai-thai-homestay', '1JUlARR5v0FC-FSdUWzoGHemy_2Luoyqh', 0),
-  ('co-gai-thai-homestay', '1S9_k2IKKLvyfAS40cH8AnlZcXj07rsFa', 1),
-  ('co-gai-thai-homestay', '1pW2SfloFWwYYQp1wfy-XVHGIAczrlMB6', 2),
-  ('co-gai-thai-homestay', '1gNYsuAzbGqyWIn91L0KgSZMeabHHsFEm', 3),
-  ('co-gai-thai-homestay', '1lsf-Y3Gu1dJOrrKT5si7UPHYW0KseTEB', 4),
-
-  -- moc-homestay (4 ảnh)
-  ('moc-homestay', '1iVtsux0LQe7DXm6g15zsIUjZl0ZgoY1i', 0),
-  ('moc-homestay', '1acgQo4urm1shzGGA-BHaJoVW2GU5Q-Ik', 1),
-  ('moc-homestay', '1FPeKd-pnRkhmmjbYwyEvRUMeOzaZR_JF', 2),
-  ('moc-homestay', '1tAY6wLR0uyM9cKWdD5yp_lxGiYtJbSrQ', 3),
-
-  -- bungalow-xuan-giang (5 ảnh)
-  ('bungalow-xuan-giang', '1rVMvRLExU1gNYmKOINNjEDKKhdlQTkU3', 0),
-  ('bungalow-xuan-giang', '1Xo30KBXTyDQ8D6fe6qjWIygh7D1sMUFg', 1),
-  ('bungalow-xuan-giang', '1z9WwGO3rFjYB_kuYNRGLvckv5z-AcuB9', 2),
-  ('bungalow-xuan-giang', '1tb0mlwR_KdxmCuqcbU3hksEZ0-FQkHAL', 3),
-  ('bungalow-xuan-giang', '1OPGfcmHra1jfE5B65TAmBpGt1M-VIFlu', 4),
-
-  -- hotel-thuat-hoa (2 ảnh)
-  ('hotel-thuat-hoa', '11VqzSrYKxtdwIMV7Nif4jJcD6r0yH4SS', 0),
-  ('hotel-thuat-hoa', '1dZWzySZoyuB7kVsnh_JiMSY9rzHp2cU6', 1),
-
-  -- chelly-hotel (5 ảnh drone)
-  ('chelly-hotel', '1g7N5v5840ejum3gVWD7Nf1-MEHRIQS86', 0),
-  ('chelly-hotel', '1hGD7vBdDcIuvZ6aZwJHNIpF67QRKq86V', 1),
-  ('chelly-hotel', '1j1TYfo-MXfJK1eR-UhrHxpknuDYsPpaj', 2),
-  ('chelly-hotel', '1PxZ70yvQxIp_UIfTzFVbHamQCN6E8ZPM', 3),
-  ('chelly-hotel', '1indQGDvPBqf9qDEeacsu6GeM22IQWUur', 4),
-
-  -- hanh-phuc-creek-homestay (5 ảnh)
-  ('hanh-phuc-creek-homestay', '1GAy6l3NGnltZ7-CSfaS1eNdCCHv_Zucm', 0),
-  ('hanh-phuc-creek-homestay', '11d0A71kmG_mOerclPcjXdwuxFaaII9iL', 1),
-  ('hanh-phuc-creek-homestay', '1kSLi5qfLt7wqb5-Sq2DiuO2qOxdc9c5q', 2),
-  ('hanh-phuc-creek-homestay', '1KddIAymEOWgTLY5QPavq20Yg0LhJwZKV', 3),
-  ('hanh-phuc-creek-homestay', '1WAI5P1EMuHYDzdWkI4s8T88m7ODUCiKI', 4),
-
-  -- hotel-nhat-phuong (5 ảnh drone)
-  ('hotel-nhat-phuong', '1CtQdMs8KLYcYe77wxoBlcxN8uYydgc6c', 0),
-  ('hotel-nhat-phuong', '16rZ6wDOBB0w-Md6IbV7rRucwI2sOzBai', 1),
-  ('hotel-nhat-phuong', '1YTJZLHT6qh4RPmBeZeE5JuJXJHBeMsQE', 2),
-  ('hotel-nhat-phuong', '1PaR0rrTQspD44r4Yf8iiugAO7ez9y7rP', 3),
-  ('hotel-nhat-phuong', '1tOEDUpt7cTPe-DFj5__5gYutvcloOCb4', 4)
-
-) AS v(slug, file_id, sort_order)
--- Chỉ insert home chưa có ảnh
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/d90fff5ee41be4c3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672426/viettrek/homestays/homestay-anh-tuc/d90fff5ee41be4c3.jpg', 0),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/46fca0e93167dae8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672460/viettrek/homestays/homestay-anh-tuc/46fca0e93167dae8.jpg', 1),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/f1963ac1e63c8935', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672462/viettrek/homestays/homestay-anh-tuc/f1963ac1e63c8935.jpg', 2),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/2cb30e19237436d4', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672466/viettrek/homestays/homestay-anh-tuc/2cb30e19237436d4.jpg', 3),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/fb1a1ccce625a554', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672469/viettrek/homestays/homestay-anh-tuc/fb1a1ccce625a554.jpg', 4),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/e5c484591dd7d7b5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672471/viettrek/homestays/new-highland-hotel/e5c484591dd7d7b5.jpg', 0),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/c8b71c9f047d5571', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672475/viettrek/homestays/new-highland-hotel/c8b71c9f047d5571.jpg', 1),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/b18f4fdc5e758088', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672477/viettrek/homestays/new-highland-hotel/b18f4fdc5e758088.jpg', 2),
+  ('hoa-son-tra-hotel', 'cloudinary:viettrek/homestays/hoa-son-tra-hotel/c7752c45c9a1eba5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672481/viettrek/homestays/hoa-son-tra-hotel/c7752c45c9a1eba5.jpg', 0),
+  ('nha-nghi-duy-vu', 'cloudinary:viettrek/homestays/nha-nghi-duy-vu/d6e8e2a4da507785', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672484/viettrek/homestays/nha-nghi-duy-vu/d6e8e2a4da507785.jpg', 0),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/93160762ed6afe24', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672487/viettrek/homestays/homestay-hoa-thao/93160762ed6afe24.jpg', 0),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/1a3b65375cf79541', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672489/viettrek/homestays/homestay-hoa-thao/1a3b65375cf79541.jpg', 1),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/364b09472bfa523c', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672491/viettrek/homestays/homestay-hoa-thao/364b09472bfa523c.jpg', 2),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/3502224f9e290daf', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672494/viettrek/homestays/homestay-hoa-thao/3502224f9e290daf.jpg', 3),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/99f050ccac4f1a0c', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672496/viettrek/homestays/homestay-hoa-thao/99f050ccac4f1a0c.jpg', 4),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/b209fbffb2015134', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672499/viettrek/homestays/homestay-cuong-tu/b209fbffb2015134.jpg', 0),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/7cb278784069c5a3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672501/viettrek/homestays/homestay-cuong-tu/7cb278784069c5a3.jpg', 1),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/935d898f9bad7170', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672504/viettrek/homestays/homestay-cuong-tu/935d898f9bad7170.jpg', 2),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/f213210ea784c9aa', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672506/viettrek/homestays/homestay-cuong-tu/f213210ea784c9aa.jpg', 3),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/e73525a9b6d8a21f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672509/viettrek/homestays/homestay-cuong-tu/e73525a9b6d8a21f.jpg', 4),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/74083a7fc60f3f1a', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672511/viettrek/homestays/homestay-bao-lan/74083a7fc60f3f1a.jpg', 0),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/c7782b7caf1a8a46', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672513/viettrek/homestays/homestay-bao-lan/c7782b7caf1a8a46.jpg', 1),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/907d9a5542dd885b', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672516/viettrek/homestays/homestay-bao-lan/907d9a5542dd885b.jpg', 2),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/093ff8078aee4ddb', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672518/viettrek/homestays/homestay-bao-lan/093ff8078aee4ddb.jpg', 3),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/dca50ca9a4ff974e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672819/viettrek/homestays/win-homestay/dca50ca9a4ff974e.jpg', 0),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/cd1bb62f283b4e44', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672828/viettrek/homestays/win-homestay/cd1bb62f283b4e44.jpg', 1),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/8c8a661a2ffd15b6', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672838/viettrek/homestays/win-homestay/8c8a661a2ffd15b6.jpg', 2),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/0b0574c9d2efed9d', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672847/viettrek/homestays/win-homestay/0b0574c9d2efed9d.jpg', 3),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/dea9f9f9c66c3f6f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672554/viettrek/homestays/pu-nhu-house/dea9f9f9c66c3f6f.jpg', 0),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/b49760aea0ef39e2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672557/viettrek/homestays/pu-nhu-house/b49760aea0ef39e2.jpg', 1),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/f323df2a781f7ff5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672560/viettrek/homestays/pu-nhu-house/f323df2a781f7ff5.jpg', 2),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/805c8d9909f7a244', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672562/viettrek/homestays/pu-nhu-house/805c8d9909f7a244.jpg', 3),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/e9841d2951ac68ca', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672565/viettrek/homestays/pu-nhu-house/e9841d2951ac68ca.jpg', 4),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/ea675f2ac9bd5012', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672568/viettrek/homestays/co-gai-thai-homestay/ea675f2ac9bd5012.jpg', 0),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/929e992d93533558', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672571/viettrek/homestays/co-gai-thai-homestay/929e992d93533558.jpg', 1),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/ed7ab1856c1438ac', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672574/viettrek/homestays/co-gai-thai-homestay/ed7ab1856c1438ac.jpg', 2),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/2658abd0f5730146', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672577/viettrek/homestays/co-gai-thai-homestay/2658abd0f5730146.jpg', 3),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/3ae3d6c246d8fbb2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672580/viettrek/homestays/co-gai-thai-homestay/3ae3d6c246d8fbb2.jpg', 4),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/1bc6fa023bfc92e4', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672583/viettrek/homestays/moc-homestay/1bc6fa023bfc92e4.jpg', 0),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/139c17a38c1e919e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672586/viettrek/homestays/moc-homestay/139c17a38c1e919e.jpg', 1),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/0a3999d7f935fa8e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672588/viettrek/homestays/moc-homestay/0a3999d7f935fa8e.jpg', 2),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/c9c62db6954c4ee0', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672591/viettrek/homestays/moc-homestay/c9c62db6954c4ee0.jpg', 3),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/cfd2468425002454', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672594/viettrek/homestays/bungalow-xuan-giang/cfd2468425002454.jpg', 0),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/8c890f94f0f45597', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672596/viettrek/homestays/bungalow-xuan-giang/8c890f94f0f45597.jpg', 1),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/0f2740705e34d86f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672599/viettrek/homestays/bungalow-xuan-giang/0f2740705e34d86f.jpg', 2),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/9879e38504f6a2f2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672601/viettrek/homestays/bungalow-xuan-giang/9879e38504f6a2f2.jpg', 3),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/bd985e5a77efaa45', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672604/viettrek/homestays/bungalow-xuan-giang/bd985e5a77efaa45.jpg', 4),
+  ('hotel-thuat-hoa', 'cloudinary:viettrek/homestays/hotel-thuat-hoa/6f0205c796dcce92', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672607/viettrek/homestays/hotel-thuat-hoa/6f0205c796dcce92.jpg', 0),
+  ('hotel-thuat-hoa', 'cloudinary:viettrek/homestays/hotel-thuat-hoa/59befb3953b006b3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672610/viettrek/homestays/hotel-thuat-hoa/59befb3953b006b3.jpg', 1),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/c46173223df9c0e8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672856/viettrek/homestays/chelly-hotel/c46173223df9c0e8.jpg', 0),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/d66e187a6f29d18e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672861/viettrek/homestays/chelly-hotel/d66e187a6f29d18e.jpg', 1),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/6bb38a31747ccc88', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672870/viettrek/homestays/chelly-hotel/6bb38a31747ccc88.jpg', 2),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/4a3207f67af076f6', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672656/viettrek/homestays/chelly-hotel/4a3207f67af076f6.jpg', 3),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/d361006785ce93d5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672877/viettrek/homestays/chelly-hotel/d361006785ce93d5.jpg', 4),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/1c3180205e459d06', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672671/viettrek/homestays/hanh-phuc-creek-homestay/1c3180205e459d06.jpg', 0),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/7f6a5ad07a26439a', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672674/viettrek/homestays/hanh-phuc-creek-homestay/7f6a5ad07a26439a.jpg', 1),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/87e163c4a7c765e5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672677/viettrek/homestays/hanh-phuc-creek-homestay/87e163c4a7c765e5.jpg', 2),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/a34ae709f1eb8047', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672680/viettrek/homestays/hanh-phuc-creek-homestay/a34ae709f1eb8047.jpg', 3),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/da308c7061fd5467', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672683/viettrek/homestays/hanh-phuc-creek-homestay/da308c7061fd5467.jpg', 4),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/25240e3f71fa85d0', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672884/viettrek/homestays/hotel-nhat-phuong/25240e3f71fa85d0.jpg', 0),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/a930e2edcb5ef75f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672700/viettrek/homestays/hotel-nhat-phuong/a930e2edcb5ef75f.jpg', 1),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/d2754cc5086217c8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672892/viettrek/homestays/hotel-nhat-phuong/d2754cc5086217c8.jpg', 2),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/e7c865be67d0610e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672899/viettrek/homestays/hotel-nhat-phuong/e7c865be67d0610e.jpg', 3),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/a15872a2324d52e8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672907/viettrek/homestays/hotel-nhat-phuong/a15872a2324d52e8.jpg', 4)
+) AS v(slug, storage_key, public_url, sort_order)
 WHERE NOT EXISTS (
-  SELECT 1 FROM place_media pm
-  JOIN place p2 ON p2.id = pm.place_id
-  WHERE p2.slug = v.slug
-)
-ON CONFLICT (storage_key) DO NOTHING;
+  SELECT 1 FROM media_asset m WHERE m.storage_key = v.storage_key
+);
 
--- Bước 2: Insert place_media (liên kết ảnh với place)
+-- Bước 2: Insert place_media (gắn ảnh vào place)
 INSERT INTO place_media (place_id, media_id, role, sort_order)
 SELECT
   p.id,
   m.id,
-  CASE WHEN v.sort_order = 0 THEN 'COVER' ELSE 'GALLERY' END,
+  CASE WHEN v.sort_order = 0 AND NOT EXISTS (SELECT 1 FROM place_media pm2 WHERE pm2.place_id = p.id AND pm2.role = 'COVER') THEN 'COVER' ELSE 'GALLERY' END,
   v.sort_order
 FROM (VALUES
-  ('homestay-anh-tuc', '1a2RDQLveeRde6v60ox06IMm1-GSX_h5Z', 0),
-  ('homestay-anh-tuc', '1ZC6DAxM1SVqYYR4CHGYfGQczwyZ3d8c-', 1),
-  ('homestay-anh-tuc', '1d1BJGzpkrv8f8Dw3gzLcBK0ojP3ENjzI', 2),
-  ('homestay-anh-tuc', '1kCKZs_ErUc3iPamM4wX6jEJM3PhR6xXS', 3),
-  ('homestay-anh-tuc', '1Eos-PisGrm9wHd2x9bZyL2m3mwqw_Rx2', 4),
-  ('new-highland-hotel', '1rXdFz7id7_LjuE82HsZgs1d6WP1yBZ7e', 0),
-  ('new-highland-hotel', '1hCPH6NJ-CVShxScvI2GfgJJE9A0uWwpD', 1),
-  ('new-highland-hotel', '1WbxLIeVJXwUwJeaf1GuKBfSmzbkaAup9', 2),
-  ('hoa-son-tra-hotel', '1W06k1RNvz4WMsQeaVqzgo7NE2DdRO0yy', 0),
-  ('nha-nghi-duy-vu', '19z2eXqhiJLVybIAvFSkwmzNEeeK2YjvV', 0),
-  ('homestay-hoa-thao', '1ZOAXyVpSMUP8PWvRyCHyIPysMw5QGpbj', 0),
-  ('homestay-hoa-thao', '1RG52lcn_qsd89qF6YIw2kPI3HFUd8xQH', 1),
-  ('homestay-hoa-thao', '1GEbayd0E2YRKBCDSc-5Crurzwxo6DWNr', 2),
-  ('homestay-hoa-thao', '1-McYaeXy9cR8qmmyFCFMFft7eNj1ORB0', 3),
-  ('homestay-hoa-thao', '1fF4Buif01tARjK2fH-a7DfY-m-lNhHt8', 4),
-  ('homestay-cuong-tu', '1jC_uyQ531C-H98BwSDwB2vEtr4cYqo8n', 0),
-  ('homestay-cuong-tu', '1JKArE_9VZd_34rCXS7r4YBs-W3T2OdHJ', 1),
-  ('homestay-cuong-tu', '1Fw032VIDv3-Z25ve2FUAhcLfncrECcxx', 2),
-  ('homestay-cuong-tu', '1nXLtV6tOK_nPeSAOZ3lM0jfgFTDA7qgw', 3),
-  ('homestay-cuong-tu', '1tqmvGW9r0j1H_IvhIG8Ho1WM1ADm790_', 4),
-  ('homestay-bao-lan', '15rf-cPK4nku-1pdwHgf225WuQVHZzOiG', 0),
-  ('homestay-bao-lan', '1qrdtH_rZXgRPvG-WTpvlN3jUPOkHjGAZ', 1),
-  ('homestay-bao-lan', '1311JCRLcm3f-YP2HWIkrA93qKP_3mjEU', 2),
-  ('homestay-bao-lan', '1_FakTmA84bqJ_W9t6AW-7MZlOvS9G51g', 3),
-  ('win-homestay', '1zYMr9S6xMzsPV4uy7JQUc3V6oYXKMFuQ', 0),
-  ('win-homestay', '1quFOSUoNHU-w7UhZHSZa6fIZSy6kZwi7', 1),
-  ('win-homestay', '1WJpu0gnM0cBstD1EGaUtbxsW-ivdXkky', 2),
-  ('win-homestay', '1WG9mGAtpaRCAi0QFXLdbrOTCHzvEJ7zP', 3),
-  ('pu-nhu-house', '19OzuU8-8fPqW04JABT1LR_WSkC8p8wT2', 0),
-  ('pu-nhu-house', '1kfMoXspypBHum7p8bSuithI8J0vOUXu-', 1),
-  ('pu-nhu-house', '1Xn691lCbK3DIK4HS7L8pDsHroVlHbkg-', 2),
-  ('pu-nhu-house', '1d8-h3f-bJPj_xcCFlCmtWXkOTTiQCSBF', 3),
-  ('pu-nhu-house', '1qdrliMepxRuDIwvGBx81NFTyLVEL0TRv', 4),
-  ('co-gai-thai-homestay', '1JUlARR5v0FC-FSdUWzoGHemy_2Luoyqh', 0),
-  ('co-gai-thai-homestay', '1S9_k2IKKLvyfAS40cH8AnlZcXj07rsFa', 1),
-  ('co-gai-thai-homestay', '1pW2SfloFWwYYQp1wfy-XVHGIAczrlMB6', 2),
-  ('co-gai-thai-homestay', '1gNYsuAzbGqyWIn91L0KgSZMeabHHsFEm', 3),
-  ('co-gai-thai-homestay', '1lsf-Y3Gu1dJOrrKT5si7UPHYW0KseTEB', 4),
-  ('moc-homestay', '1iVtsux0LQe7DXm6g15zsIUjZl0ZgoY1i', 0),
-  ('moc-homestay', '1acgQo4urm1shzGGA-BHaJoVW2GU5Q-Ik', 1),
-  ('moc-homestay', '1FPeKd-pnRkhmmjbYwyEvRUMeOzaZR_JF', 2),
-  ('moc-homestay', '1tAY6wLR0uyM9cKWdD5yp_lxGiYtJbSrQ', 3),
-  ('bungalow-xuan-giang', '1rVMvRLExU1gNYmKOINNjEDKKhdlQTkU3', 0),
-  ('bungalow-xuan-giang', '1Xo30KBXTyDQ8D6fe6qjWIygh7D1sMUFg', 1),
-  ('bungalow-xuan-giang', '1z9WwGO3rFjYB_kuYNRGLvckv5z-AcuB9', 2),
-  ('bungalow-xuan-giang', '1tb0mlwR_KdxmCuqcbU3hksEZ0-FQkHAL', 3),
-  ('bungalow-xuan-giang', '1OPGfcmHra1jfE5B65TAmBpGt1M-VIFlu', 4),
-  ('hotel-thuat-hoa', '11VqzSrYKxtdwIMV7Nif4jJcD6r0yH4SS', 0),
-  ('hotel-thuat-hoa', '1dZWzySZoyuB7kVsnh_JiMSY9rzHp2cU6', 1),
-  ('chelly-hotel', '1g7N5v5840ejum3gVWD7Nf1-MEHRIQS86', 0),
-  ('chelly-hotel', '1hGD7vBdDcIuvZ6aZwJHNIpF67QRKq86V', 1),
-  ('chelly-hotel', '1j1TYfo-MXfJK1eR-UhrHxpknuDYsPpaj', 2),
-  ('chelly-hotel', '1PxZ70yvQxIp_UIfTzFVbHamQCN6E8ZPM', 3),
-  ('chelly-hotel', '1indQGDvPBqf9qDEeacsu6GeM22IQWUur', 4),
-  ('hanh-phuc-creek-homestay', '1GAy6l3NGnltZ7-CSfaS1eNdCCHv_Zucm', 0),
-  ('hanh-phuc-creek-homestay', '11d0A71kmG_mOerclPcjXdwuxFaaII9iL', 1),
-  ('hanh-phuc-creek-homestay', '1kSLi5qfLt7wqb5-Sq2DiuO2qOxdc9c5q', 2),
-  ('hanh-phuc-creek-homestay', '1KddIAymEOWgTLY5QPavq20Yg0LhJwZKV', 3),
-  ('hanh-phuc-creek-homestay', '1WAI5P1EMuHYDzdWkI4s8T88m7ODUCiKI', 4),
-  ('hotel-nhat-phuong', '1CtQdMs8KLYcYe77wxoBlcxN8uYydgc6c', 0),
-  ('hotel-nhat-phuong', '16rZ6wDOBB0w-Md6IbV7rRucwI2sOzBai', 1),
-  ('hotel-nhat-phuong', '1YTJZLHT6qh4RPmBeZeE5JuJXJHBeMsQE', 2),
-  ('hotel-nhat-phuong', '1PaR0rrTQspD44r4Yf8iiugAO7ez9y7rP', 3),
-  ('hotel-nhat-phuong', '1tOEDUpt7cTPe-DFj5__5gYutvcloOCb4', 4)
-) AS v(slug, file_id, sort_order)
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/d90fff5ee41be4c3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672426/viettrek/homestays/homestay-anh-tuc/d90fff5ee41be4c3.jpg', 0),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/46fca0e93167dae8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672460/viettrek/homestays/homestay-anh-tuc/46fca0e93167dae8.jpg', 1),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/f1963ac1e63c8935', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672462/viettrek/homestays/homestay-anh-tuc/f1963ac1e63c8935.jpg', 2),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/2cb30e19237436d4', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672466/viettrek/homestays/homestay-anh-tuc/2cb30e19237436d4.jpg', 3),
+  ('homestay-anh-tuc', 'cloudinary:viettrek/homestays/homestay-anh-tuc/fb1a1ccce625a554', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672469/viettrek/homestays/homestay-anh-tuc/fb1a1ccce625a554.jpg', 4),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/e5c484591dd7d7b5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672471/viettrek/homestays/new-highland-hotel/e5c484591dd7d7b5.jpg', 0),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/c8b71c9f047d5571', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672475/viettrek/homestays/new-highland-hotel/c8b71c9f047d5571.jpg', 1),
+  ('new-highland-hotel', 'cloudinary:viettrek/homestays/new-highland-hotel/b18f4fdc5e758088', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672477/viettrek/homestays/new-highland-hotel/b18f4fdc5e758088.jpg', 2),
+  ('hoa-son-tra-hotel', 'cloudinary:viettrek/homestays/hoa-son-tra-hotel/c7752c45c9a1eba5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672481/viettrek/homestays/hoa-son-tra-hotel/c7752c45c9a1eba5.jpg', 0),
+  ('nha-nghi-duy-vu', 'cloudinary:viettrek/homestays/nha-nghi-duy-vu/d6e8e2a4da507785', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672484/viettrek/homestays/nha-nghi-duy-vu/d6e8e2a4da507785.jpg', 0),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/93160762ed6afe24', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672487/viettrek/homestays/homestay-hoa-thao/93160762ed6afe24.jpg', 0),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/1a3b65375cf79541', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672489/viettrek/homestays/homestay-hoa-thao/1a3b65375cf79541.jpg', 1),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/364b09472bfa523c', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672491/viettrek/homestays/homestay-hoa-thao/364b09472bfa523c.jpg', 2),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/3502224f9e290daf', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672494/viettrek/homestays/homestay-hoa-thao/3502224f9e290daf.jpg', 3),
+  ('homestay-hoa-thao', 'cloudinary:viettrek/homestays/homestay-hoa-thao/99f050ccac4f1a0c', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672496/viettrek/homestays/homestay-hoa-thao/99f050ccac4f1a0c.jpg', 4),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/b209fbffb2015134', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672499/viettrek/homestays/homestay-cuong-tu/b209fbffb2015134.jpg', 0),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/7cb278784069c5a3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672501/viettrek/homestays/homestay-cuong-tu/7cb278784069c5a3.jpg', 1),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/935d898f9bad7170', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672504/viettrek/homestays/homestay-cuong-tu/935d898f9bad7170.jpg', 2),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/f213210ea784c9aa', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672506/viettrek/homestays/homestay-cuong-tu/f213210ea784c9aa.jpg', 3),
+  ('homestay-cuong-tu', 'cloudinary:viettrek/homestays/homestay-cuong-tu/e73525a9b6d8a21f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672509/viettrek/homestays/homestay-cuong-tu/e73525a9b6d8a21f.jpg', 4),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/74083a7fc60f3f1a', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672511/viettrek/homestays/homestay-bao-lan/74083a7fc60f3f1a.jpg', 0),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/c7782b7caf1a8a46', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672513/viettrek/homestays/homestay-bao-lan/c7782b7caf1a8a46.jpg', 1),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/907d9a5542dd885b', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672516/viettrek/homestays/homestay-bao-lan/907d9a5542dd885b.jpg', 2),
+  ('homestay-bao-lan', 'cloudinary:viettrek/homestays/homestay-bao-lan/093ff8078aee4ddb', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672518/viettrek/homestays/homestay-bao-lan/093ff8078aee4ddb.jpg', 3),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/dca50ca9a4ff974e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672819/viettrek/homestays/win-homestay/dca50ca9a4ff974e.jpg', 0),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/cd1bb62f283b4e44', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672828/viettrek/homestays/win-homestay/cd1bb62f283b4e44.jpg', 1),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/8c8a661a2ffd15b6', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672838/viettrek/homestays/win-homestay/8c8a661a2ffd15b6.jpg', 2),
+  ('win-homestay', 'cloudinary:viettrek/homestays/win-homestay/0b0574c9d2efed9d', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672847/viettrek/homestays/win-homestay/0b0574c9d2efed9d.jpg', 3),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/dea9f9f9c66c3f6f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672554/viettrek/homestays/pu-nhu-house/dea9f9f9c66c3f6f.jpg', 0),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/b49760aea0ef39e2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672557/viettrek/homestays/pu-nhu-house/b49760aea0ef39e2.jpg', 1),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/f323df2a781f7ff5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672560/viettrek/homestays/pu-nhu-house/f323df2a781f7ff5.jpg', 2),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/805c8d9909f7a244', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672562/viettrek/homestays/pu-nhu-house/805c8d9909f7a244.jpg', 3),
+  ('pu-nhu-house', 'cloudinary:viettrek/homestays/pu-nhu-house/e9841d2951ac68ca', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672565/viettrek/homestays/pu-nhu-house/e9841d2951ac68ca.jpg', 4),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/ea675f2ac9bd5012', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672568/viettrek/homestays/co-gai-thai-homestay/ea675f2ac9bd5012.jpg', 0),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/929e992d93533558', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672571/viettrek/homestays/co-gai-thai-homestay/929e992d93533558.jpg', 1),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/ed7ab1856c1438ac', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672574/viettrek/homestays/co-gai-thai-homestay/ed7ab1856c1438ac.jpg', 2),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/2658abd0f5730146', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672577/viettrek/homestays/co-gai-thai-homestay/2658abd0f5730146.jpg', 3),
+  ('co-gai-thai-homestay', 'cloudinary:viettrek/homestays/co-gai-thai-homestay/3ae3d6c246d8fbb2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672580/viettrek/homestays/co-gai-thai-homestay/3ae3d6c246d8fbb2.jpg', 4),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/1bc6fa023bfc92e4', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672583/viettrek/homestays/moc-homestay/1bc6fa023bfc92e4.jpg', 0),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/139c17a38c1e919e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672586/viettrek/homestays/moc-homestay/139c17a38c1e919e.jpg', 1),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/0a3999d7f935fa8e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672588/viettrek/homestays/moc-homestay/0a3999d7f935fa8e.jpg', 2),
+  ('moc-homestay', 'cloudinary:viettrek/homestays/moc-homestay/c9c62db6954c4ee0', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672591/viettrek/homestays/moc-homestay/c9c62db6954c4ee0.jpg', 3),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/cfd2468425002454', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672594/viettrek/homestays/bungalow-xuan-giang/cfd2468425002454.jpg', 0),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/8c890f94f0f45597', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672596/viettrek/homestays/bungalow-xuan-giang/8c890f94f0f45597.jpg', 1),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/0f2740705e34d86f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672599/viettrek/homestays/bungalow-xuan-giang/0f2740705e34d86f.jpg', 2),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/9879e38504f6a2f2', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672601/viettrek/homestays/bungalow-xuan-giang/9879e38504f6a2f2.jpg', 3),
+  ('bungalow-xuan-giang', 'cloudinary:viettrek/homestays/bungalow-xuan-giang/bd985e5a77efaa45', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672604/viettrek/homestays/bungalow-xuan-giang/bd985e5a77efaa45.jpg', 4),
+  ('hotel-thuat-hoa', 'cloudinary:viettrek/homestays/hotel-thuat-hoa/6f0205c796dcce92', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672607/viettrek/homestays/hotel-thuat-hoa/6f0205c796dcce92.jpg', 0),
+  ('hotel-thuat-hoa', 'cloudinary:viettrek/homestays/hotel-thuat-hoa/59befb3953b006b3', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672610/viettrek/homestays/hotel-thuat-hoa/59befb3953b006b3.jpg', 1),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/c46173223df9c0e8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672856/viettrek/homestays/chelly-hotel/c46173223df9c0e8.jpg', 0),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/d66e187a6f29d18e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672861/viettrek/homestays/chelly-hotel/d66e187a6f29d18e.jpg', 1),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/6bb38a31747ccc88', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672870/viettrek/homestays/chelly-hotel/6bb38a31747ccc88.jpg', 2),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/4a3207f67af076f6', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672656/viettrek/homestays/chelly-hotel/4a3207f67af076f6.jpg', 3),
+  ('chelly-hotel', 'cloudinary:viettrek/homestays/chelly-hotel/d361006785ce93d5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672877/viettrek/homestays/chelly-hotel/d361006785ce93d5.jpg', 4),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/1c3180205e459d06', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672671/viettrek/homestays/hanh-phuc-creek-homestay/1c3180205e459d06.jpg', 0),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/7f6a5ad07a26439a', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672674/viettrek/homestays/hanh-phuc-creek-homestay/7f6a5ad07a26439a.jpg', 1),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/87e163c4a7c765e5', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672677/viettrek/homestays/hanh-phuc-creek-homestay/87e163c4a7c765e5.jpg', 2),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/a34ae709f1eb8047', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672680/viettrek/homestays/hanh-phuc-creek-homestay/a34ae709f1eb8047.jpg', 3),
+  ('hanh-phuc-creek-homestay', 'cloudinary:viettrek/homestays/hanh-phuc-creek-homestay/da308c7061fd5467', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672683/viettrek/homestays/hanh-phuc-creek-homestay/da308c7061fd5467.jpg', 4),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/25240e3f71fa85d0', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672884/viettrek/homestays/hotel-nhat-phuong/25240e3f71fa85d0.jpg', 0),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/a930e2edcb5ef75f', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672700/viettrek/homestays/hotel-nhat-phuong/a930e2edcb5ef75f.jpg', 1),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/d2754cc5086217c8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672892/viettrek/homestays/hotel-nhat-phuong/d2754cc5086217c8.jpg', 2),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/e7c865be67d0610e', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672899/viettrek/homestays/hotel-nhat-phuong/e7c865be67d0610e.jpg', 3),
+  ('hotel-nhat-phuong', 'cloudinary:viettrek/homestays/hotel-nhat-phuong/a15872a2324d52e8', 'https://res.cloudinary.com/rf7zlbah/image/upload/v1793672907/viettrek/homestays/hotel-nhat-phuong/a15872a2324d52e8.jpg', 4)
+) AS v(slug, storage_key, public_url, sort_order)
 JOIN place p ON p.slug = v.slug
-JOIN media_asset m ON m.storage_key = 'drive:' || v.file_id
+JOIN media_asset m ON m.storage_key = v.storage_key
 WHERE NOT EXISTS (
   SELECT 1 FROM place_media pm WHERE pm.place_id = p.id AND pm.media_id = m.id
 );
@@ -204,7 +168,7 @@ COMMIT;
 SELECT
   p.slug,
   p.name,
-  COUNT(pm.id) AS so_anh,
+  COUNT(pm.media_id) AS so_anh,
   SUM(CASE WHEN pm.role = 'COVER' THEN 1 ELSE 0 END) AS cover
 FROM place p
 LEFT JOIN place_media pm ON pm.place_id = p.id
