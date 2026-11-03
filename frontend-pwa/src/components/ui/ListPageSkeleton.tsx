@@ -23,7 +23,7 @@ export const LIST_SKELETON_SPECS = {
 /** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 16:10 + tên + địa điểm + giá, cùng bo góc / khoảng đệm với thẻ thật. */
 export function CompactCardSkeleton() {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/10 ring-1 ring-slate-200/80 shadow-xs aspect-[4/5] relative p-3.5 sm:p-4 justify-between">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/10 ring-1 ring-slate-200/80 shadow-xs aspect-square relative p-3.5 sm:p-4 justify-between">
       <div className="flex justify-between items-center">
         <Skeleton className={`${bar} h-5 w-20 rounded-full`} />
         <Skeleton className={`${bar} h-5 w-16 rounded-full`} />

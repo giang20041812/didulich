@@ -14,6 +14,7 @@ const GoogleSignupDialog = lazy(() => import("@/components/auth/GoogleSignupDial
 import NearMePanel from "@/components/home/NearMePanel"
 import NearMeToggle from "@/components/home/NearMeToggle"
 import TimelySuggestion from "@/components/home/TimelySuggestion"
+import HomeAiItinerarySection from "@/components/home/HomeAiItinerarySection"
 import { SakuraBlossomIcon } from "@/components/ui/SakuraBlossomIcon"
 import Reveal from "@/components/ui/Reveal"
 import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
@@ -81,9 +82,9 @@ const CARD =
 const CARD_GREEN = `${CARD} ring-emerald-800/25 hover:ring-emerald-600/50`;
 /** Thẻ điểm đến / đặc sản: ảnh phủ kín cả thẻ, chữ nằm đè lên chân ảnh trên một lớp glow xanh (CARD_GLOW) — không còn phần nền xanh riêng. */
 const CARD_DARK =
-  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]';
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-black/10 shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-xl';
 /** Lớp glow xanh tan dần từ chân thẻ lên ảnh, nằm DƯỚI chữ (chữ ở lớp z-10 phía trên). */
-const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-gradient-to-t from-[#0b6a53]/95 via-[#139274]/55 via-50% to-transparent';
+const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-black/85 via-black/40 via-45% to-transparent';
 /** Ảnh phủ kín thẻ. */
 const CARD_MEDIA = 'absolute inset-0 overflow-hidden bg-slate-100';
 const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]';
@@ -193,7 +194,7 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
         )}
         {/* Hiện sau ~3 giây như một nét viết tiếp; giữ chỗ ngay từ đầu nên không đẩy bố cục */}
         <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,3.4vw,2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
-          đi khắp mọi nơi
+          đi như người bản địa
         </p>
       </div>
     </div>
@@ -486,7 +487,7 @@ export default function HomePage() {
         <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-clip">
           <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-12">
             <HeroTitle className="flex" />
-            <p className="hero-rise hidden md:block [animation-delay:260ms] max-w-[640px] break-words [overflow-wrap:anywhere] text-lg sm:text-xl md:text-[22px] lg:text-[26px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
+            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[20px] lg:text-[24px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
               Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn
             </p>
           </div>
@@ -561,6 +562,9 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      {/* 3b. Gợi ý lịch trình tự động với AI Đi Du Lịch */}
+      <HomeAiItinerarySection />
 
       {/* 4. Homestay Bản Địa & Chốn Nghỉ Bình Yên */}
       <section className={`${SHEET} home-glow-sky`}>
