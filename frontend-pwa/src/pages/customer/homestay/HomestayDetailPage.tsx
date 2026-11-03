@@ -107,8 +107,6 @@ function descriptionPoints(text: string | null | undefined): string[] | null {
 
 /** Số ý mô tả hiện trước khi bấm "Xem thêm". */
 const DESCRIPTION_POINTS_SHOWN = 6;
-/** Số tiện nghi hiện trước khi bấm "Xem tất cả" (3 hàng trên máy tính). */
-const AMENITIES_SHOWN = 9;
 
 type SuggestTab = 'trip' | 'nearby';
 /** Hai "bảng nhỏ" của khung "Gợi ý cho chuyến đi". */
@@ -183,7 +181,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [exploreAvailable, setExploreAvailable] = useState(false);
   const [suggestTab, setSuggestTab] = useState<SuggestTab>('trip');
   const [copiedLink, setCopiedLink] = useState(false);
@@ -595,6 +592,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     ? homestay.amenityItems.filter((item) => item.value !== 'NO').map((item) => item.name)
     : homestay.amenities ?? [];
   const otherAmenities = profile?.otherAmenities?.trim() || null;
+  const nearbyAttractions = homestay.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
 
   // Tổng quan gọn: mô tả thành gạch đầu dòng + các thông tin chính mỗi thứ một dòng có biểu tượng.
   const descPoints = descriptionPoints(homestay.description);
@@ -691,8 +689,8 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-1">
                 {[
                   { id: 'booking', label: 'Đặt phòng' },
-                  { id: 'about', label: 'Tổng quan' },
-                  { id: 'amenities', label: 'Tiện nghi' },
+                  { id: 'about', label: 'Giới thiệu' },
+                  { id: 'amenities', label: 'Tiện ích' },
                   ...(activeServices.length > 0 ? [{ id: 'services', label: 'Dịch vụ' }] : []),
                   ...(showSuggest ? [{ id: 'suggest', label: 'Gợi ý' }] : []),
                   { id: 'reviews', label: 'Đánh giá' },
@@ -827,13 +825,23 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 <span className="text-slate-300" aria-hidden>·</span>
                 <button
                   type="button"
-                  onClick={() => scrollToSection('about')}
+                  onClick={() => scrollToSection('amenities')}
                   className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-200/80 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
                   <span>Chi tiết tiện nghi & dịch vụ</span>
                 </button>
               </div>
+
+              {nearbyAttractions && (
+                <p className="flex items-start gap-1.5 text-xs text-slate-500">
+                  <Navigation className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden />
+                  <span>
+                    <span className="font-medium text-slate-600">Điểm vui chơi: </span>
+                    {nearbyAttractions}
+                  </span>
+                </p>
+              )}
             </div>
 
             {/* Actions: Chia sẻ & Yêu thích */}
@@ -886,6 +894,39 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
         {/* ── 2. THƯ VIỆN ẢNH (VỚI PARALLAX NHẸ TRÊN DESKTOP) ── */}
         <HomestayGallery images={authenticImages} name={homestay.name} onOpen={setLightboxIndex} />
 
+        {/* ── TIỆN ÍCH (ngay dưới ảnh, trước grid 2 cột) ── */}
+        {(amenityNames.length > 0 || otherAmenities) && (
+          <section
+            id="amenities"
+            className="mt-6 scroll-mt-24 rounded-2xl border border-slate-100 bg-slate-50/60 px-5 py-4"
+          >
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+              <h2 className="text-base font-bold tracking-tight text-slate-900">Tiện ích</h2>
+              <span className="text-xs font-medium text-slate-400">
+                {amenityNames.length + 1} tiện ích
+              </span>
+            </div>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 lg:grid-cols-4">
+              <li className="flex items-start gap-2 text-sm text-slate-700">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                <span>Đầy đủ tiện nghi vệ sinh khép kín</span>
+              </li>
+              {amenityNames.map((name) => (
+                <li key={name} className="flex items-start gap-2 text-sm text-slate-700">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                  <span>{name}</span>
+                </li>
+              ))}
+            </ul>
+            {otherAmenities && (
+              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-600">
+                <span className="font-semibold text-slate-700">Tiện ích khác: </span>
+                {otherAmenities}
+              </p>
+            )}
+          </section>
+        )}
+
         {/* ── 3. KHUNG NỘI DUNG CHÍNH (2 CỘT TRÊN MÁY TÍNH) ── */}
         <div className="mt-8 lg:grid lg:grid-cols-[1fr_360px] lg:gap-10">
           {/* CỘT TRÁI: Nội dung chi tiết */}
@@ -918,7 +959,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
                 <button
                   type="button"
-                  onClick={() => scrollToSection('about')}
+                  onClick={() => scrollToSection('amenities')}
                   className="self-start sm:self-center inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/70 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-100 hover:border-emerald-600/50 transition cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
@@ -992,7 +1033,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </div>
             </motion.section>
 
-            {/* ── 2. TỔNG QUAN CHỖ NGHỈ ── */}
+            {/* ── 2. GIỚI THIỆU CHỖ NGHỈ ── */}
             <motion.section
               id="about"
               initial="hidden"
@@ -1001,7 +1042,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               variants={sectionVariants}
               className="scroll-mt-28 space-y-4 pt-8 border-t border-slate-200"
             >
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Tổng quan chỗ nghỉ</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Giới thiệu chỗ nghỉ</h2>
 
               {descPoints ? (
                 <div>
@@ -1082,53 +1123,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </motion.div>
             )}
 
-            {/* Tiện nghi — danh sách đánh dấu gọn, không khung từng ô */}
-            {(amenityNames.length > 0 || otherAmenities) && (
-              <motion.section
-                id="amenities"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: '-40px' }}
-                variants={sectionVariants}
-                className="scroll-mt-28 space-y-3 pt-6 border-t border-slate-100"
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="text-xl font-bold tracking-tight text-slate-900">Tiện nghi sẵn có</h2>
-                  {amenityNames.length > 0 && (
-                    <span className="text-xs font-medium text-slate-400">{amenityNames.length} tiện nghi</span>
-                  )}
-                </div>
-
-                {amenityNames.length > 0 && (
-                  <ul className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-                    {(showAllAmenities ? amenityNames : amenityNames.slice(0, AMENITIES_SHOWN)).map((name) => (
-                      <li key={name} className="flex items-start gap-2 text-sm text-slate-700">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
-                        <span>{name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {/* "Tiện ích khác" chủ nhà tự gõ khi tạo homestay */}
-                {otherAmenities && (
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">
-                    <span className="font-semibold text-slate-700">Tiện ích khác: </span>
-                    {otherAmenities}
-                  </p>
-                )}
-
-                {amenityNames.length > AMENITIES_SHOWN && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllAmenities((open) => !open)}
-                    className="text-sm font-semibold text-[var(--color-primary)] hover:underline cursor-pointer"
-                  >
-                    {showAllAmenities ? 'Thu gọn' : `Xem tất cả ${amenityNames.length} tiện nghi`}
-                  </button>
-                )}
-              </motion.section>
-            )}
 
             {/* Dịch vụ tại chỗ — một bảng giá gọn */}
             {activeServices.length > 0 && (

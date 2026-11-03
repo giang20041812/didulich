@@ -8,12 +8,12 @@ Ngày 17/10/2026 · chưa commit.
   - Toàn bộ ảnh trong cơ sở dữ liệu là ảnh ngẫu nhiên `picsum.photos`, nên "Đèo Khau Phạ" có thể hiện ảnh bờ biển hay thành phố.
   - Tệp `lib/placeImages.ts` thay ảnh theo tên địa điểm bằng ảnh Unsplash chung chung nhưng ghi là "100% ảnh thật". Ví dụ: Rừng trúc hiện ảnh bãi biển nhiệt đới, Tà Xùa bị gán vào Sống Lưng Khủng Long.
   - Các trang danh sách và trang đăng nhập dùng ảnh Unsplash không phải Tây Bắc.
-- **Bây giờ:** 36 ảnh thật lấy từ Wikimedia Commons và Flickr, đều theo giấy phép cho phép dùng: CC0, phạm vi công cộng, CC BY, CC BY-SA. Mỗi ảnh tôi đã **xem tận mắt** để chắc chụp đúng nơi hoặc đúng món, và ghi tác giả, giấy phép, đường dẫn gốc.
+- **Bây giờ:** 36 ảnh thật lấy từ Wikimedia Commons và Flickr, đều theo giấy phép cho phép dùng: CC0, phạm vi công cộng, CC BY, CC BY-SA. Mỗi ảnh tôi đã **xem tận mắt** để chắc chụp đúng nơi hoặc đúng món, và ghi t    ác giả, giấy phép, đường dẫn gốc.
 - **Ảnh không còn bị thay theo tên.**
   - Địa điểm nào chưa có ảnh đúng thì hiện ô trống, không mượn ảnh nơi khác. Hiện có 2 nơi như vậy: *Rừng trúc Mồ Dề* và *Đồi Kim Nọi*.
   - Ảnh "khu vực" hoặc "minh họa" đều ghi rõ trong chú thích.
 - **Trang chủ** (theo yêu cầu bổ sung: *giữ ảnh cũ*, chỉ thêm chuyển động cho sống động):
-  - Ảnh nền vẫn là ảnh ruộng bậc thang cũ. Tôi dựng lại từ bản gốc lớn hơn (`public/images/hero-home.jpg`, 1536 px) để nét hơn bản 1440 px trước đây.
+  - Ảnh nền vẫn là ảnh    ruộng bậc thang cũ. Tôi dựng lại từ bản gốc lớn hơn (`public/images/hero-home.jpg`, 1536 px) để nét hơn bản 1440 px trước đây.
   - Chuyển động bám đúng các chi tiết trong ảnh:
     - cả khung ảnh trôi chậm;
     - mặt trời sáng dịu theo nhịp thở, tia nắng xoay rất chậm;
