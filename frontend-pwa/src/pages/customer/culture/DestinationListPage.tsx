@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { CardSkeleton } from '@/components/ui/CardSkeleton';
 import Reveal from '@/components/ui/Reveal';
 import HomeMotifs from '@/components/home/HomeMotifs';
-import CompactPlaceCard, { CompactCardBadge } from '@/components/ui/CompactPlaceCard';
+import CompactPlaceCard, { CompactCardBadge, GlassBadge } from '@/components/ui/CompactPlaceCard';
 import { COMPACT_GRID_WITH_SIDEBAR, formatVnd } from '@/lib/compactCard';
 import { SakuraBlossomIcon } from '@/components/ui/SakuraBlossomIcon';
 import {
@@ -77,7 +77,7 @@ export default function DestinationListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  const ITEMS_PER_PAGE = 8;
+  const ITEMS_PER_PAGE = 9;
 
   const handleFilterChange = (updates: Partial<DestinationFilterParams>) => {
     setFilters(prev => {
@@ -464,19 +464,27 @@ export default function DestinationListPage() {
                   return (
                     <Reveal key={dest.id} className="h-full" offset={28}>
                     <CompactPlaceCard
-                      frame="mountain"
-                      compact
                       to={`/destinations/${dest.id}`}
                       name={dest.name}
                       imageUrl={dest.coverImageUrl}
                       location={dest.address || dest.district || 'Mù Cang Chải, Yên Bái'}
+                      description={dest.description}
                       price={dest.ticketPrice > 0 ? formatVnd(dest.ticketPrice) : 'Miễn phí'}
                       priceUnit={dest.ticketPrice > 0 ? 'lượt' : null}
+                      ctaText="Khám phá ngay"
                       badge={
                         <CompactCardBadge className={season.yearRound ? 'bg-gradient-to-r from-teal-500 to-emerald-600' : 'bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500'}>
                           <SakuraBlossomIcon className="h-3 w-3 shrink-0" />
                           <span className="truncate">{season.text}</span>
                         </CompactCardBadge>
+                      }
+                      secondaryBadge={
+                        dest.scenicType ? (
+                          <GlassBadge>
+                            <Mountain className="w-2.5 h-2.5 text-emerald-300 shrink-0" />
+                            <span className="truncate max-w-[90px]">{(dest.scenicType.split('&')[0] || '').trim()}</span>
+                          </GlassBadge>
+                        ) : undefined
                       }
                     />
                     </Reveal>
