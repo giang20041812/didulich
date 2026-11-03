@@ -601,6 +601,33 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     [homestay],
   );
 
+  const nearbyAttractions = homestay?.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
+  const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
+  const nearestAttraction = parsedNearbyList[0] as NearbyPointItem | undefined;
+  const otherAttractions = useMemo(() => parsedNearbyList.slice(1), [parsedNearbyList]);
+  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
+  const nearbyDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!nearbyDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (nearbyDropdownRef.current && !nearbyDropdownRef.current.contains(e.target as Node)) {
+        setNearbyDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNearbyDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [nearbyDropdownOpen]);
+
   if (loading) {
     return <HomestayDetailSkeleton />;
   }
@@ -638,32 +665,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     ? homestay.amenityItems.filter((item) => item.value !== 'NO').map((item) => item.name)
     : homestay.amenities ?? [];
   const otherAmenities = profile?.otherAmenities?.trim() || null;
-  const nearbyAttractions = homestay.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
-  const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
-  const nearestAttraction = parsedNearbyList[0] as NearbyPointItem | undefined;
-  const otherAttractions = useMemo(() => parsedNearbyList.slice(1), [parsedNearbyList]);
-  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
-  const nearbyDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!nearbyDropdownOpen) return;
-    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
-      if (nearbyDropdownRef.current && !nearbyDropdownRef.current.contains(e.target as Node)) {
-        setNearbyDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setNearbyDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('touchstart', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('touchstart', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [nearbyDropdownOpen]);
 
   // Tổng quan gọn: mô tả thành gạch đầu dòng + các thông tin chính mỗi thứ một dòng có biểu tượng.
   const descPoints = descriptionPoints(homestay.description);
