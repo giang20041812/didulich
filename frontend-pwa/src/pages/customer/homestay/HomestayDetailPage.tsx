@@ -87,6 +87,51 @@ const BOOKED_DATES_REFRESH_GAP_MS = 3000;
  * khoảng trắng — "TP. Yên Bái", "1.200 m" giữ nguyên); câu kiểu liệt kê ngắn ("nhà gỗ…, view…, có bữa tối…") tách tiếp ở
  * ", " ("1,5 km" giữ nguyên). Văn xuôi dài giữ nguyên câu. Dưới 2 ý thì trả null để hiện đoạn văn như cũ.
  */
+interface NearbyPointItem {
+  name: string;
+  distanceKm: number;
+  distanceText: string;
+}
+
+/**
+ * Tách và sắp xếp điểm vui chơi / danh thắng lân cận theo thứ tự khoảng cách tăng dần (km ngắn đến dài).
+ */
+function parseAndSortNearbyAttractions(content: string | null | undefined): NearbyPointItem[] {
+  if (!content?.trim()) return [];
+  // Tách theo dấu chấm giữa (·), dấu phẩy, chấm phẩy, hoặc xuống dòng
+  const parts = content.split(/[·,\n;]+/).map((s) => s.trim()).filter(Boolean);
+
+  const items: NearbyPointItem[] = parts.map((part) => {
+    // Trích xuất số km hoặc m: vd "2km", "2.5 km", "500m", "10 km"
+    const match = part.match(/(\d+(?:[.,]\d+)?)\s*(km|m)\b/i);
+    let distanceKm = 999999;
+    let distanceText = '';
+    let name = part;
+
+    if (match && match[1] && match[2]) {
+      const val = parseFloat(match[1].replace(',', '.'));
+      const unit = match[2].toLowerCase();
+      distanceKm = unit === 'm' ? val / 1000 : val;
+      distanceText = `${val} ${unit}`;
+      // Lấy tên điểm vui chơi (bỏ phần khoảng cách và dấu gạch đầu dòng cũ nếu có)
+      name = part
+        .replace(match[0], '')
+        .replace(/^[-\s:–—•(]+|[-\s:–—•)]+$/g, '')
+        .trim();
+      if (!name) name = part;
+    }
+
+    return {
+      name,
+      distanceKm,
+      distanceText: distanceText || match?.[0] || '',
+    };
+  });
+
+  // Ưu tiên từ số km ngắn đến dài
+  return items.sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
 function descriptionPoints(text: string | null | undefined): string[] | null {
   if (!text?.trim()) return null;
   const sentences = text
@@ -593,6 +638,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     : homestay.amenities ?? [];
   const otherAmenities = profile?.otherAmenities?.trim() || null;
   const nearbyAttractions = homestay.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
+  const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
 
   // Tổng quan gọn: mô tả thành gạch đầu dòng + các thông tin chính mỗi thứ một dòng có biểu tượng.
   const descPoints = descriptionPoints(homestay.description);
@@ -833,7 +879,27 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 </button>
               </div>
 
-              {nearbyAttractions && (
+              {parsedNearbyList.length > 0 ? (
+                <div className="pt-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-700 mb-2">
+                    <Navigation className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden />
+                    <span>Khoảng cách đến các điểm vui chơi:</span>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-slate-600 pl-1">
+                    {parsedNearbyList.map((item, idx) => (
+                      <li key={idx} className="flex items-baseline gap-1.5 text-slate-700">
+                        <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                        <span className="font-medium text-slate-800">{item.name}{item.distanceText ? ':' : ''}</span>
+                        {item.distanceText && (
+                          <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs">
+                            {item.distanceText}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : nearbyAttractions ? (
                 <p className="flex items-start gap-1.5 text-xs text-slate-500">
                   <Navigation className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden />
                   <span>
@@ -841,7 +907,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                     {nearbyAttractions}
                   </span>
                 </p>
-              )}
+              ) : null}
             </div>
 
             {/* Actions: Chia sẻ & Yêu thích */}

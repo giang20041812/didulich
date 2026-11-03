@@ -1,5 +1,6 @@
 -- Khoảng cách đến điểm vui chơi nổi bật (từ sheet col "Khoảng cách đến điểm vui chơi nổi bật")
 -- Run AFTER migration 017-highlight-nearby.sql
+-- Sắp xếp ưu tiên khoảng cách từ km ngắn đến dài
 
 DELETE FROM place_highlight
 WHERE type = 'NEARBY'
@@ -15,36 +16,36 @@ WHERE type = 'NEARBY'
   ));
 
 WITH nearby_data (slug, content) AS (VALUES
-  ('homestay-anh-tuc',         'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('new-highland-hotel',       'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('homestay-mua-vang',        'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('trai-ban-homestay',        'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('hoa-son-tra-hotel',        'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('nha-nghi-duy-vu',          'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('baan-mali-homestay',       'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('homestay-hoa-thao',        'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('homestay-cuong-tu',        'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('homestay-bao-lan',         'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('win-homestay',             'Móng Ngựa 4km · Mâm Xôi 10km · Rừng Trúc 4km · Kim Nọi 7km · Háng Đăng Dê 4km · Sống Lưng KL 8km'),
-  ('pu-nhu-house',             'Móng Ngựa 12km · Mâm Xôi 1km · Rừng Trúc 4km · Kim Nọi 17km · Háng Đăng Dê 13km · Sống Lưng KL 8km'),
-  ('co-gai-thai-homestay',     'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('moc-homestay',             'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('bungalow-xuan-giang',      'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('hotel-thuat-hoa',          'Móng Ngựa 3km · Mâm Xôi 13km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('chelly-hotel',             'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('hanh-phuc-creek-homestay', 'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('doi-doi-gio',              'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('mcc-lu-tre',               'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('mai-linh-hotel',           'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('sky-motel',                'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('nang-hotel',               'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('nha-nghi-ngu',             'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('chiba-ecolodge',           'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('ha-chau-2-homestay',       'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('homestay-hien-quang',      'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('chai-eco-house',           'Móng Ngựa 3km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km'),
-  ('hotel-moon-2',             'Móng Ngựa 4km · Mâm Xôi 14km · Rừng Trúc 6km · Kim Nọi 6km · Háng Đăng Dê 3km · Sống Lưng KL 10km'),
-  ('hotel-nhat-phuong',        'Móng Ngựa 4km · Mâm Xôi 12km · Rừng Trúc 5km · Kim Nọi 5km · Háng Đăng Dê 2km · Sống Lưng KL 10km')
+  ('homestay-anh-tuc',         'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('new-highland-hotel',       'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('homestay-mua-vang',        'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('trai-ban-homestay',        'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('hoa-son-tra-hotel',        'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('nha-nghi-duy-vu',          'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('baan-mali-homestay',       'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('homestay-hoa-thao',        'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('homestay-cuong-tu',        'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('homestay-bao-lan',         'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('win-homestay',             'Háng Đăng Dê 4km · Móng Ngựa 4km · Rừng Trúc 4km · Kim Nọi 7km · Sống Lưng KL 8km · Mâm Xôi 10km'),
+  ('pu-nhu-house',             'Mâm Xôi 1km · Rừng Trúc 4km · Sống Lưng KL 8km · Móng Ngựa 12km · Háng Đăng Dê 13km · Kim Nọi 17km'),
+  ('co-gai-thai-homestay',     'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('moc-homestay',             'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('bungalow-xuan-giang',      'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('hotel-thuat-hoa',          'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 13km'),
+  ('chelly-hotel',             'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('hanh-phuc-creek-homestay', 'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('doi-doi-gio',              'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('mcc-lu-tre',               'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('mai-linh-hotel',           'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('sky-motel',                'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('nang-hotel',               'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('nha-nghi-ngu',             'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('chiba-ecolodge',           'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('ha-chau-2-homestay',       'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('homestay-hien-quang',      'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('chai-eco-house',           'Háng Đăng Dê 2km · Móng Ngựa 3km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km'),
+  ('hotel-moon-2',             'Háng Đăng Dê 3km · Móng Ngựa 4km · Rừng Trúc 6km · Kim Nọi 6km · Sống Lưng KL 10km · Mâm Xôi 14km'),
+  ('hotel-nhat-phuong',        'Háng Đăng Dê 2km · Móng Ngựa 4km · Rừng Trúc 5km · Kim Nọi 5km · Sống Lưng KL 10km · Mâm Xôi 12km')
 )
 INSERT INTO place_highlight (place_id, type, content, is_public, sort_order)
 SELECT p.id, 'NEARBY', d.content, TRUE, 99
