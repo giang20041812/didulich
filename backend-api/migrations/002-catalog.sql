@@ -1,4 +1,4 @@
---liquibase formatted sql
+    --liquibase formatted sql
 
 --changeset viettrek:v2-002-region
 --comment: Khu vực hành chính dạng cây: tỉnh (1) -> huyện (2) -> xã (3). path = tên các cấp nối bằng '/'.
