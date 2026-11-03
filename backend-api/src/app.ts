@@ -84,6 +84,9 @@ function catalogChangeHook(req: Request, res: Response, next: NextFunction): voi
   res.on('finish', () => {
     if (res.statusCode >= 400) return;
     if (req.path.includes('/notifications') || req.path.includes('/push')) return;
+    // Xóa cache NGAY (đồng bộ) để request GET kế tiếp không đọc phải bản cũ trong lúc chờ ghi phiên bản vào DB;
+    // lần xóa thứ hai sau bump đảm bảo mục nào vừa nạp lại trong khoảng chờ cũng bị bỏ.
+    invalidateAllCaches();
     void bumpCatalogVersion()
       .then(() => invalidateAllCaches())
       .catch((err: Error) => logger.warn('[CatalogCache] Không làm mới được cache danh mục', { error: err.message }));
