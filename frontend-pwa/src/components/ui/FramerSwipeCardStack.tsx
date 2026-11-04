@@ -14,11 +14,13 @@ interface FramerSwipeCardStackProps {
   label?: string;
   /** Điện thoại: bề rộng mỗi cột thẻ (mỗi cột xếp 2 thẻ chồng dọc). */
   mobileColumnClassName?: string;
+  /** Điện thoại: xếp thẻ thành lưới cuộn dọc (vd "grid grid-cols-2 gap-3") thay vì cuộn ngang. */
+  mobileVerticalClassName?: string;
 }
 
 /**
- * Máy tính / tablet: lưới thẻ (hoặc từng trang perPage thẻ). Điện thoại: không băng chuyền — mỗi cột 2 thẻ, cuộn ngang
- * để xem các cột tiếp theo.
+ * Máy tính / tablet: lưới thẻ (hoặc từng trang perPage thẻ). Điện thoại: không băng chuyền, không tự cuộn — mặc định mỗi
+ * cột 2 thẻ, vuốt ngang để xem các cột tiếp theo; có mobileVerticalClassName thì xếp lưới và cuộn dọc theo trang.
  */
 export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
   children,
@@ -27,8 +29,11 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
   perPage,
   label = 'Danh sách thẻ',
   mobileColumnClassName = 'auto-cols-[44%]',
+  mobileVerticalClassName,
 }) => {
-  if (children.length === 0) return null;
+  const total = children.length;
+
+  if (total === 0) return null;
 
   return (
     <div className={`w-full ${className}`}>
@@ -42,7 +47,9 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
         </div>
       )}
       <div
-        className={`md:hidden grid grid-flow-col grid-rows-2 ${mobileColumnClassName} gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+        className={mobileVerticalClassName
+          ? `md:hidden ${mobileVerticalClassName}`
+          : `md:hidden grid grid-flow-col grid-rows-2 ${mobileColumnClassName} gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         role="region"
         aria-label={label}
       >

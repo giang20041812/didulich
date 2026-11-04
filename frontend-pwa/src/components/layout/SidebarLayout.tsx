@@ -6,7 +6,6 @@ import Footer from './Footer';
 import BackToTop from '@/components/ui/BackToTop';
 import OfflineIndicator from '@/components/pwa/OfflineIndicator';
 import HeroPwaDownloadBanner from '@/components/pwa/HeroPwaDownloadBanner';
-import WelcomeIntro from '@/components/ui/WelcomeIntro';
 import { useProviderTypeModalOpen } from '@/lib/providerTypeModal';
 import { useNearbySuggestions } from '@/lib/nearbyPrefs';
 import { usePhoneMissing } from '@/lib/phoneMissing';
@@ -94,9 +93,6 @@ export default function SidebarLayout() {
       {phoneMissing && <Suspense fallback={null}><PhoneRequiredPrompt /></Suspense>}
       {/* Gợi ý quanh đây (khách tự bật trong menu ☰) */}
       {nearbyOn && <Suspense fallback={null}><NearbySuggestionWatcher /></Suspense>}
-
-      {/* Màn chào thương hiệu khi tải trang (position: fixed, phủ trên cùng) */}
-      <WelcomeIntro />
     </div>
   );
 }

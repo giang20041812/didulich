@@ -63,7 +63,7 @@ export default function PlaceShowcaseSections({ showcase, error, name, showStayP
                     aria-label={`Xem ảnh ${i + 1} của ${images.length}${img.caption ? `: ${img.caption}` : ''}`}
                     className="group relative block aspect-[4/3] w-full cursor-zoom-in overflow-hidden rounded-md border border-border bg-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                   >
-                    <img src={img.url} alt={img.caption ?? `${name} ${i + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    <img src={img.url} alt={img.caption ?? `${name} ${i + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-300" />
                     {img.cover && (
                       <span className="absolute left-1 top-1 rounded-sm bg-ink-deep/70 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-white">Ảnh bìa</span>
                     )}

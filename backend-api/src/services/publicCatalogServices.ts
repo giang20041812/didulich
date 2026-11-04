@@ -185,11 +185,19 @@ export function festivalListCard(f: FestivalDto): FestivalDto {
  * video TikTok: điểm đến lấy từ liên hệ TIKTOK, món ăn từ dish.video_url.
  */
 export async function getHomeData() {
-  const section = async (kind: 'ATTRACTION' | 'HOMESTAY', size: number) =>
-    (await publicPlaces.getPlaces({ kind, page: 0, size })).content;
-  const attractions = await section('ATTRACTION', 16);
-  const homestays = await section('HOMESTAY', 16);
-  const specialties = await listDishes(16);
+  // Không giới hạn số thẻ: lấy lần lượt từng trang (tối đa 100/trang) cho tới khi hết.
+  const section = async (kind: 'ATTRACTION' | 'HOMESTAY') => {
+    const all: Awaited<ReturnType<typeof publicPlaces.getPlaces>>['content'] = [];
+    for (let page = 0; page < 50; page++) {
+      const { content } = await publicPlaces.getPlaces({ kind, page, size: 100 });
+      all.push(...content);
+      if (content.length < 100) break;
+    }
+    return all;
+  };
+  const attractions = await section('ATTRACTION');
+  const homestays = await section('HOMESTAY');
+  const specialties = await listDishes(0);
 
   // Gắn link TikTok đầu tiên (theo thứ tự liên hệ) của mỗi thẻ; thẻ không có link giữ null.
   if (attractions.length > 0) {

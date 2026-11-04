@@ -1,13 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { MOTIFS, type MotifName } from '@/components/home/motifShapes';
-import DongSonDrum from '@/components/home/DongSonDrum';
 
 /**
  * Họa tiết minh họa nền cho từng phần trang chủ, vẽ nét mảnh, bo tròn và mờ ở hai mép: mỗi phần một bộ riêng theo nội dung
  * (điểm đến → núi / ruộng bậc thang, homestay → nhà sàn / đèn lồng / lửa trại, đặc sản → bát phở / bông lúa / cá nướng, hành
  * trình → la bàn / đường đi / ba lô). Hình nằm trong motifShapes.tsx; trong cùng một phần / trang không có hai hình trùng nhau. Khi cuộn tới, từng nét được "vẽ" dần ra, lần lượt từ nét này sang nét khác (xem .motif trong globals.css);
- * vẽ xong thì đứng yên nên không tốn công vẽ lại khi cuộn. Riêng phần điểm đến có thêm một mặt trống đồng Đông Sơn lớn ở mép phải, thay cho cụm
- * ruộng bậc thang (DongSonDrum).
+ * vẽ xong thì đứng yên nên không tốn công vẽ lại khi cuộn.
  *
  * Các trang danh sách (homestay, điểm đến, ẩm thực...) dùng lại cùng lớp này làm nền dưới hero (`className` đặt vùng phủ).
  *
@@ -21,18 +19,16 @@ export type MotifVariant =
 
 type Placement = { motif: MotifName; side: 'left' | 'right'; at: string; mirror?: boolean };
 
-/** Trống đồng lớn dọc mép `side` (tâm ở `at`, tính theo chiều cao phần), lệch phần lớn ra ngoài mép. */
-type DrumPlacement = { side: 'left' | 'right'; at: string };
-
 /** Họa tiết so le hai mép cho mỗi phần; hình vẽ neo vào mép trái (ruộng, dây đèn, đường đi) được lật khi nằm bên phải. */
-const LAYOUT: Record<MotifVariant, { tone: string; drum?: DrumPlacement; items: Placement[] }> = {
+const LAYOUT: Record<MotifVariant, { tone: string; items: Placement[] }> = {
   // ---- Trang chủ ----
   destinations: {
     tone: '#0a7d64',
-    drum: { side: 'right', at: 'top-[36%]' },
     items: [
       { motif: 'mountains', side: 'left', at: 'top-[3%]' },
+      { motif: 'cloudSea', side: 'right', at: 'top-[28%]' },
       { motif: 'terraces', side: 'left', at: 'top-[60%]' },
+      { motif: 'pass', side: 'right', at: 'bottom-[2%]' },
     ],
   },
   homestay: {
@@ -182,16 +178,11 @@ function Motif({ children, className, together, sectionDrawn, order }: { childre
 }
 
 export default function HomeMotifs({ variant, className = 'inset-0' }: { variant: MotifVariant; className?: string }) {
-  const { tone, drum, items } = LAYOUT[variant];
+  const { tone, items } = LAYOUT[variant];
 
-  // Mỗi phần cao theo nội dung (không còn một phần = một màn hình), nên trống và từng họa tiết tự vẽ khi lướt tới nó.
+  // Mỗi phần cao theo nội dung (không còn một phần = một màn hình), nên từng họa tiết tự vẽ khi lướt tới nó.
   return (
     <div aria-hidden className={`pointer-events-none absolute -z-10 overflow-hidden ${className}`} style={{ color: tone }}>
-      {drum && (
-        <DongSonDrum
-          className={`h-[240px] w-[240px] md:h-[450px] md:w-[450px] -translate-y-1/2 ${drum.at} ${drum.side === 'left' ? 'left-0 -translate-x-[42%]' : 'right-0 translate-x-[42%]'}`}
-        />
-      )}
       {items.map(({ motif, side, at, mirror }, i) => (
         <Motif
           key={i}

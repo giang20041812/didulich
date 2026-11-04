@@ -178,16 +178,16 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
   return (
     <div className={`${compact ? 'flex min-w-0 items-center gap-3' : 'flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 md:gap-5 mb-4 md:mb-5'} ${className}`}>
       {/* Biểu tượng "Đi" + chữ "Du Lịch" bên dưới đọc liền thành "Đi Du Lịch". Không còn khung kính / viền trắng quanh logo. */}
-      <div data-intro-logo className="hero-rise relative shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]">
+      <div className="hero-rise relative shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]">
         <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32'} />
       </div>
       <div className="min-w-0">
         {compact ? (
-          <h1 data-intro-word className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.1rem,10.5vw,3rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.1rem,10.5vw,3rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
             Du Lịch
           </h1>
         ) : (
-          <h1 data-intro-word className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,8vw,7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,8vw,7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
             Du Lịch
           </h1>
         )}
