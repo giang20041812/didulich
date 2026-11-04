@@ -34,6 +34,16 @@ const CATEGORY_GROUPS = [
   { id: 'SHARED_CAR', label: 'Xe ghép liên xã & taxi', desc: 'Kết nối TP Yên Bái, Chế Cu Nha, Nậm Có' },
 ];
 
+const P400 = '400.000đ';
+const P350 = '350.000đ';
+const TRANSPORT_SAMPLE_ROWS: { name: string; note?: string; cells: { time?: string; price?: string }[]; route: string }[] = [
+  { name: '1. Nhà xe Mỹ đình - MCC', cells: [{ time: '9h15', price: P400 }, { time: '16h30', price: P400 }, { time: '20h30', price: P400 }, { time: '5h30', price: P400 }], route: 'QL32' },
+  { name: '2. Nhà xe Mỹ đình - Ngã ba Kim', note: '(cách MCC 18km)', cells: [{ time: '10h', price: P400 }, { time: '17h00', price: P400 }, { time: '20h30', price: P400 }, { time: '5h30', price: P400 }], route: 'QL32' },
+  { name: '3. Nhà xe Mỹ đình - MCC', cells: [{ time: '1h00', price: P350 }, { time: '13h00', price: P350 }, { time: '21h30', price: P350 }, { price: '300.000đ' }], route: 'CT Nội Bài - Lào Cai' },
+  { name: '4. Nhà xe Mỹ đình - MCC', cells: [{ time: '18h30', price: P350 }, { time: '2h', price: P350 }, { time: '21h', price: P350 }, { time: '4h', price: P350 }], route: 'QL32' },
+  { name: '5. Nhà xe đón điểm - MCC', cells: [{ time: 'Đón tại Hà Nội (Lĩnh Nam, Hồ Tùng Mậu, Linh Đàm)', price: P350 }, { time: '5h00', price: P350 }, { time: '20h30', price: P350 }, { time: 'Gà', price: P350 }], route: 'QL32' },
+];
+
 export default function TransportListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -187,6 +197,45 @@ export default function TransportListPage() {
           <span>/</span>
           <span className="text-[var(--color-ink-deep)] font-semibold">Dịch vụ di chuyển</span>
         </div>
+
+        <section className="mb-6 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-900/[0.06] shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)]">
+          <div className="bg-gradient-to-r from-emerald-700 to-teal-600 px-4 py-3 text-white">
+            <h2 className="text-base md:text-lg font-bold">Bảng mẫu – Lịch trình xe Hà Nội - MCC (Khứ hồi)</h2>
+            <p className="text-xs text-emerald-50/90">An toàn • Đúng giờ • Thoải mái</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm text-center">
+              <thead>
+                <tr className="bg-emerald-50 text-emerald-900">
+                  <th className="px-3 py-2.5 text-left font-bold">Nhà xe</th>
+                  <th className="px-3 py-2.5 font-bold">A<br /><span className="text-xs font-medium">XB Mỹ Đình</span></th>
+                  <th className="px-3 py-2.5 font-bold">B<br /><span className="text-xs font-medium">Đến MCC</span></th>
+                  <th className="px-3 py-2.5 font-bold">C<br /><span className="text-xs font-medium">XB MCC</span></th>
+                  <th className="px-3 py-2.5 font-bold">D<br /><span className="text-xs font-medium">Đến MD</span></th>
+                  <th className="px-3 py-2.5 font-bold">E<br /><span className="text-xs font-medium">Tuyến</span></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {TRANSPORT_SAMPLE_ROWS.map((r) => (
+                  <tr key={r.name} className="hover:bg-slate-50/70">
+                    <td className="px-3 py-2.5 text-left font-semibold text-[var(--color-ink-deep)]">
+                      {r.name}
+                      {r.note && <span className="block text-xs font-normal text-slate-500">{r.note}</span>}
+                    </td>
+                    {r.cells.map((c, i) => (
+                      <td key={i} className="px-3 py-2.5 align-middle">
+                        {c.time && <div className="font-semibold text-slate-800">{c.time}</div>}
+                        {c.price && <span className="mt-1 inline-block rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white">{c.price}</span>}
+                      </td>
+                    ))}
+                    <td className="px-3 py-2.5 font-bold text-emerald-800">{r.route}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="px-4 py-2.5 text-xs italic text-slate-500 border-t border-slate-100">Đặt xe ngay – Đồng hành cùng bạn trên mọi hành trình!</p>
+        </section>
 
         {firstLoad ? (
           <ToolbarSkeleton {...SKELETON.toolbar} />
