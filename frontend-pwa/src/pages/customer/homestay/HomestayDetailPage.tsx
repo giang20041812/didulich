@@ -102,7 +102,10 @@ function parseAndSortNearbyAttractions(content: string | null | undefined): Near
   // Tách theo dấu chấm giữa (·), dấu phẩy, chấm phẩy, hoặc xuống dòng
   const parts = content.split(/[·,\n;]+/).map((s) => s.trim()).filter(Boolean);
 
-  const items: NearbyPointItem[] = parts.map((part) => {
+  const seen = new Set<string>();
+  const items: NearbyPointItem[] = [];
+
+  for (const part of parts) {
     // Trích xuất số km hoặc m: vd "2km", "2.5 km", "500m", "10 km"
     const match = part.match(/(\d+(?:[.,]\d+)?)\s*(km|m)\b/i);
     let distanceKm = 999999;
@@ -122,12 +125,16 @@ function parseAndSortNearbyAttractions(content: string | null | undefined): Near
       if (!name) name = part;
     }
 
-    return {
+    const normKey = name.toLowerCase().trim();
+    if (!normKey || seen.has(normKey)) continue;
+    seen.add(normKey);
+
+    items.push({
       name,
       distanceKm,
       distanceText: distanceText || match?.[0] || '',
-    };
-  });
+    });
+  }
 
   // Ưu tiên từ số km ngắn đến dài
   return items.sort((a, b) => a.distanceKm - b.distanceKm);
@@ -444,7 +451,26 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
   const sellableRooms = useMemo(() => {
     const active = (homestay?.rooms ?? []).filter((room: RoomTypeDto) => (room.status ?? 'ACTIVE') === 'ACTIVE');
-    return [...active.filter((r) => r.basePrice != null), ...active.filter((r) => r.basePrice == null)];
+    const sorted = [...active.filter((r) => r.basePrice != null), ...active.filter((r) => r.basePrice == null)];
+    // Chống trùng phòng: mỗi loại phòng / tên phòng chỉ xuất hiện 1 lần duy nhất
+    const seenNames = new Set<string>();
+    const seenIds = new Set<number>();
+    const deduped: RoomTypeDto[] = [];
+    for (const r of sorted) {
+      if (seenIds.has(r.id)) continue;
+      const cleanKey = r.name
+        .replace(/\[.*?seed.*?\]/gi, '')
+        .trim()
+        .toLowerCase();
+      if (seenNames.has(cleanKey)) continue;
+      seenIds.add(r.id);
+      seenNames.add(cleanKey);
+      deduped.push({
+        ...r,
+        name: r.name.replace(/\s*\[.*?seed.*?\]/gi, '').trim(),
+      });
+    }
+    return deduped;
   }, [homestay]);
 
   const roomOptions = useMemo<RoomTypeTab[]>(() => {
