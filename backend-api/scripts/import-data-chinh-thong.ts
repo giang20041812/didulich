@@ -21,9 +21,10 @@ import { bumpCatalogVersion } from '../src/services/catalogCache.js';
  *   --publish-held           công khai luôn cả các mục dataset đề nghị giữ ẩn (chỉ có tên + ảnh; nhà hàng bị ghi "Không có")
  *   --festival-visibility=PUBLISHED|DRAFT      hiển thị của lễ hội mới (mặc định PUBLISHED)
  *   --attach-existing        gắn thêm ảnh từ thư mục ảnh vào các địa điểm ĐÃ CÓ (mặc định: không đụng tới địa điểm hiện hữu)
+ *   --verified               đặt data_verified = TRUE cho địa điểm mới (dữ liệu đã xác thực xong)
  *   --skip-images            không tải / không gắn ảnh
  *   --only=HOMESTAY,RESTAURANT,...             chỉ xử lý các loại địa điểm này (mặc định: tất cả; lễ hội đi kèm khi có FESTIVAL)
- *   --upload=cloudinary|fake                   nơi tải ảnh (fake: không gọi mạng, dùng cho kiểm thử)
+ *   --upload=supabase|cloudinary|fake          nơi tải ảnh (mặc định supabase = Supabase Storage; fake: không gọi mạng)
  *   --report=<file.md>       ghi báo cáo đối chiếu (mặc định ops/import/data-chinh-thong/bao-cao-doi-chieu.md)
  *   --concurrency=3          số ảnh tải song song
  *
@@ -84,10 +85,12 @@ const args = parseArgs(process.argv.slice(2));
 const APPLY = args.apply === true;
 const SKIP_IMAGES = args['skip-images'] === true;
 const ATTACH_EXISTING = args['attach-existing'] === true;
-const UPLOAD = String(args.upload ?? 'cloudinary');
+const UPLOAD = String(args.upload ?? 'supabase');
 const VISIBILITY = String(args.visibility ?? 'PUBLISHED');
 const FESTIVAL_VISIBILITY = String(args['festival-visibility'] ?? 'PUBLISHED');
 const PUBLISH_HELD = args['publish-held'] === true;
+/** Dữ liệu đã được đội xác thực xong → đặt place.data_verified = TRUE cho địa điểm mới (mặc định FALSE như đợt đầu). */
+const VERIFIED = args.verified === true;
 const CONCURRENCY = Number(args.concurrency ?? 3);
 const ONLY = args.only ? String(args.only).split(',').map((s) => s.trim().toUpperCase()) : null;
 const DATASET_PATH = String(args.dataset ?? path.join(DATA_DIR, 'dataset.json'));
@@ -97,7 +100,7 @@ const STATE_DIR = path.join(DATA_DIR, '.import-state');
 
 if (!['DRAFT', 'UNPUBLISHED', 'PUBLISHED'].includes(VISIBILITY)) throw new Error(`--visibility không hợp lệ: ${VISIBILITY}`);
 if (!['DRAFT', 'PUBLISHED'].includes(FESTIVAL_VISIBILITY)) throw new Error(`--festival-visibility không hợp lệ: ${FESTIVAL_VISIBILITY}`);
-if (!['cloudinary', 'fake'].includes(UPLOAD)) throw new Error(`--upload không hợp lệ: ${UPLOAD}`);
+if (!['supabase', 'cloudinary', 'fake'].includes(UPLOAD)) throw new Error(`--upload không hợp lệ: ${UPLOAD}`);
 
 // ---- Tiện ích ---------------------------------------------------------------------------------------------------------------------
 const cut = (s: string | null | undefined, n: number): string | null => (s == null || s === '' ? null : s.length > n ? s.slice(0, n - 1) + '…' : s);
@@ -106,7 +109,7 @@ const fmtVnd = (n: number | null) => (n == null ? '' : n.toLocaleString('vi-VN')
 const log = (...a: unknown[]) => console.log(...a);
 let regionNames = new Map<string, string>(); // mã khu vực → tên, chỉ để báo cáo dễ đọc
 
-interface ImageItem { abs: string; rel: string; sha: string; size: number; ext: string }
+interface ImageItem { abs: string; rel: string; sha: string; size: number; ext: string; srcUrl?: string }
 const hashCache = new Map<string, { sha: string; size: number }>();
 function describeFile(rel: string): ImageItem {
   const abs = path.join(REPO, rel);
@@ -131,6 +134,7 @@ function collectImages(folderRecs: DsFolder[], reserved = 0): { items: ImageItem
   let files = 0;
   for (const rec of folderRecs) {
     for (const rel of rec.images) {
+      if (!fs.existsSync(path.join(REPO, rel))) continue; // file gốc không còn trên máy: bỏ qua (ảnh lấy từ cache theo slug)
       files++;
       const it = describeFile(rel);
       if (seen.has(it.sha)) continue;
@@ -143,16 +147,46 @@ function collectImages(folderRecs: DsFolder[], reserved = 0): { items: ImageItem
   return { items: kept, files, duplicates: files - items.length, overflow: items.length - kept.length };
 }
 
+/**
+ * Ảnh theo slug lấy từ cache đã tải lên Cloudinary (publicId dạng viettrek/import-data-chinh-thong/<slug>/<sha16>).
+ * Dùng khi thư mục ảnh gốc không còn trên máy: ánh xạ ảnh ↔ địa điểm vẫn đúng vì slug được ghi vào publicId lúc tải.
+ */
+function itemsFromState(slug: string): ReturnType<typeof collectImages> {
+  const legacyPrefix = `viettrek/import-data-chinh-thong/${slug}/`;
+  const sbPrefix = `import-data-chinh-thong/${slug}/`;
+  const bySha = new Map<string, ImageItem>();
+  for (const [sha, u] of Object.entries(legacyCloudinary)) {
+    if (u.publicId.startsWith(legacyPrefix)) bySha.set(sha, { abs: '', rel: `cloudinary:${u.publicId}`, sha, size: u.bytes ?? 0, ext: path.extname(u.url).toLowerCase() || '.jpg', srcUrl: u.url });
+  }
+  for (const [sha, u] of Object.entries(uploadState)) {
+    if ((u.publicId.startsWith(sbPrefix) || u.publicId.startsWith(legacyPrefix)) && !bySha.has(sha)) {
+      bySha.set(sha, { abs: '', rel: u.publicId, sha, size: u.bytes ?? 0, ext: path.extname(u.url).toLowerCase() || '.jpg', srcUrl: u.url });
+    }
+  }
+  const items = [...bySha.values()];
+  const kept = items.slice(0, MAX_IMAGES);
+  return { items: kept, files: items.length, duplicates: 0, overflow: items.length - kept.length };
+}
+const localFilesExist = (recs: DsFolder[]) => recs.some((r) => r.images.some((rel) => fs.existsSync(path.join(REPO, rel))));
+
 // ---- Tải ảnh ---------------------------------------------------------------------------------------------------------------------
 interface Uploaded { publicId: string; url: string; width: number | null; height: number | null; bytes: number | null }
 type UploadState = Record<string, Uploaded>;
 let uploadState: UploadState = {};
 let stateFile = '';
+let legacyCloudinary: Record<string, { publicId: string; url: string; width: number | null; height: number | null; bytes: number | null }> = {};
 /** Đọc cache ảnh đã tải; tên file gắn với kho ảnh nên ảnh "fake" không bao giờ bị dùng lại cho lần tải thật. */
 function loadState(): void {
-  const store = UPLOAD === 'fake' ? 'fake' : `cloudinary.${config().cloudinary.cloudName || 'unset'}`;
+  const store = UPLOAD === 'fake' ? 'fake' : UPLOAD === 'supabase' ? `supabase.${config().supabase.storageBucket}` : `cloudinary.${config().cloudinary.cloudName || 'unset'}`;
   stateFile = path.join(STATE_DIR, `uploads.${store}.json`);
   uploadState = fs.existsSync(stateFile) ? (JSON.parse(fs.readFileSync(stateFile, 'utf8')) as UploadState) : {};
+  // Ảnh đã lên Cloudinary ở lần chạy trước: nguồn để chép sang Supabase khi thư mục ảnh gốc không còn trên máy.
+  legacyCloudinary = {};
+  if (fs.existsSync(STATE_DIR)) {
+    for (const f of fs.readdirSync(STATE_DIR).filter((n) => /^uploads\.cloudinary\..+\.json$/.test(n))) {
+      Object.assign(legacyCloudinary, JSON.parse(fs.readFileSync(path.join(STATE_DIR, f), 'utf8')) as UploadState);
+    }
+  }
 }
 function saveState() {
   fs.mkdirSync(STATE_DIR, { recursive: true });
@@ -167,6 +201,40 @@ async function uploadOne(item: ImageItem, folderId: string): Promise<Uploaded> {
     const fake = { publicId, url: `https://res.cloudinary.com/fake-cloud/image/upload/${publicId}${item.ext}`, width: null, height: null, bytes: item.size };
     uploadState[item.sha] = fake;
     return fake;
+  }
+  if (UPLOAD === 'supabase') {
+    const sb = config().supabase;
+    if (!sb.url || !sb.serviceKey) throw new Error('Thiếu SUPABASE_URL / SUPABASE_SERVICE_KEY.');
+    const objectPath = `import-data-chinh-thong/${folderId}/${item.sha.slice(0, 16)}${item.ext || '.jpg'}`;
+    let buf: Buffer;
+    if (item.abs && fs.existsSync(item.abs)) buf = fs.readFileSync(item.abs);
+    else if (item.srcUrl) {
+      const dl = await fetch(item.srcUrl, { signal: AbortSignal.timeout(120_000) });
+      if (!dl.ok) throw new Error(`Không tải được nguồn ${item.srcUrl}: HTTP ${dl.status}`);
+      buf = Buffer.from(await dl.arrayBuffer());
+    } else throw new Error(`Không có nguồn cho ${item.rel}`);
+    const base = sb.url.replace(/\/+$/, '');
+    let lastE: unknown;
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      try {
+        const res = await fetch(`${base}/storage/v1/object/${sb.storageBucket}/${objectPath}`, {
+          method: 'POST',
+          headers: { apikey: sb.serviceKey, Authorization: `Bearer ${sb.serviceKey}`, 'Content-Type': IMAGE_MIME[item.ext] ?? 'image/jpeg', 'x-upsert': 'true' },
+          body: new Blob([buf]),
+          signal: AbortSignal.timeout(180_000),
+        });
+        if (res.ok) {
+          const up = { publicId: objectPath, url: `${base}/storage/v1/object/public/${sb.storageBucket}/${objectPath}`, width: null, height: null, bytes: buf.length };
+          uploadState[item.sha] = up;
+          saveState();
+          return up;
+        }
+        lastE = new Error(`Supabase ${res.status}: ${(await res.text()).slice(0, 150)}`);
+        if (res.status < 500 && res.status !== 429) break;
+      } catch (err) { lastE = err; }
+      await new Promise((r) => setTimeout(r, 1500 * attempt));
+    }
+    throw new Error(`Không đưa được ${item.rel} lên Supabase: ${(lastE as Error).message}`);
   }
   const c = config().cloudinary;
   if (!c.cloudName || !c.apiKey || !c.apiSecret) throw new Error('Thiếu CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET.');
@@ -215,7 +283,7 @@ async function findOrCreateAsset(item: ImageItem, up: Uploaded, altText: string,
   const existing = await one<{ id: number }>('SELECT id FROM media_asset WHERE checksum_sha256 = $1', [item.sha]);
   if (existing) return existing.id;
   const row = await insertRow<{ id: number }>('media_asset', {
-    storageKey: `cloudinary:${up.publicId}`,
+    storageKey: UPLOAD === 'supabase' ? up.publicId : `cloudinary:${up.publicId}`,
     publicUrl: up.url,
     mimeType: IMAGE_MIME[item.ext] ?? 'image/jpeg',
     widthPx: up.width,
@@ -296,7 +364,7 @@ async function main() {
   const decisions: PlaceDecision[] = [];
   for (const p of dataset.places.filter(wanted)) {
     const folderRecs = p.photoFolders.map((f) => folderByName.get(f)).filter((f): f is DsFolder => !!f);
-    const images = collectImages(folderRecs);
+    const images = folderRecs.length === 0 || localFilesExist(folderRecs) ? collectImages(folderRecs) : itemsFromState(p.slug);
     const videos = folderRecs.flatMap((f) => f.videos);
     let slug = p.slug;
     const bySlug = await one<{ id: number; sourceName: string | null; name: string }>('SELECT id, source_name, name FROM place WHERE slug = $1', [slug]);
@@ -398,7 +466,7 @@ async function main() {
             visibility: visibilityOf(p), operationStatus: 'OPERATING', operationNote: cut(p.operationNote, 500), isDeleted: false,
             googleRating: p.googleRating, ratingCount: 0, sourceType: 'PUBLIC_TRUSTED', sourceName: cut(p.sourceName, 255),
             sourceUrl: cut(p.sourceUrl, 1000), verification: 'UNVERIFIED', coordVerified: false,
-            dataVerified: false, // dữ liệu mới nhập → CHƯA xác thực; Admin bật sau khi đối chiếu
+            dataVerified: VERIFIED, // mặc định CHƯA xác thực; --verified khi dữ liệu đã được đội xác thực xong
             approvalStatus: 'APPROVED', createdAt: now, updatedAt: now,
           });
           const id = place.id;
@@ -471,8 +539,8 @@ async function main() {
 
   await bumpCatalogVersion();
   log(`\nXong: tạo ${created} địa điểm, ${newFestivals.length} lễ hội, gắn ${attached} ảnh vào địa điểm có sẵn.`);
-  const total = await scalar<number>(`SELECT count(*) FROM place WHERE source_name LIKE $1 AND data_verified = FALSE AND is_deleted = FALSE`, [`${MARKER}%`]);
-  log(`Kiểm tra: ${total} địa điểm mang nguồn "${MARKER}" đang ở trạng thái chưa xác thực (data_verified = FALSE).`);
+  const total = await scalar<number>(`SELECT count(*) FROM place WHERE source_name LIKE $1 AND data_verified = $2 AND is_deleted = FALSE`, [`${MARKER}%`, VERIFIED]);
+  log(`Kiểm tra: ${total} địa điểm mang nguồn "${MARKER}" có data_verified = ${VERIFIED ? 'TRUE' : 'FALSE'}.`);
   if (failures.length) {
     log(`\n!! ${failures.length} lỗi (chạy lại lệnh này để thử tiếp phần còn lại):`);
     failures.forEach((f) => log('  -', f));

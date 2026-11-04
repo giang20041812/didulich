@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "migrate": "tsx --env-file-if-exists=.env.local src/db/migrateCli.ts",
-    "import:data-chinh-thong": "tsx --env-file-if-exists=.env.local scripts/import-data-chinh-thong.ts"
+    "import:data-chinh-thong": "tsx --env-file-if-exists=.env.local scripts/import-data-chinh-thong.ts",
+    "import:dimcc": "tsx --env-file-if-exists=.env.local scripts/import-dimcc.ts",
+    "prune:unconfirmed": "tsx --env-file-if-exists=.env.local scripts/prune-unconfirmed.ts",
+    "wipe:catalog": "tsx --env-file-if-exists=.env.local scripts/wipe-catalog-data.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
