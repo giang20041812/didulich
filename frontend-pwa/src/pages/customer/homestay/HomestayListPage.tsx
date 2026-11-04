@@ -893,47 +893,17 @@ export default function HomestayListPage() {
                         name={hs.name}
                         imageUrl={hs.coverImageUrl}
                         location={hs.district || 'Yên Bái'}
-                        description={hs.roomType ? `${hs.roomType}${hs.bedInfo ? ' · ' + hs.bedInfo : ''}` : undefined}
                         price={formatVnd(hs.price, 'Liên hệ')}
                         priceUnit={hs.price ? 'đêm' : null}
                         amenities={hs.amenities ?? []}
                         ctaText="Khám phá ngay"
                         // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
                         onIntent={() => prefetchHomestay(hs.id)}
-                        badge={
-                          hs.isGenius ? (
-                            <CompactCardBadge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold shadow-sm">
-                              Genius
-                            </CompactCardBadge>
-                          ) : undefined
-                        }
                         notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
                           <span className="text-[11px] font-bold text-amber-300">Tạm ngừng nhận đặt phòng</span>
-                        ) : hs.hasOnlineRooms === false ? (
-                          <span className="text-[11px] font-bold text-slate-300">Liên hệ trực tiếp để đặt</span>
                         ) : hs.availableForSelectedDates === false ? (
                           <span className="text-[11px] font-bold text-slate-300">Hết phòng ngày đã chọn</span>
                         ) : undefined}
-                        action={
-                          // Lưu homestay yêu thích (tại thiết bị này)
-                          // Nút tròn kính mờ, viền sáng, bóng dịu; đã lưu: nền hồng nhạt + tim tô hồng, "nảy" nhẹ khi vừa bấm.
-                          <button
-                            type="button"
-                            aria-label={saved ? `Bỏ lưu ${hs.name}` : `Lưu ${hs.name}`}
-                            aria-pressed={saved}
-                            onClick={(e) => toggleSave(e, hs)}
-                            className={`flex h-9 w-9 items-center justify-center rounded-full ring-1 backdrop-blur-md shadow-[0_6px_16px_-6px_rgba(15,23,42,0.45)] transition-[background-color,box-shadow,transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-110 hover:shadow-[0_10px_22px_-8px_rgba(225,29,72,0.55)] active:scale-95 cursor-pointer ${
-                              saved
-                                ? 'bg-rose-50/95 text-rose-500 ring-rose-200/80'
-                                : 'bg-white/75 text-slate-500 ring-white/80 hover:bg-white hover:text-rose-500'
-                            }`}
-                          >
-                            <Heart
-                              strokeWidth={2.2}
-                              className={`h-[18px] w-[18px] transition-[fill] duration-300 ${saved ? 'fill-current' : 'fill-transparent'} ${saved && poppedId === hs.id ? 'heart-pop' : ''}`}
-                            />
-                          </button>
-                        }
                       />
                       </Reveal>
                     );
