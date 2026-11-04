@@ -76,17 +76,17 @@ function DesktopSeeAll({ to, children }: { to: string; children: ReactNode }) {
  * có sẵn (ring), rê chuột thì đậm lên.
  */
 const CARD =
-  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 shadow-[0_1px_2px_rgba(16,40,34,0.05),0_10px_24px_-14px_rgba(16,40,34,0.18)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:shadow-[0_2px_4px_rgba(16,40,34,0.05),0_28px_48px_-18px_rgba(16,40,34,0.38)]';
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 shadow-[0_1px_2px_rgba(16,40,34,0.05),0_10px_24px_-14px_rgba(16,40,34,0.18)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]';
 /** Màu viền: xanh rừng cho thẻ điểm đến / tiện ích (đặc sản dùng vàng hổ phách), có sẵn và đậm lên khi rê chuột. */
-const CARD_GREEN = `${CARD} ring-emerald-800/25 hover:ring-emerald-600/50`;
+const CARD_GREEN = `${CARD} ring-emerald-800/25`;
 /** Thẻ điểm đến / đặc sản: ảnh phủ kín cả thẻ, chữ nằm đè lên chân ảnh trên một lớp glow xanh (CARD_GLOW) — không còn phần nền xanh riêng. */
 const CARD_DARK =
-  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-emerald-300/30 shadow-[0_1px_2px_rgba(5,36,30,0.2),0_12px_26px_-14px_rgba(5,36,30,0.55)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:ring-emerald-300/50 hover:shadow-[0_2px_4px_rgba(5,36,30,0.2),0_28px_48px_-18px_rgba(5,36,30,0.7)]';
+  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-black/10 shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 ease-out';
 /** Lớp glow xanh tan dần từ chân thẻ lên ảnh, nằm DƯỚI chữ (chữ ở lớp z-10 phía trên). */
-const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[68%] bg-gradient-to-t from-[#0b6a53]/95 via-[#139274]/55 via-50% to-transparent';
+const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-black/85 via-black/40 via-45% to-transparent';
 /** Ảnh phủ kín thẻ. */
 const CARD_MEDIA = 'absolute inset-0 overflow-hidden bg-slate-100';
-const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]';
+const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]';
 
 /**
  * Các phần sau hero là những "tấm" vuông vức nối tiếp nhau (không bo góc), đổ bóng nhẹ ngược lên phần trước để có chiều
@@ -193,7 +193,7 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
         )}
         {/* Hiện sau ~3 giây như một nét viết tiếp; giữ chỗ ngay từ đầu nên không đẩy bố cục */}
         <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,3.4vw,2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
-          đi khắp mọi nơi
+          đi như người bản địa
         </p>
       </div>
     </div>
@@ -409,54 +409,7 @@ export default function HomePage() {
   // Đặc sản: hiện hết món API trả về (lưới 10 thẻ mỗi trang, 2 hàng × 5 cột)
   const displayedSpecialties = useMemo(() => homeData?.specialties ?? [], [homeData]);
 
-  if (loading) {
-    return (
-      <div className="w-full flex flex-col min-h-screen bg-[var(--color-canvas)]">
-        {/* Hero Section Skeleton */}
-        <section className="relative z-30 w-full min-h-[460px] md:min-h-[500px] flex items-center justify-center pt-[calc(var(--app-header-height,130px)+16px)] pb-16 bg-[#07362c]">
-          <HeroBackdrop />
-          <div className="relative z-30 flex flex-col items-center justify-center px-4 max-w-5xl mx-auto w-full animate-pulse">
-            <div className="h-14 md:h-20 bg-emerald-800/60 rounded-2xl w-3/4 max-w-xl mb-4" />
-            <div className="h-5 bg-emerald-800/40 rounded-full w-1/2 max-w-md mb-8" />
-            <div className="w-full h-32 md:h-[78px] bg-white/95 rounded-2xl shadow-[0_28px_60px_-24px_rgba(4,36,29,0.6)]" />
-          </div>
-        </section>
-
-        {/* Content Section Skeleton */}
-        <div className="bg-white">
-          <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 py-10 space-y-12">
-            <div>
-              <div className="h-7 bg-gray-200 rounded-full w-48 mb-6 animate-pulse" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="bg-white rounded-2xl overflow-hidden ring-1 ring-slate-900/[0.06] shadow-[0_10px_24px_-14px_rgba(16,40,34,0.18)] animate-pulse flex flex-col">
-                    <div className="w-full h-48 bg-gray-200 mb-3" />
-                    <div className="mx-4 h-4 bg-gray-200 rounded-full w-3/4 mb-2.5" />
-                    <div className="mx-4 h-3 bg-gray-100 rounded-full w-1/2 mb-4" />
-                    <div className="m-4 mt-auto h-8 bg-gray-100 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="h-7 bg-gray-200 rounded-full w-56 mb-6 animate-pulse" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((n) => (
-                  <div key={n} className="bg-white rounded-2xl overflow-hidden ring-1 ring-slate-900/[0.06] shadow-[0_10px_24px_-14px_rgba(16,40,34,0.18)] animate-pulse flex flex-col">
-                    <div className="w-full h-40 bg-gray-200 mb-3" />
-                    <div className="mx-4 h-4 bg-gray-200 rounded-full w-3/4 mb-2" />
-                    <div className="mx-4 h-3 bg-gray-100 rounded-full w-1/2 mb-3" />
-                    <div className="m-4 mt-auto h-8 bg-gray-100 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   if (!homeData) {
     return (
@@ -486,7 +439,7 @@ export default function HomePage() {
         <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-clip">
           <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-12">
             <HeroTitle className="flex" />
-            <p className="hero-rise hidden md:block [animation-delay:260ms] max-w-[640px] break-words [overflow-wrap:anywhere] text-lg sm:text-xl md:text-[22px] lg:text-[26px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
+            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[20px] lg:text-[24px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
               Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn
             </p>
           </div>
@@ -693,7 +646,7 @@ export default function HomePage() {
                   <Reveal key={to} delay={80 + i * 40}>
                     <Link to={to} className={`${CARD_GREEN} justify-between p-3 sm:p-4`}>
                       <div>
-                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${tile} flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-105`}>
+                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${tile} flex items-center justify-center text-white transition-transform duration-300`}>
                           <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                         </div>
                         <h4 className="mt-2.5 sm:mt-3.5 font-bold text-slate-900 text-[13px] sm:text-sm leading-snug">{title}</h4>
@@ -725,7 +678,7 @@ export default function HomePage() {
               <div className="relative grid grid-cols-2 gap-2.5 sm:gap-3.5 flex-1">
                 {COMMITMENTS.map(({ Icon, title, text, tag, tile }, i) => (
                   <Reveal key={title} delay={80 + i * 40}>
-                    <div className="flex h-full flex-col justify-between rounded-2xl bg-white/[0.06] p-3 sm:p-4 ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[background-color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:bg-white/[0.1]">
+                    <div className="flex h-full flex-col justify-between rounded-2xl bg-white/[0.06] p-3 sm:p-4 ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[background-color,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
                       <div>
                         <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl ring-1 flex items-center justify-center ${tile}`}>
                           <Icon className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
