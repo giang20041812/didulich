@@ -111,6 +111,11 @@ const hashCache = new Map<string, { sha: string; size: number }>();
 function describeFile(rel: string): ImageItem {
   const abs = path.join(REPO, rel);
   let h = hashCache.get(abs);
+  if (!h && SKIP_IMAGES) {
+    // Không có thư mục ảnh trên máy này: chỉ nhập phần chữ, không đọc file ảnh.
+    h = { sha: crypto.createHash('sha256').update(rel).digest('hex'), size: 0 };
+    hashCache.set(abs, h);
+  }
   if (!h) {
     const buf = fs.readFileSync(abs);
     h = { sha: crypto.createHash('sha256').update(buf).digest('hex'), size: buf.length };

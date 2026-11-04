@@ -227,7 +227,8 @@ export default function HomestayListPage() {
     setLoading(true);
     setError(null);
     fetchHomestays({ ...filters, page: currentPage - 1, sort: sortBy }).then(data => {
-      setHomestays(data.content);
+      const items = (data.content || []).filter((item, index, self) => index === self.findIndex(t => t.id === item.id));
+      setHomestays(items);
       setTotalElements(data.totalElements);
       setTotalPages(data.totalPages);
     }).catch((err: unknown) => {
