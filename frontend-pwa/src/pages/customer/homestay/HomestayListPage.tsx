@@ -10,7 +10,7 @@ import { formatVnDate } from '@/lib/roomAvailability';
 import { PriceSlider } from '@/components/ui/price-slider';
 import { Button } from '@/components/ui/button';
 import { CardSkeleton } from '@/components/ui/CardSkeleton';
-import CompactPlaceCard, { CompactCardBadge } from '@/components/ui/CompactPlaceCard';
+import CompactPlaceCard from '@/components/ui/CompactPlaceCard';
 import { COMPACT_GRID_WITH_SIDEBAR_COLS, formatVnd } from '@/lib/compactCard';
 import FramerSwipeCardStack from '@/components/ui/FramerSwipeCardStack';
 import Reveal from '@/components/ui/Reveal'
@@ -37,7 +37,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import VietmapView from '@/components/map/VietmapView';
-import { getFavoriteIds, toggleFavorite, onFavoritesChange } from '@/lib/favorites';
+import { getFavoriteIds, onFavoritesChange } from '@/lib/favorites';
 import { ToolbarSkeleton, FilterPanelSkeleton, LIST_SKELETON_SPECS } from '@/components/ui/ListPageSkeleton';
 import { useFirstLoad } from '@/hooks/useFirstLoad';
 
@@ -120,17 +120,6 @@ export default function HomestayListPage() {
   useEffect(() => onFavoritesChange(() => setSavedIds(getFavoriteIds())), []);
   useEffect(() => { setShowSavedOnly(searchParams.get('saved') === '1'); }, [searchParams]);
 
-  // Homestay vừa bấm lưu — chỉ thẻ này chạy hiệu ứng tim nảy (không nảy hàng loạt lúc mở trang).
-  const [poppedId, setPoppedId] = useState<string | null>(null);
-
-  const toggleSave = (e: React.MouseEvent, hs: HomestayDto) => {
-    e.preventDefault(); e.stopPropagation();
-    setPoppedId(hs.id);
-    toggleFavorite({
-      id: hs.id, slug: String(hs.id), name: hs.name,
-      priceRefMin: hs.price ?? null, coverImageUrl: hs.coverImageUrl, regionName: hs.district,
-    });
-  };
   const [showMap, setShowMap] = useState(false);
 
   const [totalElements, setTotalElements] = useState(0);
@@ -227,8 +216,7 @@ export default function HomestayListPage() {
     setLoading(true);
     setError(null);
     fetchHomestays({ ...filters, page: currentPage - 1, sort: sortBy }).then(data => {
-      const items = (data.content || []).filter((item, index, self) => index === self.findIndex(t => t.id === item.id));
-      setHomestays(items);
+      setHomestays(data.content);
       setTotalElements(data.totalElements);
       setTotalPages(data.totalPages);
     }).catch((err: unknown) => {
@@ -885,7 +873,6 @@ export default function HomestayListPage() {
                 // Điện thoại: vuốt từng thẻ như phần homestay trang chủ; từ md: lưới cạnh bộ lọc.
                 <FramerSwipeCardStack gridClassName={COMPACT_GRID_WITH_SIDEBAR_COLS} label="Homestay & chỗ nghỉ">
                   {paginatedHomestays.map((hs, index) => {
-                    const saved = savedIds.includes(hs.id);
                     return (
                       <Reveal key={hs.id} delay={(index % 3) * 80} className="h-full" offset={28}>
                       <CompactPlaceCard
