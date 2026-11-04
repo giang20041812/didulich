@@ -58,31 +58,10 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
     el.scrollTo({ left: target * stepOf(el), behavior: reduce ? 'auto' : 'smooth' });
   };
 
-  // Tự chuyển trang mỗi 5 giây (hết trang thì quay về đầu); tạm dừng khi rê chuột / đang focus trong vùng thẻ.
-  const paused = useRef(false);
-  useEffect(() => {
-    if (count < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => {
-      const el = scrollerRef.current;
-      if (!el || paused.current || document.hidden) return;
-      const current = Math.round(el.scrollLeft / Math.max(1, stepOf(el)));
-      el.scrollTo({ left: ((current + 1) % count) * stepOf(el), behavior: 'smooth' });
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [count]);
-
   if (count === 0) return null;
 
   return (
-    <div
-      role="region"
-      aria-roledescription="carousel"
-      aria-label={label}
-      onMouseEnter={() => { paused.current = true; }}
-      onMouseLeave={() => { paused.current = false; }}
-      onFocus={() => { paused.current = true; }}
-      onBlur={() => { paused.current = false; }}
-    >
+    <div role="region" aria-roledescription="carousel" aria-label={label}>
       {/* Lề 8px quanh khung cuộn: bóng / nhấc thẻ khi rê chuột không bị cắt */}
       <div
         ref={scrollerRef}

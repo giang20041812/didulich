@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import CardPages from '@/components/ui/CardPages';
 
 interface FramerSwipeCardStackProps {
@@ -14,11 +14,13 @@ interface FramerSwipeCardStackProps {
   label?: string;
   /** Điện thoại: bề rộng mỗi cột thẻ (mỗi cột xếp 2 thẻ chồng dọc). */
   mobileColumnClassName?: string;
+  /** Điện thoại: xếp thẻ thành lưới cuộn dọc (vd "grid grid-cols-2 gap-3") thay vì cuộn ngang. */
+  mobileVerticalClassName?: string;
 }
 
 /**
- * Máy tính / tablet: lưới thẻ (hoặc từng trang perPage thẻ). Điện thoại: không băng chuyền — mỗi cột 2 thẻ, cuộn ngang
- * để xem các cột tiếp theo.
+ * Máy tính / tablet: lưới thẻ (hoặc từng trang perPage thẻ). Điện thoại: không băng chuyền, không tự cuộn — mặc định mỗi
+ * cột 2 thẻ, vuốt ngang để xem các cột tiếp theo; có mobileVerticalClassName thì xếp lưới và cuộn dọc theo trang.
  */
 export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
   children,
@@ -27,24 +29,9 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
   perPage,
   label = 'Danh sách thẻ',
   mobileColumnClassName = 'auto-cols-[44%]',
+  mobileVerticalClassName,
 }) => {
-  const mobileRef = useRef<HTMLDivElement>(null);
-  const touching = useRef(false);
   const total = children.length;
-
-  // Điện thoại: tự cuộn sang cột kế tiếp mỗi 4 giây, hết thì quay về đầu; dừng khi đang chạm / vuốt.
-  useEffect(() => {
-    if (total < 3 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => {
-      const el = mobileRef.current;
-      if (!el || touching.current || document.hidden || el.offsetParent === null) return;
-      const cols = el.children;
-      const step = cols.length > 2 ? (cols[2] as HTMLElement).offsetLeft - (cols[0] as HTMLElement).offsetLeft : el.clientWidth;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + step, behavior: 'smooth' });
-    }, 4000);
-    return () => window.clearInterval(timer);
-  }, [total]);
 
   if (total === 0) return null;
 
@@ -60,10 +47,9 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
         </div>
       )}
       <div
-        className={`md:hidden grid grid-flow-col grid-rows-2 ${mobileColumnClassName} gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
-        ref={mobileRef}
-        onTouchStart={() => { touching.current = true; }}
-        onTouchEnd={() => { window.setTimeout(() => { touching.current = false; }, 3000); }}
+        className={mobileVerticalClassName
+          ? `md:hidden ${mobileVerticalClassName}`
+          : `md:hidden grid grid-flow-col grid-rows-2 ${mobileColumnClassName} gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         role="region"
         aria-label={label}
       >

@@ -870,8 +870,8 @@ export default function HomestayListPage() {
                   </button>
                 </div>
               ) : (
-                // Điện thoại: vuốt từng thẻ như phần homestay trang chủ; từ md: lưới cạnh bộ lọc.
-                <FramerSwipeCardStack gridClassName={COMPACT_GRID_WITH_SIDEBAR_COLS} label="Homestay & chỗ nghỉ">
+                // Điện thoại: lưới 2 cột cuộn dọc; từ md: lưới cạnh bộ lọc.
+                <FramerSwipeCardStack gridClassName={COMPACT_GRID_WITH_SIDEBAR_COLS} mobileVerticalClassName="grid grid-cols-2 gap-3" label="Homestay & chỗ nghỉ">
                   {paginatedHomestays.map((hs, index) => {
                     return (
                       <Reveal key={hs.id} delay={(index % 3) * 80} className="h-full" offset={28}>
