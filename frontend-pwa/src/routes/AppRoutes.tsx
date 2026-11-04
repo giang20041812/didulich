@@ -30,7 +30,7 @@ const AdminGuard = lazy(() => import('@/components/admin/AdminGuard'));
 
 /** Chỗ chờ chung khi khung / trang chưa tải xong — cùng kiểu con quay của lazyPage. */
 function RouteFallback() {
-  return <DashboardSkeleton />;
+  return null;
 }
 
 /**
@@ -38,7 +38,7 @@ function RouteFallback() {
  * fallback: một dạng chung, hoặc khung riêng dựng đúng trang (RouteSkeletons) để nối liền với khung chờ của trang.
  */
 function lazyPage(load: () => Promise<{ default: ComponentType }>, fallback: SkeletonKind | ComponentType = 'cards') {
-  const Fallback = typeof fallback === 'string' ? SKELETONS[fallback] : fallback;
+  void fallback; void SKELETONS; // Không còn màn hình chờ: giữ tham số để khỏi sửa từng route.
   const Page = lazy(async () => {
     try {
       return await load();
@@ -52,7 +52,7 @@ function lazyPage(load: () => Promise<{ default: ComponentType }>, fallback: Ske
   });
   return function LazyPage() {
     return (
-      <Suspense fallback={<Fallback />}>
+      <Suspense fallback={null}>
         <Page />
       </Suspense>
     );
