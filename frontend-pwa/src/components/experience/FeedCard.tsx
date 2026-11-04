@@ -35,7 +35,7 @@ export default function FeedCard({ item, vote, onToggleHelpful }: FeedCardProps)
         className="relative block h-[104px] w-[104px] shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-[136px] sm:w-[176px]"
       >
         {cover
-          ? <img src={cover} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+          ? <img src={cover} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 ease-out" />
           : <ImagePlaceholder Icon={Mountain} />}
         <span
           className={`absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold shadow-sm sm:bottom-2 sm:left-2 sm:px-2 sm:text-[11px] ${

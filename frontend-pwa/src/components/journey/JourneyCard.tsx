@@ -33,7 +33,7 @@ export default function JourneyCard({ journey, wide = false }: { journey: Journe
     >
       <div className={`relative h-28 shrink-0 overflow-hidden bg-slate-100 sm:h-32 ${wide ? 'sm:h-auto sm:min-h-44 sm:w-2/5' : ''}`}>
         {cover ? (
-          <img src={mediaUrl(cover)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+          <img src={mediaUrl(cover)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500" />
         ) : (
           <ImagePlaceholder Icon={Mountain} />
         )}

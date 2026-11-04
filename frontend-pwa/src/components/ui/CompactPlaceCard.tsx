@@ -70,7 +70,7 @@ export default function CompactPlaceCard({
 
   const card = (
     <div
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-neutral-900 shadow-[0_2px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-neutral-900 shadow-[0_2px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10 transition-[transform,box-shadow] duration-300 ease-out hover:shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
       onPointerEnter={onIntent}
       onTouchStart={onIntent}
       onFocus={onIntent}
@@ -85,7 +85,7 @@ export default function CompactPlaceCard({
               alt={name}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+              className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             />
           ) : (
             <ImagePlaceholder Icon={FallbackIcon} label="Ảnh thực tế đang tải" />

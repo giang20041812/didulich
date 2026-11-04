@@ -49,7 +49,7 @@ export default function VisitedPlaces({ compact = false }: { compact?: boolean }
                   className="group relative block aspect-[4/5] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200"
                 >
                   {image
-                    ? <img src={mediaUrl(image)} alt={place.placeName} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                    ? <img src={mediaUrl(image)} alt={place.placeName} loading="lazy" className="h-full w-full object-cover transition-transform duration-500" />
                     : <ImagePlaceholder Icon={Mountain} />}
                   <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-2 pb-1.5 pt-6">
                     <span className="line-clamp-2 text-xs font-extrabold leading-snug text-white">{place.placeName}</span>
@@ -102,7 +102,7 @@ export default function VisitedPlaces({ compact = false }: { compact?: boolean }
               >
                 <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-100">
                   {image ? (
-                    <img src={mediaUrl(image)} alt={place.placeName} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                    <img src={mediaUrl(image)} alt={place.placeName} loading="lazy" className="h-full w-full object-cover transition-transform duration-500" />
                   ) : (
                     <ImagePlaceholder Icon={Mountain} />
                   )}

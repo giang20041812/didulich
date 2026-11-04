@@ -16,7 +16,7 @@ import type { ReactNode } from 'react';
 export type CardFrameKind = 'house' | 'mountain' | 'food' | 'specialty' | 'transport' | 'service' | 'culture';
 
 /** Nhấc cùng nhịp với thẻ khi rê chuột (thẻ: transition transform duration-500). */
-const LIFT = 'transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/frame:-translate-y-1.5';
+const LIFT = '';
 /** Lớp SVG kéo giãn trên đầu thẻ, rộng đúng bằng thẻ. */
 const TOP = `pointer-events-none absolute inset-x-0 top-0 z-10 w-full overflow-visible ${LIFT}`;
 /** Nét chung: thuộc tính stroke trên <g>; vector-effect không kế thừa nên đặt riêng từng hình (NS). */
@@ -248,13 +248,12 @@ const FRAMES: Record<CardFrameKind, { tone: string; pad: string; top: ReactNode;
 };
 
 export default function CardFrame({ kind, children }: { kind: CardFrameKind; children: ReactNode }) {
-  const { tone, pad, top, bottom } = FRAMES[kind];
+  const { tone, bottom } = FRAMES[kind];
+  // Đã bỏ phần trang trí trên đầu thẻ (top/pad) và hiệu ứng nhấc lên khi rê chuột.
   return (
-    <div className={`group/frame relative flex h-full flex-col ${pad}`}>
-      {/* Màu khung chỉ áp cho phần trang trí (display: contents vẫn truyền color xuống), không lan vào chữ trong thẻ. */}
-      <div aria-hidden className={`contents ${tone}`}>{top}</div>
-      {/* Thẻ giãn hết phần còn lại (các thẻ cùng hàng cao bằng nhau) và nhấc cùng khung khi rê chuột vào bất cứ đâu trong khung. */}
-      <div className="flex min-h-0 flex-1 flex-col *:flex-1 group-hover/frame:*:-translate-y-1.5">{children}</div>
+    <div className="group/frame relative flex h-full flex-col">
+      {/* Thẻ giãn hết phần còn lại (các thẻ cùng hàng cao bằng nhau). */}
+      <div className="flex min-h-0 flex-1 flex-col *:flex-1">{children}</div>
       {bottom && <div aria-hidden className={`contents ${tone}`}>{bottom}</div>}
     </div>
   );

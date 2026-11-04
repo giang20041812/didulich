@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import CardPages from '@/components/ui/CardPages';
 
 interface FramerSwipeCardStackProps {
@@ -28,7 +28,25 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
   label = 'Danh sách thẻ',
   mobileColumnClassName = 'auto-cols-[44%]',
 }) => {
-  if (children.length === 0) return null;
+  const mobileRef = useRef<HTMLDivElement>(null);
+  const touching = useRef(false);
+  const total = children.length;
+
+  // Điện thoại: tự cuộn sang cột kế tiếp mỗi 4 giây, hết thì quay về đầu; dừng khi đang chạm / vuốt.
+  useEffect(() => {
+    if (total < 3 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => {
+      const el = mobileRef.current;
+      if (!el || touching.current || document.hidden || el.offsetParent === null) return;
+      const cols = el.children;
+      const step = cols.length > 2 ? (cols[2] as HTMLElement).offsetLeft - (cols[0] as HTMLElement).offsetLeft : el.clientWidth;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + step, behavior: 'smooth' });
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [total]);
+
+  if (total === 0) return null;
 
   return (
     <div className={`w-full ${className}`}>
@@ -43,6 +61,9 @@ export const FramerSwipeCardStack: React.FC<FramerSwipeCardStackProps> = ({
       )}
       <div
         className={`md:hidden grid grid-flow-col grid-rows-2 ${mobileColumnClassName} gap-3 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+        ref={mobileRef}
+        onTouchStart={() => { touching.current = true; }}
+        onTouchEnd={() => { window.setTimeout(() => { touching.current = false; }, 3000); }}
         role="region"
         aria-label={label}
       >

@@ -238,7 +238,7 @@ export default function SharedJourneyPage() {
               <button type="button" onClick={() => setGuideIndex(index)} className="group block w-full text-left cursor-pointer">
                 <span className="block aspect-[4/3] overflow-hidden rounded-md bg-slate-100">
                   {stop.checkinPhotoUrl ? (
-                    <img src={mediaUrl(stop.checkinPhotoUrl)} alt={`Ảnh check-in tại ${stop.placeName}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                    <img src={mediaUrl(stop.checkinPhotoUrl)} alt={`Ảnh check-in tại ${stop.placeName}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-500" />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center bg-[#f3f6ee] text-[#9fb0a8]"><Quote className="h-6 w-6" aria-hidden /></span>
                   )}
