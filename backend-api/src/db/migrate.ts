@@ -149,7 +149,11 @@ export async function migrate(pool: pg.Pool, changeSets: ChangeSet[] = loadChang
 
   const client = await pool.connect();
   try {
-    for (const cs of changeSets) {
+    // Lọc trước một lần: chỉ duyệt changeset chưa áp dụng. Nếu không, mỗi lần khởi động phải đi qua toàn bộ changeset
+    // (mỗi cái nhiều lượt truy vấn) — khi có changeset đang chờ điều kiện thì khởi động quá chậm và bị Vercel hết giờ.
+    const alreadyApplied = await appliedKeys(client);
+    const todo = changeSets.filter((cs) => !alreadyApplied.has(keyOf(cs)));
+    for (const cs of todo) {
       await client.query('BEGIN');
       try {
         // Khóa theo giao dịch (an toàn với transaction pooler): chờ tiến trình khác chạy xong rồi kiểm tra lại.
