@@ -21,11 +21,11 @@ export default function HeroBackdrop() {
     if (!root) return;
     // Dừng animation ngay khi người dùng bắt đầu cuộn (không đợi hero khuất hẳn): đang cuộn mà 7 lớp nền còn chạy thì
     // tranh luồng vẽ với việc cuộn → giật. Về lại đầu trang thì chạy tiếp.
+    // Không ẩn hero (visibility: hidden) khi cuộn khuất: trình duyệt bỏ luôn ảnh đã vẽ, cuộn lại lên thì ảnh nền phải giải
+    // mã + vẽ lại → thấy như ảnh "tải lại". Dừng animation là đủ nhẹ.
     let visible = true;
-    // Hero cuộn khuất hẳn thì ẩn luôn (visibility) để trình duyệt khỏi giữ/vẽ các lớp GPU của nó khi đọc phần dưới.
     const update = () => {
       root.toggleAttribute('data-paused', !visible || window.scrollY > 24);
-      root.style.visibility = visible ? '' : 'hidden';
     };
     const io = 'IntersectionObserver' in window
       ? new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; update(); })

@@ -244,16 +244,10 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
   const tabIdx = activeTab ? TAB_ORDER.indexOf(activeTab) : 0;
   const tabDir = useRef({ idx: 0, dir: 1 });
   if (activeTab && tabDir.current.idx !== tabIdx) tabDir.current = { idx: tabIdx, dir: tabIdx > tabDir.current.idx ? 1 : -1 };
-  // Máy tính: khối tìm kiếm cuộn khuất dưới header -> thanh thu gọn 3 ô nằm trong header (thay menu giữa), như Airbnb.
+  // Khối tìm kiếm cuộn khuất dưới header -> thanh thu gọn nằm trong header (thay menu giữa), như Airbnb — cả máy tính lẫn
+  // điện thoại (máy tính: 3 ô; điện thoại: một viên "tỉnh · thời gian" mở bảng tìm kiếm).
   const headerSlot = useHeaderSearchSlot();
-  const [isDesktopView, setIsDesktopView] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    const sync = () => setIsDesktopView(mq.matches);
-    mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
-  }, []);
-  const headerCompact = isSticky && isDesktopView && !!headerSlot;
+  const headerCompact = isSticky && !!headerSlot;
   useEffect(() => {
     setHeaderSearchCompact(headerCompact);
     return () => setHeaderSearchCompact(false);
@@ -770,7 +764,21 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           transform sau khi chạy xong (dù là ma trận đơn vị), biến div đó thành containing block cho mọi "fixed" lồng bên
           trong, nên "fixed" sẽ bám theo div đang cuộn thay vì theo màn hình nếu không thoát ra ngoài bằng portal. */}
       {headerCompact && headerSlot && createPortal(
-        <div role="group" aria-label="Tìm homestay" className="flex h-11 items-center rounded-full bg-white pl-1.5 pr-1.5 text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10">
+        <>
+        <button
+          type="button"
+          onClick={toggleSearch}
+          aria-haspopup="dialog"
+          aria-expanded={activeTab !== null}
+          aria-label={`Tìm homestay: ${summary}`}
+          className="md:hidden flex h-10 w-full min-w-0 items-center gap-2 rounded-full bg-white py-0 pl-1 pr-4 text-[13px] font-semibold text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10 cursor-pointer active:scale-[0.98]"
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white">
+            <Search className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
+          </span>
+          <span className="min-w-0 truncate">{province} · {durationShort} · {guestText}</span>
+        </button>
+        <div role="group" aria-label="Tìm homestay" className="hidden md:flex h-11 items-center rounded-full bg-white pl-1.5 pr-1.5 text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10">
           {([['location', province], ['dates', `${dateText} · ${durationShort}`], ['guests', guestText]] as [Tab, string][]).map(([tab, text], i) => (
             <button
               key={tab}
@@ -786,7 +794,8 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           <button type="button" onClick={handleSearch} aria-label={ctaLabel} className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer">
             <Search className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </button>
-        </div>,
+        </div>
+        </>,
         headerSlot
       )}
       {typeof window !== 'undefined' && createPortal(

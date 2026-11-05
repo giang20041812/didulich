@@ -356,6 +356,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         {/* Chiều cao hàng cố định, không co lại khi cuộn: co chiều cao / đổi cỡ logo làm cả trang dàn lại từng khung hình
             (header, khối tìm kiếm, đo menu "Thêm") nên cuộn bị giật — giờ cuộn chỉ đổi nền header.
             Hàng chính. Điện thoại: [☰ logo] … [tài khoản]; khi cuộn qua ô tìm kiếm: [☰] [ô tìm kiếm] [tài khoản].
+            Nút ☰ (mở sidebar) hiện ở mọi kích thước.
             Từ md: lưới 1fr | auto | 1fr — menu (hoặc ô tìm kiếm thu gọn) luôn nằm chính giữa, hai cụm bên chia đều. */}
         <div
           ref={rowRef}
@@ -369,7 +370,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 onClick={handleOpen}
                 aria-label="Mở menu điều hướng"
                 title="Mở menu điều hướng"
-                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center md:hidden ${
+                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center ${
                   isSidebarOpen
                     ? 'opacity-0 pointer-events-none invisible'
                     : 'opacity-100'
@@ -403,8 +404,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
             </Link>
           </div>
 
-          {/* Ô giữa: Luôn hiển thị thanh menu điều hướng chính như ảnh số 2 */}
-          <div className="min-w-0 md:justify-self-center hidden md:block">
+          {/* Ô giữa: menu điều hướng chính (từ md) hoặc thanh tìm kiếm thu gọn (mọi kích thước) khi khối tìm kiếm cuộn khuất */}
+          <div className={`min-w-0 md:justify-self-center ${searchCompact ? 'flex-1 md:flex-none' : 'hidden md:block'}`}>
             <nav ref={desktopNavRef} aria-label="Điều hướng chính" className={`relative items-center justify-center gap-1 ${searchCompact ? "hidden" : "flex"}`}>
               <SlidingPill
                 rect={desktopPill.rect}
@@ -678,7 +679,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         {/* Hàng menu điện thoại (cuộn ngang). Thu lại khi ô tìm kiếm thu gọn chiếm hàng chính để header chỉ còn 1 hàng;
             menu đầy đủ vẫn mở được bằng nút ☰. */}
         <div
-          className={`md:hidden grid transition-[grid-template-rows,opacity] duration-300 ${searchCompact ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
+          className={`md:hidden grid transition-opacity duration-300 ${searchCompact ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
           aria-hidden={searchCompact || undefined}
           inert={searchCompact || undefined}
         >

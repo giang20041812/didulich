@@ -38,6 +38,9 @@ interface CompactPlaceCardProps {
   compact?: boolean;
   /** Khung nét mảnh bên ngoài thẻ theo loại thông tin (nhà sàn cho homestay, núi cho điểm đến... — xem CardFrame). */
   frame?: CardFrameKind;
+  /** Thuộc tính sizes của ảnh theo bề rộng thẻ thật trong lưới (mặc định: điện thoại 1 cột, tablet 2, máy tính 3). Đặt đúng để
+   *  trình duyệt không tải / giải mã ảnh to gấp mấy lần khung — ảnh to dễ bị bỏ khỏi bộ nhớ giải mã rồi hiện lại chậm khi cuộn về. */
+  sizes?: string;
 }
 
 /**
@@ -63,6 +66,7 @@ export default function CompactPlaceCard({
   onIntent,
   compact = false,
   frame,
+  sizes = '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw',
 }: CompactPlaceCardProps) {
   // Chỉ dùng ảnh thật của chính địa điểm; ảnh tạm (picsum...) coi như chưa có ảnh.
   const resolvedPhoto = resolvePlacePhoto(imageUrl);
@@ -81,10 +85,9 @@ export default function CompactPlaceCard({
             <img
               src={src}
               srcSet={mediaSrcSet(resolvedPhoto)}
-              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+              sizes={sizes}
               alt={name}
               loading="lazy"
-              decoding="async"
               className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             />
           ) : (

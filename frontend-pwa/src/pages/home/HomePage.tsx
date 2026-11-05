@@ -14,7 +14,6 @@ const GoogleSignupDialog = lazy(() => import("@/components/auth/GoogleSignupDial
 import NearMePanel from "@/components/home/NearMePanel"
 import NearMeToggle from "@/components/home/NearMeToggle"
 import TimelySuggestion from "@/components/home/TimelySuggestion"
-import { SakuraBlossomIcon } from "@/components/ui/SakuraBlossomIcon"
 import RevealBase from "@/components/ui/Reveal"
 import TypeText from "@/components/ui/TypeText"
 import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
@@ -98,6 +97,9 @@ const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[90
  */
 const SHEET = 'home-snap-panel home-screen relative isolate pt-12 pb-10 md:pt-14 md:pb-12 shadow-[0_-14px_30px_-26px_rgba(10,46,38,0.45)]';
 
+/** Phần "Đặc Sản Nổi Tiếng" trên trang chủ: tạm ẩn. */
+const SHOW_SPECIALTIES = false as boolean;
+
 /** Tiện ích cho chuyến đi (cột trái phần cuối trang). */
 const TRAVEL_TOOLS = [
   {
@@ -163,17 +165,6 @@ const seasonLabel = (dest: PlaceSummaryDto): { text: string; yearRound: boolean 
   return { text: end ? `Mùa đẹp đến: ${end}` : `Mùa đẹp: ${start}`, yearRound: false };
 };
 
-/** Tag "thời điểm phù hợp" trong khung video: mùa đẹp (hồng cam) hoặc quanh năm (xanh). */
-function SuitableTimeTag({ place }: { place: PlaceSummaryDto }) {
-  const season = seasonLabel(place);
-  return (
-    <span className={`inline-flex max-w-full items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-extrabold text-white shadow-sm ${season.yearRound ? 'bg-gradient-to-r from-teal-500 to-emerald-600' : 'bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500'}`}>
-      <SakuraBlossomIcon className="w-3.5 h-3.5 shrink-0" />
-      <span className="truncate">{season.text}</span>
-    </span>
-  );
-}
-
 /**
  * Logo + "Đi Du Lịch" + tagline. `compact`: cỡ nhỏ để nằm gọn trong thẻ banner 3:2 trên điện thoại (bản máy tính ở ngoài
  * thẻ, cỡ lớn). Hai bản cùng có trong DOM nhưng luôn ẩn một (display: none) nên chỉ một tiêu đề được đọc / hiện.
@@ -212,7 +203,7 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
       <Link to={`/destinations/${dest.id}`} className={`${CARD_DARK} aspect-[4/5]`}>
         <div className={CARD_MEDIA}>
           {src ? (
-            <img src={src} alt={dest.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
+            <img src={src} alt={dest.name} loading="lazy" className={CARD_IMAGE} />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
               <Mountain className="h-7 w-7" />
@@ -220,11 +211,6 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
           )}
         </div>
         <div className={CARD_GLOW} aria-hidden />
-
-        {/* Tag mùa đẹp góc trên trái */}
-        <div className="absolute left-2 top-2 z-10 max-w-[calc(100%-1rem)] [&>span]:text-[10px]">
-          <SuitableTimeTag place={dest} />
-        </div>
 
         {/* Chữ đè lên glow ở chân thẻ */}
         <div className="relative z-10 mt-auto px-3 pb-3 pt-10">
@@ -261,7 +247,7 @@ function SpecialtyCard({ item }: { item: NonNullable<HomeResponseDto['specialtie
       <Link to={placeDetailPath(item.kind, item.id)} className={`${CARD_DARK} aspect-[4/5]`}>
         <div className={CARD_MEDIA}>
           {src ? (
-            <img src={src} alt={item.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
+            <img src={src} alt={item.name} loading="lazy" className={CARD_IMAGE} />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
               <Tag className="h-6 w-6" />
@@ -470,8 +456,75 @@ export default function HomePage() {
           quanh khách có chỗ — không có vị trí / không có gì gần thì không render. */}
       <TimelySuggestion />
 
-      {/* 3. Điểm Đến Thích Hợp Theo Mùa */}
+      {/* 3. Homestay Bản Địa & Chốn Nghỉ Bình Yên */}
       <section className="home-snap-panel home-screen relative isolate pt-12 pb-10 md:pt-14 md:pb-12 home-glow-mint">
+        <HomeMotifs variant="homestay" />
+        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <Reveal className="min-w-0 flex-1">
+              <SectionHeading
+
+                title="Homestay & Nhà Nghỉ"
+
+                action={<MobileSeeAll to="/homestays" />}
+              />
+            </Reveal>
+            <DesktopSeeAll to="/homestays">Xem tất cả Homestay bản địa</DesktopSeeAll>
+          </div>
+
+          {/* "Gần tôi": nút chính của phần homestay, kèm lời giải thích ngắn */}
+          <Reveal delay={60}>
+            <div className="mb-7 flex items-center gap-3">
+              <NearMeToggle
+                active={nearHomestays}
+                onToggle={() => setNearHomestays((on) => !on)}
+                noun="homestay"
+              />
+              <p className="min-w-0 text-xs font-medium leading-snug text-slate-500">
+                {nearHomestays
+                  ? 'Xếp theo khoảng cách từ chỗ bạn đứng.'
+                  : 'Đang đi du lịch? Tìm chỗ nghỉ gần nhất.'}
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Homestay: từ tablet mỗi trang 8 thẻ (2 hàng × 4 cột), lướt / bấm ‹ › xem thêm; điện thoại vuốt từng thẻ */}
+          <Reveal delay={100}>
+            {nearHomestays ? (
+              <NearMePanel kind="HOMESTAY" />
+            ) : displayedHomestays.length > 0 ? (
+              <FramerSwipeCardStack perPage={8} gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5" label="Homestay & nhà nghỉ">
+                {displayedHomestays.map((hs) => (
+                  <CompactPlaceCard
+                    key={hs.id}
+                    to={`/homestays/${hs.id}`}
+                    name={hs.name}
+                    imageUrl={hs.coverImageUrl}
+                    location={hs.regionName}
+                    price={formatVnd(hs.priceRefMin, 'Liên hệ')}
+                    priceUnit={hs.priceRefMin ? 'đêm' : null}
+                    // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
+                    onIntent={() => prefetchHomestay(hs.id)}
+                    badge={hs.tagBadge ? <CompactCardBadge className="bg-[#052620]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
+                    compact={true}
+                    frame="house"
+                    // Điện thoại: cột thẻ 44% bề ngang; tablet 3 cột; máy tính 4 cột.
+                    sizes="(max-width: 767px) 45vw, (max-width: 1023px) 33vw, 25vw"
+                  />
+                ))}
+              </FramerSwipeCardStack>
+            ) : (
+              <div className="py-10 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+                <Tent className="w-10 h-10 text-slate-300 mb-2" />
+                <p className="font-medium text-sm">Chưa có homestay bản địa nào</p>
+              </div>
+            )}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* 4. Điểm Đến Thích Hợp Theo Mùa */}
+      <section className={`${SHEET} home-glow-sky`}>
         <HomeMotifs variant="destinations" />
         <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
           {/* Tiêu đề bên trái, "Khám phá thêm" ở góc phải (máy tính) / cạnh nhãn overline (điện thoại) */}
@@ -525,72 +578,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Homestay Bản Địa & Chốn Nghỉ Bình Yên */}
-      <section className={`${SHEET} home-glow-sky`}>
-        <HomeMotifs variant="homestay" />
-        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <Reveal className="min-w-0 flex-1">
-              <SectionHeading
-
-                title="Homestay & Nhà Nghỉ"
-
-                action={<MobileSeeAll to="/homestays" />}
-              />
-            </Reveal>
-            <DesktopSeeAll to="/homestays">Xem tất cả Homestay bản địa</DesktopSeeAll>
-          </div>
-
-          {/* "Gần tôi": nút chính của phần homestay, kèm lời giải thích ngắn */}
-          <Reveal delay={60}>
-            <div className="mb-7 flex items-center gap-3">
-              <NearMeToggle
-                active={nearHomestays}
-                onToggle={() => setNearHomestays((on) => !on)}
-                noun="homestay"
-              />
-              <p className="min-w-0 text-xs font-medium leading-snug text-slate-500">
-                {nearHomestays
-                  ? 'Xếp theo khoảng cách từ chỗ bạn đứng.'
-                  : 'Đang đi du lịch? Tìm chỗ nghỉ gần nhất.'}
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Homestay: từ tablet mỗi trang 8 thẻ (2 hàng × 4 cột), lướt / bấm ‹ › xem thêm; điện thoại vuốt từng thẻ */}
-          <Reveal delay={100}>
-            {nearHomestays ? (
-              <NearMePanel kind="HOMESTAY" />
-            ) : displayedHomestays.length > 0 ? (
-              <FramerSwipeCardStack perPage={8} gridClassName="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5" label="Homestay & nhà nghỉ">
-                {displayedHomestays.map((hs) => (
-                  <CompactPlaceCard
-                    key={hs.id}
-                    to={`/homestays/${hs.id}`}
-                    name={hs.name}
-                    imageUrl={hs.coverImageUrl}
-                    location={hs.regionName}
-                    price={formatVnd(hs.priceRefMin, 'Liên hệ')}
-                    priceUnit={hs.priceRefMin ? 'đêm' : null}
-                    // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
-                    onIntent={() => prefetchHomestay(hs.id)}
-                    badge={hs.tagBadge ? <CompactCardBadge className="bg-[#052620]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
-                    compact={true}
-                    frame="house"
-                  />
-                ))}
-              </FramerSwipeCardStack>
-            ) : (
-              <div className="py-10 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
-                <Tent className="w-10 h-10 text-slate-300 mb-2" />
-                <p className="font-medium text-sm">Chưa có homestay bản địa nào</p>
-              </div>
-            )}
-          </Reveal>
-        </div>
-      </section>
-
-      {/* 5. Đặc Sản Nổi Tiếng - Danh sách món ngon & thức quà bản địa dạng list/grid kèm hiệu ứng hover */}
+      {/* 5. Đặc Sản Nổi Tiếng - Danh sách món ngon & thức quà bản địa dạng list/grid kèm hiệu ứng hover. Tạm ẩn
+          (SHOW_SPECIALTIES) — bật lại thì đổi cờ thành true. */}
+      {SHOW_SPECIALTIES && (
       <section className={`${SHEET} home-glow-ripe`}>
         <HomeMotifs variant="specialty" />
         <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
@@ -624,6 +614,7 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
+      )}
 
       {/* 6. KẾT HỢP: TIỆN ÍCH DU KHÁCH & CAM KẾT DU LỊCH */}
       <section className={`${SHEET} bg-white`}>
