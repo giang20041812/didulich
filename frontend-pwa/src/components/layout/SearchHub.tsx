@@ -116,8 +116,8 @@ const chipClass = (active: boolean, padding = 'px-1.5') => `inline-flex h-10 min
  */
 interface SearchHubProps {
   /**
-   * Hiệu ứng mở đầu (trang chủ): chính nút "Tìm homestay" bật ra thành nút kính lúp tròn, giãn sang trái hiện chữ, rồi khối
-   * trắng mở tiếp sang trái lộ các ô còn lại.
+   * Hiệu ứng mở đầu (trang chủ): chính nút tìm kiếm (kính lúp tròn) bật ra ở đầu trái thanh, rồi gạt sang phải tới cuối
+   * thanh, khối trắng mở theo ngay sau nút lộ các ô còn lại.
    */
   intro?: boolean;
 }
@@ -151,29 +151,23 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
   const ctaMobileRef = useRef<HTMLButtonElement>(null);
   const ctaDesktopRef = useRef<HTMLButtonElement>(null);
 
-  // Hiệu ứng mở đầu: đo nút "Tìm homestay" đang hiện (điện thoại / máy tính) — cỡ nút để khối trắng mở từ đúng hình nút,
-  // khoảng dời kính lúp để lúc còn là nút tròn, kính lúp nằm giữa vòng tròn ở mép phải. Đo bằng offset* (không tính
-  // transform của animation đang chạy).
+  // Hiệu ứng mở đầu: đo nút kính lúp đang hiện (điện thoại / máy tính) — cỡ nút để khối trắng mở từ đúng vòng tròn ở mép
+  // trái, quãng nút trượt từ đầu thanh tới chỗ của nó ở cuối thanh (--cta-travel). Đo bằng offset* (không tính transform
+  // của animation đang chạy).
   useLayoutEffect(() => {
     if (!intro) return undefined;
-    let alive = true;
     const measure = () => {
       const form = formRef.current;
-      if (!alive || !form) return;
+      if (!form) return;
       for (const btn of [ctaMobileRef.current, ctaDesktopRef.current]) {
         if (!btn || btn.offsetWidth === 0) continue;
-        const icon = btn.querySelector<HTMLElement>('[data-cta-icon]');
-        const w = btn.offsetWidth;
-        const h = btn.offsetHeight;
-        const iconCenter = icon ? icon.offsetLeft + icon.offsetWidth / 2 : w / 2;
-        btn.style.setProperty('--cta-shift', `${w - h / 2 - iconCenter}px`);
-        form.style.setProperty('--cta-w', `${w}px`);
-        form.style.setProperty('--cta-h', `${h}px`);
+        form.style.setProperty('--cta-h', `${btn.offsetHeight}px`);
+        form.style.setProperty('--cta-travel', `${form.offsetWidth - 12 - btn.offsetWidth}px`);
       }
     };
     measure();
-    void document.fonts?.ready.then(measure);
-    return () => { alive = false; };
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
   }, [intro]);
 
   // Đồng bộ với đường dẫn (quay lại / mở link kết quả tìm kiếm). Đường dẫn không có thì giữ giá trị mặc định đang có.
@@ -663,12 +657,9 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
             ref={ctaMobileRef}
             type="submit"
             aria-label={ctaLabel}
-            className="relative flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full cta cta-primary px-4 text-sm font-extrabold text-white cursor-pointer"
+            className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
           >
-            <span data-cta-icon className={`flex shrink-0 ${intro ? 'search-cta-icon' : ''}`}>
-              <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            </span>
-            <span className={`max-[359px]:hidden ${intro ? 'search-cta-label' : ''}`}>{ctaLabel}</span>
+            <Search className="h-5 w-5" strokeWidth={2.75} aria-hidden />
           </button>
         </div>
 
@@ -729,12 +720,10 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           <button
             ref={ctaDesktopRef}
             type="submit"
-            className="relative flex h-full w-[184px] items-center justify-center gap-2 whitespace-nowrap rounded-full cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
+            aria-label={ctaLabel}
+            className={`relative flex h-full w-[66px] items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
           >
-            <span data-cta-icon className={`flex shrink-0 ${intro ? 'search-cta-icon' : ''}`}>
-              <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            </span>
-            <span className={intro ? 'search-cta-label' : undefined}>{ctaLabel}</span>
+            <Search className="h-6 w-6" strokeWidth={2.75} aria-hidden />
           </button>
         </div>
       </form>
