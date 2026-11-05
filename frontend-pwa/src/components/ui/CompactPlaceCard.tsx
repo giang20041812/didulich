@@ -38,6 +38,9 @@ interface CompactPlaceCardProps {
   compact?: boolean;
   /** Khung nét mảnh bên ngoài thẻ theo loại thông tin (nhà sàn cho homestay, núi cho điểm đến... — xem CardFrame). */
   frame?: CardFrameKind;
+  /** Thuộc tính sizes của ảnh theo bề rộng thẻ thật trong lưới (mặc định: điện thoại 1 cột, tablet 2, máy tính 3). Đặt đúng để
+   *  trình duyệt không tải / giải mã ảnh to gấp mấy lần khung — ảnh to dễ bị bỏ khỏi bộ nhớ giải mã rồi hiện lại chậm khi cuộn về. */
+  sizes?: string;
 }
 
 /**
@@ -63,6 +66,7 @@ export default function CompactPlaceCard({
   onIntent,
   compact = false,
   frame,
+  sizes = '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw',
 }: CompactPlaceCardProps) {
   // Chỉ dùng ảnh thật của chính địa điểm; ảnh tạm (picsum...) coi như chưa có ảnh.
   const resolvedPhoto = resolvePlacePhoto(imageUrl);
@@ -75,16 +79,15 @@ export default function CompactPlaceCard({
       onTouchStart={onIntent}
       onFocus={onIntent}
     >
-      <Link to={to} className="relative flex flex-1 flex-col aspect-square">
+      <Link to={to} className="relative flex flex-1 flex-col aspect-[4/5]">
         <div className="absolute inset-0 overflow-hidden bg-neutral-900">
           {src ? (
             <img
               src={src}
               srcSet={mediaSrcSet(resolvedPhoto)}
-              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+              sizes={sizes}
               alt={name}
               loading="lazy"
-              decoding="async"
               className="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
             />
           ) : (
@@ -92,7 +95,7 @@ export default function CompactPlaceCard({
           )}
         </div>
         {/* Lớp bóng đen mờ tự nhiên ở chân ảnh để chữ nổi bật, 60% phần trên giữ ảnh nguyên bản 100% không pha bất kỳ màu nào */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-black/85 via-black/40 via-45% to-transparent" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[36%] bg-gradient-to-t from-black/85 via-black/40 via-50% to-transparent" />
         
         {/* Hàng badge phía trên thẻ */}
         {(badge || secondaryBadge || action) && (
@@ -108,22 +111,22 @@ export default function CompactPlaceCard({
 
         {/* Nội dung đè trên ảnh */}
         <div className={`relative z-10 mt-auto flex flex-col gap-1.5 ${compact ? 'p-2.5 pt-8 sm:p-3 sm:pt-10' : 'p-3.5 pt-10 sm:p-4 sm:pt-12'}`}>
-          {location && (
-            <p className="flex min-w-0 items-center gap-1 text-[11px] sm:text-xs font-semibold text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-              <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-amber-300" />
-              <span className="truncate">{location}</span>
-            </p>
-          )}
-
-          <h3
-            className={`font-extrabold leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] ${
-              compact
-                ? 'line-clamp-1 text-xs sm:text-sm'
-                : 'line-clamp-1 text-base sm:text-lg font-bold'
-            }`}
-          >
-            {name}
-          </h3>
+          {/* Tên ngắn: địa điểm nằm cạnh tên; tên dài: địa điểm xuống dòng dưới tên */}
+          <div className={name.length <= 16 ? 'flex min-w-0 items-baseline gap-x-2' : 'flex min-w-0 flex-col gap-0.5'}>
+            <h3
+              className={`min-w-0 font-medium leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.5)] ${
+                compact ? 'line-clamp-1 text-xs sm:text-sm' : 'line-clamp-1 text-base sm:text-lg'
+              } ${name.length <= 16 ? 'shrink-0' : ''}`}
+            >
+              {name}
+            </h3>
+            {location && (
+              <p className="flex min-w-0 items-center gap-1 text-[11px] sm:text-xs font-normal text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
+                <MapPin className="h-3 w-3 shrink-0 text-amber-300" />
+                <span className="truncate">{location}</span>
+              </p>
+            )}
+          </div>
 
           {description && (
             <p className="line-clamp-2 text-[11px] sm:text-xs text-white/80 leading-relaxed font-normal">
@@ -132,19 +135,30 @@ export default function CompactPlaceCard({
           )}
 
           {amenities && !description && (
+            <div className="flex min-w-0 items-center gap-1 pt-0.5">
             <ul
-              className="hidden flex-wrap content-start gap-1 overflow-hidden pt-0.5 md:flex"
+              className="flex h-[19px] min-w-0 flex-1 flex-wrap gap-1 overflow-hidden"
               aria-label="Tiện ích"
             >
-              {amenities.slice(0, compact ? 2 : 4).map((item) => (
+              {amenities.map((item) => (
                 <li
                   key={item}
-                  className="max-w-full truncate rounded-md bg-white/15 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold leading-tight text-white border border-white/20"
+                  className="shrink-0 whitespace-nowrap rounded-md bg-white/15 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium leading-tight text-white border border-white/20"
                 >
                   {item}
                 </li>
               ))}
             </ul>
+            {amenities.length > 0 && (
+              <span
+                title={amenities.join(' · ')}
+                aria-label={`Tất cả tiện ích: ${amenities.join(', ')}`}
+                className="shrink-0 rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-bold leading-tight text-white border border-white/20"
+              >
+                …
+              </span>
+            )}
+            </div>
           )}
 
           {notice}
@@ -203,7 +217,7 @@ export default function CompactPlaceCard({
 }
 
 /** Nhãn nhỏ trên ảnh thẻ gọn (mùa đẹp, Genius...). */
-export function CompactCardBadge({ children, className = 'bg-[#0a7d64]' }: { children: ReactNode; className?: string }) {
+export function CompactCardBadge({ children, className = 'bg-[#052620]' }: { children: ReactNode; className?: string }) {
   return (
     <span className={`inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-extrabold text-white shadow-xs md:text-[11px] ${className}`}>
       {children}

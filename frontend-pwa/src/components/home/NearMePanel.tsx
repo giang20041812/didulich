@@ -53,7 +53,7 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
     <button
       type="button"
       onClick={() => setAroundTown(true)}
-      className="rounded-lg bg-[#0a7d64] px-3.5 py-2 text-xs font-bold text-white transition-colors hover:bg-[#06604a] cursor-pointer"
+      className="rounded-lg bg-[#052620] px-3.5 py-2 text-xs font-bold text-white transition-colors hover:bg-[#0a3a31] cursor-pointer"
     >
       Xem quanh thị trấn Mù Cang Chải
     </button>
@@ -63,7 +63,7 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
   if (!anchor && state.status === 'locating') {
     body = (
       <p className="flex items-center gap-2 py-6 text-sm font-medium text-slate-600">
-        <Loader2 className="h-4 w-4 animate-spin text-[#0a7d64]" /> Đang xác định vị trí của bạn…
+        <Loader2 className="h-4 w-4 animate-spin text-[#052620]" /> Đang xác định vị trí của bạn…
       </p>
     );
   } else if (!anchor) {
@@ -79,7 +79,7 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
           <button
             type="button"
             onClick={retry}
-            className="rounded-lg border-2 border-teal-600/30 bg-white px-3.5 py-2 text-xs font-bold text-[#0a7d64] transition-colors hover:border-[#0a7d64] cursor-pointer"
+            className="rounded-lg border-2 border-teal-600/30 bg-white px-3.5 py-2 text-xs font-bold text-[#052620] transition-colors hover:border-[#052620] cursor-pointer"
           >
             Thử lại
           </button>
@@ -136,11 +136,11 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
                 {place.regionName && <p className="truncate text-xs text-slate-500">{place.regionName}</p>}
                 <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-600">
                   {kind === 'HOMESTAY' && place.priceRefMin != null && place.priceRefMin > 0 && (
-                    <span className="font-semibold text-[#0a7d64]">từ {place.priceRefMin.toLocaleString('vi-VN')}đ</span>
+                    <span className="font-semibold text-[#052620]">từ {place.priceRefMin.toLocaleString('vi-VN')}đ</span>
                   )}
                 </p>
               </div>
-              <span className="shrink-0 rounded-lg bg-[#edfbf7] px-2 py-1 text-xs font-bold text-[#0a7d64]">{formatDistance(km)}</span>
+              <span className="shrink-0 rounded-lg bg-[#edfbf7] px-2 py-1 text-xs font-bold text-[#052620]">{formatDistance(km)}</span>
             </Link>
           </li>
         ))}
@@ -153,14 +153,14 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-sm font-bold text-slate-800">
-            <LocateFixed className="h-4 w-4 shrink-0 text-[#0a7d64]" />
+            <LocateFixed className="h-4 w-4 shrink-0 text-[#052620]" />
             {aroundTown ? 'Quanh thị trấn Mù Cang Chải' : `${kind === 'HOMESTAY' ? 'Homestay' : 'Điểm đến'} gần bạn`}
           </p>
           {aroundTown && state.status === 'ready' && (
             <button
               type="button"
               onClick={() => setAroundTown(false)}
-              className="ml-6 mt-0.5 text-xs font-semibold text-[#0a7d64] underline underline-offset-2 cursor-pointer"
+              className="ml-6 mt-0.5 text-xs font-semibold text-[#052620] underline underline-offset-2 cursor-pointer"
             >
               Dùng vị trí của tôi
             </button>
@@ -179,9 +179,9 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
             value={radius}
             onChange={(e) => setRadius(Number(e.target.value))}
             aria-label={`Bán kính tìm ${noun}`}
-            className="h-1.5 flex-1 cursor-pointer accent-[#0a7d64]"
+            className="h-1.5 flex-1 cursor-pointer accent-[#052620]"
           />
-          <span className="w-12 shrink-0 text-right text-xs font-bold text-[#0a7d64]">{radius} km</span>
+          <span className="w-12 shrink-0 text-right text-xs font-bold text-[#052620]">{radius} km</span>
         </label>
       )}
 

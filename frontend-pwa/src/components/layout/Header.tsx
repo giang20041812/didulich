@@ -18,7 +18,7 @@ import NotificationBell from "./NotificationBell";
 import { hasHeroOverlay } from "@/lib/routeUtils";
 import RecentBookingTag from "./RecentBookingTag";
 import { CUSTOMER_NAV, isCustomerNavActive } from "./customerNav";
-import { useHeaderSearchCompact } from "@/lib/headerSearch";
+import { setHeaderSearchSlot, useHeaderSearchCompact } from "@/lib/headerSearch";
 
 /** Nhãn "Mới" nhỏ cạnh mục điều hướng vừa ra mắt. */
 function NavBadge({ text }: { text: string }) {
@@ -316,7 +316,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
 
   // Cỡ chữ / đệm / độ đậm của mục menu desktop: dùng chung cho mục thật và bản sao đo bề rộng. Mọi thứ làm đổi bề rộng
   // phải giống hệt nhau giữa hai bên (kể cả mục đang chọn), nếu không mục cuối sẽ tràn vào nút chuông.
-  const navItemSize = 'px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-semibold';
+  const navItemSize = 'px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-medium';
   // Mục đang chọn: viên thuốc nền nhạt + chữ màu nhấn. Nền trắng dùng xanh thương hiệu (vàng trên trắng không đọc được),
   // nền ảnh hero dùng vàng nắng trên kính mờ.
   const navItemTone = (active: boolean) =>
@@ -342,7 +342,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
       <header
         ref={headerRef}
         id="app-header"
-        className={`fixed top-0 inset-x-0 z-50 flex flex-col w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ease-out pt-[var(--safe-top)] pl-[var(--safe-left)] pr-[var(--safe-right)] ${
+        className={`fixed top-0 inset-x-0 z-50 flex flex-col w-full border-b transition-[background-color,border-color] duration-300 ease-out pt-[var(--safe-top)] pl-[var(--safe-left)] pr-[var(--safe-right)] ${
           isSolid
             ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.985),rgba(236,253,245,0.97))] border-emerald-900/[0.08] shadow-[0_12px_32px_-18px_rgba(10,46,38,0.45)]'
             : 'bg-transparent border-transparent'
@@ -356,6 +356,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         {/* Chiều cao hàng cố định, không co lại khi cuộn: co chiều cao / đổi cỡ logo làm cả trang dàn lại từng khung hình
             (header, khối tìm kiếm, đo menu "Thêm") nên cuộn bị giật — giờ cuộn chỉ đổi nền header.
             Hàng chính. Điện thoại: [☰ logo] … [tài khoản]; khi cuộn qua ô tìm kiếm: [☰] [ô tìm kiếm] [tài khoản].
+            Nút ☰ (mở sidebar) hiện ở mọi kích thước.
             Từ md: lưới 1fr | auto | 1fr — menu (hoặc ô tìm kiếm thu gọn) luôn nằm chính giữa, hai cụm bên chia đều. */}
         <div
           ref={rowRef}
@@ -403,9 +404,9 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
             </Link>
           </div>
 
-          {/* Ô giữa: Luôn hiển thị thanh menu điều hướng chính như ảnh số 2 */}
-          <div className="min-w-0 md:justify-self-center hidden md:block">
-            <nav ref={desktopNavRef} aria-label="Điều hướng chính" className="relative flex items-center justify-center gap-1">
+          {/* Ô giữa: menu điều hướng chính (từ md) hoặc thanh tìm kiếm thu gọn (mọi kích thước) khi khối tìm kiếm cuộn khuất */}
+          <div className={`min-w-0 md:justify-self-center ${searchCompact ? 'flex-1 md:flex-none' : 'hidden md:block'}`}>
+            <nav ref={desktopNavRef} aria-label="Điều hướng chính" className={`relative items-center justify-center gap-1 ${searchCompact ? "hidden" : "flex"}`}>
               <SlidingPill
                 rect={desktopPill.rect}
                 animate={desktopPill.animate}
@@ -468,6 +469,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 </div>
               )}
             </nav>
+            {/* Ô chứa thanh tìm kiếm thu gọn (SearchHub đưa vào khi khối tìm kiếm cuộn khuất) */}
+            <div ref={setHeaderSearchSlot} className={searchCompact ? 'flex justify-center' : 'hidden'} />
           </div>
 
           {/* Bản sao ẩn của menu giữa để đo bề rộng từng mục (không nhận focus, không chiếm chỗ) */}
@@ -501,7 +504,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     ref={accountButtonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen((v) => !v)}
-                    className={`icon-fx relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
+                    className={`acct-glow relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
                       isSolid
                         ? 'bg-white/90 border-slate-200/80 hover:border-emerald-500/50 shadow-2xs'
                         : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:border-white/60 shadow-xs'
@@ -676,7 +679,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         {/* Hàng menu điện thoại (cuộn ngang). Thu lại khi ô tìm kiếm thu gọn chiếm hàng chính để header chỉ còn 1 hàng;
             menu đầy đủ vẫn mở được bằng nút ☰. */}
         <div
-          className={`md:hidden grid transition-[grid-template-rows,opacity] duration-300 ${searchCompact ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
+          className={`md:hidden grid transition-opacity duration-300 ${searchCompact ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`}
           aria-hidden={searchCompact || undefined}
           inert={searchCompact || undefined}
         >

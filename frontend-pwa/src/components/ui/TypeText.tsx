@@ -30,8 +30,11 @@ export default function TypeText({ text, delay = 0, speed = 28, repeat = true, c
       (entries) => {
         const entry = entries[entries.length - 1];
         if (!entry) return;
-        if (entry.isIntersecting) setInView(true);
-        else if (repeat) {
+        if (entry.isIntersecting) {
+          setInView(true);
+          // Chỉ gõ một lần: thôi theo dõi, khỏi tính giao cắt cho phần tử này ở mỗi khung hình cuộn.
+          if (!repeat) io.disconnect();
+        } else if (repeat) {
           setInView(false);
           setShown(0);
         }

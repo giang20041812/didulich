@@ -71,7 +71,7 @@ export default function TravelGuidePage() {
         <div className="flex flex-wrap items-center gap-2 py-4">
           {SECTIONS.map(s => (
             <button key={s.id} type="button" onClick={() => scrollTo(s.id)}
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition-all hover:border-[#0a7d64] hover:text-[#0a7d64] active:scale-95">
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition-all hover:border-[#052620] hover:text-[#052620] active:scale-95">
               <s.icon className="h-3.5 w-3.5" /> {s.label}
             </button>
           ))}
@@ -160,7 +160,7 @@ export default function TravelGuidePage() {
             <SectionHead icon={UtensilsCrossed} title="Ẩm thực không nên bỏ lỡ" desc="Cốm Tú Lệ còn ấm, xôi ngũ sắc, gà nướng mắc khén… — xem mục Đặc sản để biết nơi mua, nơi thưởng thức." />
             <Link to="/specialties" className="group flex items-center justify-between gap-3 rounded-xl border-2 border-slate-100 bg-white p-4 shadow-2xs transition-all hover:border-teal-500/30 hover:shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0a7d64]/10 text-[#0a7d64]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#052620]/10 text-[#052620]">
                   <Mountain className="h-5 w-5" />
                 </div>
                 <div>
@@ -168,7 +168,7 @@ export default function TravelGuidePage() {
                   <p className="text-xs text-slate-500">Món đặc trưng của đồng bào vùng cao và nơi mua</p>
                 </div>
               </div>
-              <span className="flex items-center gap-1 text-xs font-bold text-[#0a7d64]">Xem tất cả <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+              <span className="flex items-center gap-1 text-xs font-bold text-[#052620]">Xem tất cả <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
             </Link>
           </section>
         </Reveal>

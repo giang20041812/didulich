@@ -20,7 +20,7 @@ interface AuthShellProps {
  */
 export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
   return (
-    <main className="relative flex min-h-dvh w-full flex-col justify-between overflow-x-hidden bg-[#04261f] font-body text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+    <main className="relative flex min-h-dvh w-full flex-col justify-between lg:h-dvh lg:overflow-y-hidden overflow-x-hidden bg-[#04261f] font-body text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
       {/* ── BỨC TRANH DI SẢN TÂY BẮC TOÀN MÀN HÌNH (FULL-BLEED BACKGROUND) ── */}
       <div
         className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center transition-transform duration-1000 ease-out scale-100"
@@ -35,7 +35,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
       </div>
 
       {/* ── THANH ĐIỀU HƯỚNG TRÊN CÙNG (TOP BAR) ── */}
-      <header className="relative z-20 flex w-full items-center justify-between px-4 py-5 sm:px-8 lg:px-12">
+      <header className="relative z-20 flex w-full items-center justify-between px-4 py-5 sm:px-8 lg:px-12 lg:py-3">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md transition-all duration-200 hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95"
@@ -56,7 +56,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
       </header>
 
       {/* ── NỘI DUNG CHÍNH (MAIN CONTAINER) ── */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 py-6 sm:px-6 lg:min-h-0 lg:px-8 lg:py-2">
         <div className="grid w-full grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12">
           
           {/* CỘT TRÁI (DESKTOP): Thông điệp thương hiệu & 3 cam kết vàng */}
@@ -131,10 +131,10 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           {/* CỘT PHẢI: KHỐI FORM LỒNG TRỰC TIẾP TRÊN NỀN ẢNH (GLASSMORPHISM) */}
           <div className="flex w-full justify-center lg:col-span-6 lg:justify-end xl:col-span-5">
             <div className="w-full max-w-[440px]">
-              <div className="rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8 transition-all duration-300">
+              <div className="rounded-3xl border border-white/40 bg-white/95 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl sm:p-8 lg:max-h-[calc(100dvh-8.5rem)] lg:overflow-y-auto lg:p-6 transition-all duration-300">
                 <h1 className="text-2xl font-black tracking-tight text-slate-900">{title}</h1>
                 <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-500">{subtitle}</p>
-                <div className="mt-6">{children}</div>
+                <div className="mt-6 lg:mt-4">{children}</div>
               </div>
 
               {footer && (
@@ -149,7 +149,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
       </div>
 
       {/* ── CHÂN TRANG ĐIỀU KHOẢN (FOOTER DISCLAIMER) ── */}
-      <footer className="relative z-20 py-4 text-center text-[11px] text-white/70 drop-shadow-sm px-4">
+      <footer className="relative z-20 py-4 lg:py-2 text-center text-[11px] text-white/70 drop-shadow-sm px-4">
         Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của Đi Du Lịch.
       </footer>
     </main>

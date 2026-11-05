@@ -569,41 +569,24 @@
 }
 
 /*
- * Trang chủ — họa tiết nét mảnh được vẽ dần khi cuộn tới (HomeMotifs.tsx → Motif). JS đặt --len / --dur / --delay cho từng
- * nét; ở đây ẩn nét bằng dash dài hơn nét 4px (không lộ chấm đầu nét bo tròn) rồi trượt stroke-dashoffset về 0 theo đường
- * cong êm (chậm vào – nhanh giữa – chậm ra). Nét đứt (đường đi) không dùng được dash nên hiện dần bằng opacity; hình tô sẵn
- * (kim la bàn) hiện màu sau khi nét viền đã vẽ xong. Chỉ chạy một lần, vẽ xong không còn animation nào.
+ * Trang chủ / trang danh sách — họa tiết nét mảnh hiện dần khi cuộn tới (HomeMotifs.tsx → Motif): cả khung SVG mờ dần vào
+ * và trồi nhẹ lên. Chỉ opacity + translate (GPU) — KHÔNG vẽ từng nét bằng stroke-dashoffset: animation đó chạy trên luồng
+ * chính, mỗi khung hình phải tính style + vẽ lại hàng chục nét đúng lúc cuộn tới phần mới → đo thấy là nguồn giật lớn nhất
+ * khi cuộn trang chủ khỏi hero. Không đặt will-change cố định: 16 họa tiết thành 16 lớp GPU suốt đời trang, kéo theo cả các
+ * phần nội dung đè lên chúng cũng bị tách lớp; trình duyệt tự nâng lớp trong lúc transition chạy là đủ.
  */
-/* Animation stroke-dashoffset không chạy trên GPU: mỗi khung hình phải vẽ lại SVG trên luồng chính, và nếu không cô lập thì
-   vùng vẽ lại lan ra cả nền gradient / nội dung chồng lên → giật đúng lúc cuộn tới phần mới. Mỗi họa tiết thành một lớp riêng
-   (kích thước cố định theo class) để chỉ vẽ lại chính nó. */
 .motif {
   contain: strict;
-  will-change: transform;
 }
-.motif[data-ink] :is(path, circle, ellipse):not([stroke-dasharray]) {
-  stroke-dasharray: var(--len) calc(var(--len) + 4px);
-  stroke-dashoffset: calc(var(--len) + 2px);
-}
-.motif[data-ink] path[stroke-dasharray] {
+.motif[data-ink] {
   opacity: 0;
+  translate: 0 14px;
 }
-.motif[data-ink] path[fill-opacity] {
-  fill-opacity: 0;
-}
-/* Chuyển động chỉ gắn ở trạng thái đã vẽ: lúc thêm data-ink (ẩn nét) phải ẩn ngay, nếu không nét đang hiện sẵn sẽ bị
-   "xóa ngược" dần theo từng độ trễ trước khi kịp vẽ. */
-.motif[data-ink][data-drawn] :is(path, circle, ellipse):not([stroke-dasharray]) {
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset var(--dur, 1600ms) cubic-bezier(0.45, 0, 0.2, 1) var(--delay, 0ms);
-}
-.motif[data-ink][data-drawn] path[stroke-dasharray] {
+/* Chuyển động chỉ gắn ở trạng thái đã hiện: lúc thêm data-ink (ẩn) phải ẩn ngay, không mờ dần đi. */
+.motif[data-ink][data-drawn] {
   opacity: 1;
-  transition: opacity 1600ms ease 600ms;
-}
-.motif[data-ink][data-drawn] path[fill-opacity] {
-  fill-opacity: 0.4;
-  transition: stroke-dashoffset var(--dur, 1600ms) cubic-bezier(0.45, 0, 0.2, 1) var(--delay, 0ms), fill-opacity 1600ms ease 1400ms;
+  translate: none;
+  transition: opacity 1100ms ease var(--motif-delay, 0ms), translate 1300ms cubic-bezier(0.22, 1, 0.36, 1) var(--motif-delay, 0ms);
 }
 
 @layer utilities {
@@ -824,7 +807,10 @@
 
 /*
  * Ảnh đang tải (lib/imageFx.ts gắn data-loading): giấu nội dung ảnh đang vẽ dở (đẩy object-position ra ngoài khung)
- * và vẽ skeleton lấp lánh làm nền ngay trên khung <img>; tải xong thì ảnh mờ dần vào, trọn vẹn một lần.
+ * và tô nền skeleton tĩnh ngay trên khung <img>; tải xong thì ảnh mờ dần vào, trọn vẹn một lần.
+ * Nền KHÔNG lấp lánh: vệt sáng chạy bằng background-position không lên GPU được, mỗi khung hình luồng chính phải tính style +
+ * vẽ lại mọi ảnh đang chờ. Ảnh lazy nằm ngoài khung (trang thẻ thứ 2 trong lưới cuộn ngang, ô đệm ẩn) chờ mãi không tải, nên
+ * trước đây hàng chục vệt sáng chạy suốt đời trang → cuộn trang chủ khỏi hero bị giật.
  * data-no-skeleton: chỉ chờ tải xong, không vẽ nền (ảnh trên nền tối như hero).
  */
 img[data-loading] {
@@ -833,10 +819,6 @@ img[data-loading] {
 }
 img[data-loading]:not([data-no-skeleton]) {
   background-color: #e8eeec;
-  background-image: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.65) 50%, transparent 80%);
-  background-size: 200% 100%;
-  background-repeat: no-repeat;
-  animation: imgShimmer 1.3s ease-in-out infinite;
 }
 /* Trong @layer base: ảnh nào tự có animation riêng (vd. .hero-grass, animate-*) thì animation đó được ưu tiên. */
 @layer base {
@@ -844,18 +826,9 @@ img[data-loading]:not([data-no-skeleton]) {
     animation: imgReveal 0.45s ease-out;
   }
 }
-@keyframes imgShimmer {
-  from { background-position: 150% 0; }
-  to { background-position: -50% 0; }
-}
 @keyframes imgReveal {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  img[data-loading]:not([data-no-skeleton]) {
-    animation: none;
-  }
 }
 
 /*
@@ -1000,3 +973,12 @@ img[data-loading]:not([data-no-skeleton]) {
     animation: none !important;
   }
 }
+
+/* Bảng tìm kiếm (máy tính): hiện ra từ mép trên, mờ + phóng nhẹ; đổi tab thì nội dung trượt nhẹ theo chiều chuyển. */
+.search-pop { animation: searchPop 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.search-panel-next { animation: searchPanelNext 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.search-panel-prev { animation: searchPanelPrev 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+@keyframes searchPop { from { opacity: 0; transform: scale(0.96) translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes searchPanelNext { from { opacity: 0; transform: translate3d(18px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes searchPanelPrev { from { opacity: 0; transform: translate3d(-18px, 0, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .search-pop, .search-panel-next, .search-panel-prev { animation: none !important; } }

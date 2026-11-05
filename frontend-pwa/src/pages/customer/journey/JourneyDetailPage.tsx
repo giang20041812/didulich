@@ -54,7 +54,7 @@ export default function JourneyDetailPage() {
   return (
     <div className="min-h-screen bg-[var(--color-canvas)] pb-20">
       <div className="mx-auto max-w-5xl px-4 pt-4 sm:px-6">
-        <Link to="/lich-trinh?tab=cua-toi" className="inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-semibold text-slate-600 hover:text-[#0a7d64]">
+        <Link to="/lich-trinh?tab=cua-toi" className="inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-semibold text-slate-600 hover:text-[#052620]">
           <ArrowLeft className="h-4 w-4" /> Lịch trình của tôi
         </Link>
         {justSaved && journey && (
@@ -78,7 +78,7 @@ export default function JourneyDetailPage() {
             <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-center">
               <AlertCircle className="mx-auto mb-2 h-6 w-6 text-rose-500" />
               <p className="text-sm font-semibold text-slate-700">{error || 'Không tìm thấy lịch trình.'}</p>
-              <Link to="/lich-trinh?tab=cua-toi" className="mt-3 inline-block text-sm font-bold text-[#0a7d64] hover:underline">Về lịch trình của tôi</Link>
+              <Link to="/lich-trinh?tab=cua-toi" className="mt-3 inline-block text-sm font-bold text-[#052620] hover:underline">Về lịch trình của tôi</Link>
             </div>
           ) : !journey ? (
             <div className="space-y-4" role="status" aria-label="Đang tải lịch trình">

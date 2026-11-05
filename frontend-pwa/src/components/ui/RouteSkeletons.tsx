@@ -143,10 +143,9 @@ export function HomestayListFallback() {
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-4 pb-8">
         <Crumb label="Homestay & Chỗ nghỉ" />
         <div className="mb-5">
-          <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#0a7d64] to-[#d97706] bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#052620] to-[#d97706] bg-clip-text text-transparent">
             Chốn nghỉ giữa ruộng bậc thang
           </h1>
-          <div className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
         </div>
         <ToolbarSkeleton {...spec.toolbar} />
         <SidebarBody filter={<FilterPanelSkeleton {...spec.filter} />} mobileFilter={<MobileFilterButton label="Lọc kết quả homestay" homestay />} count={spec.count} />
@@ -328,7 +327,7 @@ export function TripsHubFallback() {
           </div>
           <Link
             to="/lich-trinh/tao"
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0a7d64] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(10,125,100,0.8)] transition-colors hover:bg-[#06604a]"
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#052620] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(5,38,32,0.8)] transition-colors hover:bg-[#0a3a31]"
           >
             <Plus className="h-5 w-5" strokeWidth={2.75} aria-hidden /> Tạo lịch trình
           </Link>
