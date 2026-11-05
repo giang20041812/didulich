@@ -49,8 +49,11 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
   const scrollerRef = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
   const [page, setPage] = useState(0);
-  /** Vị trí cuộn tính theo trang (số thực, 0 → count-1): vạch sáng trên thanh tiến trình bám theo khi đang vuốt. */
-  const [progress, setProgress] = useState(0);
+  /**
+   * Vạch sáng trên thanh tiến trình bám theo vị trí cuộn (số thực, 0 → count-1) khi đang vuốt. Đặt thẳng transform qua ref,
+   * không qua state: state đổi mỗi khung hình làm React vẽ lại cả trang thẻ (8–10 thẻ có ảnh) suốt lúc vuốt → giật.
+   */
+  const barRef = useRef<HTMLSpanElement>(null);
 
   /** Khoảng cách giữa hai trang liền nhau (bề rộng trang + khe). */
   const stepOf = (el: HTMLDivElement) => {
@@ -63,7 +66,7 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
     const el = scrollerRef.current;
     if (!el) return;
     const exact = Math.max(0, Math.min(count - 1, el.scrollLeft / Math.max(1, stepOf(el))));
-    setProgress(exact);
+    if (barRef.current) barRef.current.style.transform = `translate3d(${(exact * SEG).toFixed(1)}px, -50%, 0)`;
     setPage(Math.round(exact));
   }, [count]);
   const onScroll = useCallback(() => {
@@ -120,9 +123,10 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
               <div className="relative flex items-center" style={{ width: SEG * count }}>
                 <span aria-hidden className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-900/15" />
                 <span
+                  ref={barRef}
                   aria-hidden
-                  className="absolute top-1/2 h-0.5 -translate-y-1/2 bg-[var(--color-primary)]"
-                  style={{ width: SEG, transform: `translate(${progress * SEG}px, -50%)` }}
+                  className="absolute left-0 top-1/2 h-0.5 bg-[var(--color-primary)] will-change-transform"
+                  style={{ width: SEG, transform: 'translate3d(0, -50%, 0)' }}
                 />
                 {pages.map((_, index) => (
                   <button

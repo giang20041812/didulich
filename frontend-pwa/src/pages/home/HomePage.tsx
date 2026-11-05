@@ -40,7 +40,7 @@ function SectionHeading({ title, description, action }: { title: string; descrip
 
         {action && <div className="md:hidden">{action}</div>}
       </div>
-      <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
+      <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-medium leading-tight text-[#0a2e26] tracking-tight">
         <TypeText repeat={false} text={title} speed={45} delay={150} />
       </h2>
       {description && (
@@ -627,7 +627,7 @@ export default function HomePage() {
         <div className="relative max-w-[1280px] mx-auto w-full px-4 md:px-8">
           <Reveal className="mb-9 md:mb-12 text-center">
 
-            <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
+            <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-medium leading-tight text-[#0a2e26] tracking-tight">
               <TypeText repeat={false} text="Tiện Ích Du Khách & Cam Kết Du Lịch" speed={40} delay={150} />
             </h2>
 

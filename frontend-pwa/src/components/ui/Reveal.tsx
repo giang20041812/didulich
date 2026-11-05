@@ -51,7 +51,9 @@ export default function Reveal({ children, delay = 0, className = '', offset = 2
       // will-change chỉ khi còn chờ hiện: giữ mãi thì mỗi khối thành một layer GPU riêng suốt đời trang, cuộn nặng dần.
       className={`${className} transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
         // Không dùng blur: filter trên cả khối thẻ có ảnh bắt trình duyệt vẽ lại toàn khối mỗi khung hình → cuộn giật.
-        visible ? 'opacity-100' : 'opacity-0 will-change-[opacity,transform]'
+        // Không đặt will-change lúc chờ: hàng chục khối chờ hiện thành hàng chục lớp GPU cùng lúc; trình duyệt tự nâng lớp
+        // trong lúc transition chạy là đủ.
+        visible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
         transitionDelay: visible ? `${delay}ms` : '0ms',
