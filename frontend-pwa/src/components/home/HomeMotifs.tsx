@@ -4,8 +4,8 @@ import { MOTIFS, type MotifName } from '@/components/home/motifShapes';
 /**
  * Họa tiết minh họa nền cho từng phần trang chủ, vẽ nét mảnh, bo tròn và mờ ở hai mép: mỗi phần một bộ riêng theo nội dung
  * (điểm đến → núi / ruộng bậc thang, homestay → nhà sàn / đèn lồng / lửa trại, đặc sản → bát phở / bông lúa / cá nướng, hành
- * trình → la bàn / đường đi / ba lô). Hình nằm trong motifShapes.tsx; trong cùng một phần / trang không có hai hình trùng nhau. Khi cuộn tới, từng nét được "vẽ" dần ra, lần lượt từ nét này sang nét khác (xem .motif trong globals.css);
- * vẽ xong thì đứng yên nên không tốn công vẽ lại khi cuộn.
+ * trình → la bàn / đường đi / ba lô). Hình nằm trong motifShapes.tsx; trong cùng một phần / trang không có hai hình trùng nhau. Khi cuộn tới, cả hình mờ dần vào và trồi nhẹ lên (xem .motif trong globals.css);
+ * hiện xong thì đứng yên nên không tốn công vẽ lại khi cuộn.
  *
  * Các trang danh sách (homestay, điểm đến, ẩm thực...) dùng lại cùng lớp này làm nền dưới hero (`className` đặt vùng phủ).
  *
@@ -127,12 +127,12 @@ const LAYOUT: Record<MotifVariant, { tone: string; items: Placement[] }> = {
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Một họa tiết: đo độ dài từng nét (getTotalLength) trước lần vẽ đầu để ẩn hết nét đi, rồi thêm data-drawn —
- * CSS (.motif) trượt stroke-dashoffset về 0, mỗi nét một độ trễ nối đuôi nhau nên cảm giác như một bàn tay vẽ liền mạch.
- * Khi `together` (màn hình lớn, mỗi phần vừa một màn hình): cả bộ họa tiết của phần vẽ cùng lúc khi phần đó tới
- * (`sectionDrawn`), họa tiết sau bắt đầu trễ hơn họa tiết trước 220ms. Ngược lại (điện thoại, phần dài hơn màn hình): từng
- * họa tiết tự vẽ khi lên tới 65% phía trên màn hình. Không có IntersectionObserver / bật giảm chuyển động thì giữ nguyên nét
- * hiện sẵn.
+ * Một họa tiết: ẩn đi trước lần vẽ đầu (data-ink), rồi thêm data-drawn khi cuộn tới — CSS (.motif) cho cả hình hiện dần và
+ * trồi nhẹ lên. Chỉ animate opacity + translate của cả khung SVG (chạy trên GPU): trước đây từng nét được "vẽ" bằng
+ * stroke-dashoffset, mỗi khung hình luồng chính phải tính lại style + vẽ lại hàng chục nét đúng lúc khách đang cuộn → giật.
+ * Khi `together`: cả bộ họa tiết của phần hiện cùng lúc khi phần đó tới (`sectionDrawn`), họa tiết sau trễ hơn họa tiết
+ * trước 220ms. Ngược lại: từng họa tiết tự hiện khi lên tới 65% phía trên màn hình. Không có IntersectionObserver / bật giảm
+ * chuyển động thì hiện sẵn.
  */
 function Motif({ children, className, together, sectionDrawn, order }: { children: ReactNode; className: string; together: boolean; sectionDrawn: boolean; order: number }) {
   const ref = useRef<SVGSVGElement>(null);
@@ -143,16 +143,7 @@ function Motif({ children, className, together, sectionDrawn, order }: { childre
   useLayoutEffect(() => {
     const svg = ref.current;
     if (!svg || reduceMotion() || !('IntersectionObserver' in window)) return;
-    const base = together ? order * 220 : 0;
-    let delay = base;
-    svg.querySelectorAll<SVGGeometryElement>('path, circle, ellipse').forEach((el) => {
-      const len = el.getTotalLength();
-      el.style.setProperty('--len', `${len.toFixed(1)}px`);
-      // Nét dài vẽ lâu hơn; độ trễ cộng dồn (có trần) để các nét nối nhau chứ không bắt đầu cùng lúc.
-      el.style.setProperty('--dur', `${Math.round(Math.min(2400, 800 + len * 5))}ms`);
-      el.style.setProperty('--delay', `${Math.round(delay)}ms`);
-      delay = Math.min(base + 1800, delay + 55 + len * 0.6);
-    });
+    if (together) svg.style.setProperty('--motif-delay', `${order * 220}ms`);
     setInked(true);
   }, [together, order]);
 
