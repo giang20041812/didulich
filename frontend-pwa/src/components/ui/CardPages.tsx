@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { cloneElement, isValidElement, useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CardPagesProps {
@@ -12,10 +12,10 @@ interface CardPagesProps {
   label: string;
 }
 
-/** Nút ‹ › tròn nằm trong viên thuốc điều khiển; nút "sau" tô gradient xanh làm điểm nhấn. */
-const ARROW = 'group/arrow flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[background-color,color,transform,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer';
-const ARROW_GHOST = `${ARROW} text-[var(--color-ink-deep)] hover:bg-slate-900/[0.06] disabled:hover:bg-transparent`;
-const ARROW_SOLID = `${ARROW} bg-[linear-gradient(135deg,#0a7d64,#12b886)] text-white shadow-[0_6px_14px_-6px_rgba(10,125,100,0.7)] hover:shadow-[0_10px_20px_-8px_rgba(10,125,100,0.9)] hover:scale-105 disabled:bg-slate-300 disabled:bg-none disabled:shadow-none disabled:hover:scale-100`;
+/** Nút ‹ › trơn, hòa vào nền (không viên thuốc, không bóng): chỉ đổi màu khi rê / bấm. */
+const ARROW = 'group/arrow flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-[color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-25 cursor-pointer';
+const ARROW_GHOST = `${ARROW} text-slate-500 hover:text-[var(--color-ink-deep)]`;
+const ARROW_SOLID = `${ARROW} text-[var(--color-primary)] hover:text-[#06604a]`;
 /** Bề rộng một ô trên thanh tiến trình (px) — vạch sáng trượt liền theo vị trí cuộn. */
 const SEG = 22;
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -29,6 +29,20 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
   const pages = useMemo(() => {
     const result: ReactNode[][] = [];
     for (let i = 0; i < children.length; i += perPage) result.push(children.slice(i, i + perPage));
+    // Mọi trang luôn đủ perPage ô: ô thiếu lấp bằng bản sao ẩn của thẻ đầu (cùng cỡ thẻ thật) để chiều cao phần không đổi
+    // dù có ít thẻ hay trang cuối lẻ.
+    const template = children[0];
+    if (isValidElement(template)) {
+      for (const cards of result) {
+        for (let i = cards.length; i < perPage; i += 1) {
+          cards.push(
+            <div key={`pad-${i}`} aria-hidden inert className="pointer-events-none invisible select-none">
+              {cloneElement(template as ReactElement, { key: undefined })}
+            </div>,
+          );
+        }
+      }
+    }
     return result;
   }, [children, perPage]);
   const count = pages.length;
@@ -93,7 +107,7 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
 
       {count > 1 && (
         <div className="mt-6 flex justify-center">
-          <div className="inline-flex items-center gap-1 rounded-full bg-white/90 p-1 shadow-[0_1px_2px_rgba(16,40,34,0.06),0_12px_28px_-14px_rgba(16,40,34,0.35)] ring-1 ring-slate-900/[0.06] backdrop-blur">
+          <div className="inline-flex items-center gap-1">
             <button type="button" onClick={() => goTo(page - 1)} disabled={page === 0} aria-label="Trang trước" className={ARROW_GHOST}>
               <ChevronLeft className="h-[18px] w-[18px] transition-transform duration-300 group-hover/arrow:-translate-x-0.5" strokeWidth={2.5} aria-hidden />
             </button>
@@ -104,10 +118,10 @@ export default function CardPages({ children, perPage, pageClassName, label }: C
               </span>
               {/* Thanh tiến trình: mỗi trang một ô bấm được, vạch gradient trượt liền theo vị trí cuộn */}
               <div className="relative flex items-center" style={{ width: SEG * count }}>
-                <span aria-hidden className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-slate-900/[0.08]" />
+                <span aria-hidden className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-900/15" />
                 <span
                   aria-hidden
-                  className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,#0a7d64,#12b886,#06b6d4)] shadow-[0_0_10px_rgba(18,184,134,0.55)]"
+                  className="absolute top-1/2 h-0.5 -translate-y-1/2 bg-[var(--color-primary)]"
                   style={{ width: SEG, transform: `translate(${progress * SEG}px, -50%)` }}
                 />
                 {pages.map((_, index) => (
