@@ -331,3 +331,46 @@
   }
   .cta::after { display: none; }
 }
+
+/* ============================== Nút tài khoản: viền sáng chạy vòng khi rê chuột ==============================
+   Một dải sáng xoay quanh viền (conic-gradient + mask chỉ để lộ phần viền) kèm quầng mờ phía sau, nền nút giữ nguyên. */
+@property --acct-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.acct-glow {
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.acct-glow::before,
+.acct-glow::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: conic-gradient(from var(--acct-angle), transparent 0 40%, #2dd4bf 55%, #facc15 70%, #fb923c 82%, transparent 95%);
+  transition: opacity 0.35s ease;
+}
+.acct-glow::before {
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.acct-glow::after {
+  filter: blur(9px);
+  inset: 0;
+}
+@media (hover: hover) {
+  .acct-glow:hover::before { opacity: 1; animation: acctSpin 2.2s linear infinite; }
+  .acct-glow:hover::after { opacity: 0.55; animation: acctSpin 2.2s linear infinite; }
+}
+.acct-glow:active { transform: scale(0.96); }
+@keyframes acctSpin { to { --acct-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .acct-glow::before, .acct-glow::after { animation: none !important; }
+}

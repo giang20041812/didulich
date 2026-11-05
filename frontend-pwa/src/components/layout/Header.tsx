@@ -18,7 +18,7 @@ import NotificationBell from "./NotificationBell";
 import { hasHeroOverlay } from "@/lib/routeUtils";
 import RecentBookingTag from "./RecentBookingTag";
 import { CUSTOMER_NAV, isCustomerNavActive } from "./customerNav";
-import { useHeaderSearchCompact } from "@/lib/headerSearch";
+import { setHeaderSearchSlot, useHeaderSearchCompact } from "@/lib/headerSearch";
 
 /** Nhãn "Mới" nhỏ cạnh mục điều hướng vừa ra mắt. */
 function NavBadge({ text }: { text: string }) {
@@ -405,7 +405,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
 
           {/* Ô giữa: Luôn hiển thị thanh menu điều hướng chính như ảnh số 2 */}
           <div className="min-w-0 md:justify-self-center hidden md:block">
-            <nav ref={desktopNavRef} aria-label="Điều hướng chính" className="relative flex items-center justify-center gap-1">
+            <nav ref={desktopNavRef} aria-label="Điều hướng chính" className={`relative items-center justify-center gap-1 ${searchCompact ? "hidden" : "flex"}`}>
               <SlidingPill
                 rect={desktopPill.rect}
                 animate={desktopPill.animate}
@@ -468,6 +468,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 </div>
               )}
             </nav>
+            {/* Ô chứa thanh tìm kiếm thu gọn (SearchHub đưa vào khi khối tìm kiếm cuộn khuất) */}
+            <div ref={setHeaderSearchSlot} className={searchCompact ? 'flex justify-center' : 'hidden'} />
           </div>
 
           {/* Bản sao ẩn của menu giữa để đo bề rộng từng mục (không nhận focus, không chiếm chỗ) */}
@@ -501,7 +503,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     ref={accountButtonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen((v) => !v)}
-                    className={`icon-fx relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
+                    className={`acct-glow relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
                       isSolid
                         ? 'bg-white/90 border-slate-200/80 hover:border-emerald-500/50 shadow-2xs'
                         : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:border-white/60 shadow-xs'

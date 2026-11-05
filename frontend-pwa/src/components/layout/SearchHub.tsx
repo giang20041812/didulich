@@ -9,6 +9,7 @@ import { addDaysKey, isDateKey, nightsBetween, parseDateKey, todayKey } from "@/
 import { tripPlannerPath } from "@/lib/tripLinks"
 import { fetchPublicRegions } from "@/services/homestayService"
 import { fetchTripCatalog, peekTripCatalog, prefetchTripCatalog } from "@/services/tripService"
+import { setHeaderSearchCompact, useHeaderSearchSlot } from "@/lib/headerSearch"
 
 type Tab = 'location' | 'dates' | 'guests';
 const TAB_ORDER: Tab[] = ['location', 'dates', 'guests'];
@@ -240,6 +241,23 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
   // Popover máy tính: mở từ thanh thu gọn trong header thì nằm dưới header (docked), mở từ khối trên trang thì bám dưới
   // khối đó — đo lại theo từng nhịp cuộn; khối cuộn khuất dưới header thì đóng popover (không để nó trôi đè lên header).
   const popoverOpen = activeTab !== null;
+  const tabIdx = activeTab ? TAB_ORDER.indexOf(activeTab) : 0;
+  const tabDir = useRef({ idx: 0, dir: 1 });
+  if (activeTab && tabDir.current.idx !== tabIdx) tabDir.current = { idx: tabIdx, dir: tabIdx > tabDir.current.idx ? 1 : -1 };
+  // Máy tính: khối tìm kiếm cuộn khuất dưới header -> thanh thu gọn 3 ô nằm trong header (thay menu giữa), như Airbnb.
+  const headerSlot = useHeaderSearchSlot();
+  const [isDesktopView, setIsDesktopView] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const sync = () => setIsDesktopView(mq.matches);
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  const headerCompact = isSticky && isDesktopView && !!headerSlot;
+  useEffect(() => {
+    setHeaderSearchCompact(headerCompact);
+    return () => setHeaderSearchCompact(false);
+  }, [headerCompact]);
   const [popoverDocked, setPopoverDocked] = useState(false);
   const [popoverBounds, setPopoverBounds] = useState<DOMRect | null>(null);
   // Popover mở từ nút sticky (khối gốc đã cuộn khuất) thì "chốt" ở chế độ docked ngay lúc mở — không đổi giữa chừng dù
@@ -491,8 +509,8 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
       onClick={() => setActiveTab(tab)}
       aria-pressed={activeTab === tab}
       className={`flex items-center justify-center gap-1.5 truncate rounded-lg text-center font-bold transition-[background-color,color,box-shadow] duration-200 cursor-pointer ${
-        compact ? 'min-h-9 py-1.5 text-xs' : 'px-2 py-2 text-xs sm:text-sm'
-      } ${activeTab === tab ? 'bg-white text-[var(--color-primary)] shadow-xs' : 'text-gray-600 hover:bg-white/60 hover:text-gray-900'}`}
+        compact ? 'min-h-9 py-1.5 text-xs' : 'relative z-10 px-2 py-2 text-xs sm:text-sm'
+      } ${activeTab === tab ? (compact ? 'bg-white text-[var(--color-primary)] shadow-xs' : 'text-[var(--color-primary)]') : compact ? 'text-gray-600 hover:bg-white/60 hover:text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
     >
       {!compact && <Icon className="h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />}
       <span className="truncate">{index}. {label}</span>
@@ -751,6 +769,26 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           Portal thẳng ra body (như modal điện thoại bên dưới): bên trong cây DOM có div.hero-rise — animation của nó để lại
           transform sau khi chạy xong (dù là ma trận đơn vị), biến div đó thành containing block cho mọi "fixed" lồng bên
           trong, nên "fixed" sẽ bám theo div đang cuộn thay vì theo màn hình nếu không thoát ra ngoài bằng portal. */}
+      {headerCompact && headerSlot && createPortal(
+        <div role="group" aria-label="Tìm homestay" className="flex h-11 items-center rounded-full bg-white pl-1.5 pr-1.5 text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10">
+          {([['location', province], ['dates', `${dateText} · ${durationShort}`], ['guests', guestText]] as [Tab, string][]).map(([tab, text], i) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => toggleTab(tab)}
+              aria-haspopup="dialog"
+              aria-expanded={activeTab === tab}
+              className={`h-8 max-w-[220px] truncate rounded-full px-4 text-[13px] font-medium cursor-pointer transition-colors hover:bg-slate-100 ${i > 0 ? 'border-l border-slate-200' : ''} ${activeTab === tab ? 'bg-slate-100 text-[var(--color-primary)]' : ''}`}
+            >
+              {text}
+            </button>
+          ))}
+          <button type="button" onClick={handleSearch} aria-label={ctaLabel} className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer">
+            <Search className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          </button>
+        </div>,
+        headerSlot
+      )}
       {typeof window !== 'undefined' && createPortal(
         <button
           type="button"
@@ -759,7 +797,7 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           aria-expanded={activeTab !== null}
           aria-label={`Tìm homestay: ${summary}`}
           className={`search-fab fixed left-1/2 z-40 flex h-11 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-[var(--color-ink-deep)]/95 py-0 pl-1.5 pr-4 text-sm font-bold text-white shadow-[0_10px_28px_-8px_rgba(4,36,29,0.6)] ring-1 ring-white/15 backdrop-blur transition-[opacity,transform] duration-300 cursor-pointer hover:bg-black active:scale-95 bottom-5 max-md:[html[data-pwa-bar]_&]:bottom-24 mb-[var(--safe-bottom)] ${
-            isSticky ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
+            isSticky && !headerCompact ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
           }`}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]">
@@ -773,20 +811,28 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
       {/* ---------------- DESKTOP POPOVER 3 BƯỚC ----------------
           Portal ra body (cùng lý do với nút sticky ở trên): nếu để tại chỗ, popover "fixed" sẽ vô tình bám theo
           div.hero-rise thay vì màn hình thật — định vị sai hẳn khi khối tìm kiếm gốc đã cuộn xa khỏi tầm nhìn. */}
-      {activeTab && typeof window !== 'undefined' && createPortal(
+      {activeTab && (popoverDocked || popoverBounds) && typeof window !== 'undefined' && createPortal(
         <div
-          style={popoverStyle}
+          style={{ ...popoverStyle, transformOrigin: popoverDocked ? '50% 0' : '30% 0' }}
           role="dialog"
           aria-label="Tìm homestay"
           className={`search-popover-panel hidden md:flex ${
             popoverDocked
               ? 'fixed left-1/2 -translate-x-1/2 w-[820px] max-w-[calc(100vw-32px)] shadow-2xl'
               : 'fixed shadow-2xl'
-          } max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl ring-1 ring-slate-900/[0.06] shadow-[0_30px_70px_-30px_rgba(4,36,29,0.5)] p-4 z-[100] flex-col gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200`}
+          } max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl ring-1 ring-slate-900/[0.06] shadow-[0_30px_70px_-30px_rgba(4,36,29,0.5)] p-4 z-[100] flex-col gap-3.5 search-pop`}
           onClick={stopPropagation}
         >
           <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-2.5">
-            <div className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">{tabs()}</div>
+            <div className="relative grid flex-1 grid-cols-3 rounded-xl bg-slate-100 p-1">
+              {/* Viên nền trắng trượt giữa 3 ô (kiểu Airbnb) */}
+              <span
+                aria-hidden
+                className="absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-lg bg-white shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ transform: `translateX(${tabIdx * 100}%)` }}
+              />
+              {tabs()}
+            </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
@@ -817,6 +863,7 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
             </div>
           </div>
 
+          <div key={activeTab} className={`flex flex-col gap-3 ${tabDir.current.dir > 0 ? 'search-panel-next' : 'search-panel-prev'}`}>
           {activeTab === 'location' && locationPanel(false)}
 
           {activeTab === 'dates' && (
@@ -856,6 +903,7 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
               </div>
             </div>
           )}
+          </div>
         </div>,
         document.body
       )}

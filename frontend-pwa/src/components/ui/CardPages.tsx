@@ -15,7 +15,7 @@ interface CardPagesProps {
 /** Nút ‹ › trơn, hòa vào nền (không viên thuốc, không bóng): chỉ đổi màu khi rê / bấm. */
 const ARROW = 'group/arrow flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-[color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-25 cursor-pointer';
 const ARROW_GHOST = `${ARROW} text-slate-500 hover:text-[var(--color-ink-deep)]`;
-const ARROW_SOLID = `${ARROW} text-[var(--color-primary)] hover:text-[#06604a]`;
+const ARROW_SOLID = `${ARROW} text-[var(--color-primary)] hover:text-[#0a3a31]`;
 /** Bề rộng một ô trên thanh tiến trình (px) — vạch sáng trượt liền theo vị trí cuộn. */
 const SEG = 22;
 const pad2 = (n: number) => String(n).padStart(2, '0');

@@ -55,7 +55,7 @@ function SectionHeading({ title, description, action }: { title: string; descrip
 /** Link "Xem tất cả" gọn cho điện thoại (cùng hàng nhãn overline). */
 function MobileSeeAll({ to }: { to: string }) {
   return (
-    <Link to={to} className="inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-bold text-[#0a7d64] active:bg-emerald-50">
+    <Link to={to} className="inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-xs font-bold text-[#052620] active:bg-emerald-50">
       Xem tất cả <ChevronRight className="h-3.5 w-3.5" aria-hidden />
     </Link>
   );
@@ -66,7 +66,7 @@ function DesktopSeeAll({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Link
       to={to}
-      className="group/see hidden md:inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-bold text-[#0a7d64] ring-1 ring-[#0a7d64]/20 shadow-[0_6px_16px_-10px_rgba(10,125,100,0.6)] transition-[background-color,color,box-shadow] duration-200 hover:bg-[#0a7d64] hover:text-white hover:ring-[#0a7d64] hover:shadow-[0_10px_22px_-10px_rgba(10,125,100,0.8)] active:scale-[0.98]"
+      className="group/see hidden md:inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-bold text-[#052620] ring-1 ring-[#052620]/20 shadow-[0_6px_16px_-10px_rgba(5,38,32,0.6)] transition-[background-color,color,box-shadow] duration-200 hover:bg-[#052620] hover:text-white hover:ring-[#052620] hover:shadow-[0_10px_22px_-10px_rgba(5,38,32,0.8)] active:scale-[0.98]"
     >
       {children}
       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/see:translate-x-0.5" aria-hidden />
@@ -183,7 +183,7 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
     <div className={`${compact ? 'flex min-w-0 items-center gap-3' : 'flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 md:gap-5 mb-4 md:mb-[clamp(0.5rem,2vh,1.25rem)]'} ${className}`}>
       {/* Biểu tượng "Đi" + chữ "Du Lịch" bên dưới đọc liền thành "Đi Du Lịch". Không còn khung kính / viền trắng quanh logo. */}
       <div className="hero-rise relative shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]">
-        <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-[clamp(5rem,15vh,8rem)] md:h-[clamp(5rem,15vh,8rem)]'} />
+        <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-[clamp(4.5rem,13vh,7rem)] md:h-[clamp(4.5rem,13vh,7rem)]'} />
       </div>
       <div className="min-w-0">
         {compact ? (
@@ -191,7 +191,7 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
             Du Lịch
           </h1>
         ) : (
-          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,min(8vw,11vh),7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.5rem,min(7vw,9.5vh),6rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
             Du Lịch
           </h1>
         )}
@@ -209,7 +209,7 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
   const src = mediaUrl(resolvePlacePhoto(dest.coverImageUrl), 640);
   return (
     <CardFrame kind="mountain">
-      <Link to={`/destinations/${dest.id}`} className={`${CARD_DARK} aspect-square`}>
+      <Link to={`/destinations/${dest.id}`} className={`${CARD_DARK} aspect-[4/5]`}>
         <div className={CARD_MEDIA}>
           {src ? (
             <img src={src} alt={dest.name} loading="lazy" decoding="async" className={CARD_IMAGE} />
@@ -235,12 +235,16 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
                 <span className="truncate">{dest.regionName}</span>
               </p>
             )}
-            <h3 className="mt-0.5 text-base font-extrabold leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
+            <h3 className="mt-0.5 text-base font-medium leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
               {dest.name}
             </h3>
             {dest.description && (
-              <p className="mt-0.5 text-[11px] text-white/80 line-clamp-1">{dest.description}</p>
+              <p className="mt-0.5 text-[11px] font-normal leading-relaxed text-white/80 line-clamp-2">{dest.description}</p>
             )}
+            <div className="mt-2 flex items-center justify-between border-t border-white/15 pt-2 text-[11px] font-medium text-white/95">
+              <span className="text-amber-200">{seasonLabel(dest).text}</span>
+              <span className="inline-flex items-center gap-1">Khám phá ngay <ArrowRight className="h-3 w-3 text-amber-300 transition-transform duration-300 group-hover:translate-x-1" aria-hidden /></span>
+            </div>
           </div>
         </div>
       </Link>
@@ -420,7 +424,7 @@ export default function HomePage() {
         <button
           type="button"
           onClick={() => { void loadHomeData(); }}
-          className="mt-4 rounded-full bg-[#043D32] px-5 py-2 text-white transition-colors hover:bg-[#0a7d64]"
+          className="mt-4 rounded-full bg-[#043D32] px-5 py-2 text-white transition-colors hover:bg-[#052620]"
         >
           Thử lại
         </button>
@@ -433,7 +437,7 @@ export default function HomePage() {
     // nó thay vì vào trang.
     <div className="w-full min-w-0 overflow-x-clip flex flex-col bg-white">
       {/* 1. Hero Section */}
-      <section className="home-snap-panel relative z-30 w-full min-h-[520px] md:h-[100dvh] md:min-h-[540px] flex flex-col pt-[calc(var(--app-header-height,130px)+16px)] pb-8 md:pb-[clamp(1.25rem,8vh,7rem)]">
+      <section className="home-snap-panel relative z-30 w-full min-h-[520px] md:h-[100dvh] md:min-h-[540px] flex flex-col pt-[calc(var(--app-header-height,130px)+16px)] pb-8 md:pb-[min(44vh,26rem)]">
         {/* Ảnh ruộng bậc thang cũ + chuyển động: trôi chậm, nắng, mây, gió lướt ruộng lúa (xem HeroBackdrop).
             Mọi kích thước: ảnh phủ kín cả hero, header đè lên; điện thoại chỉ thu nhỏ lại và rút ngắn hero. */}
         <HeroBackdrop />
@@ -570,7 +574,7 @@ export default function HomePage() {
                     priceUnit={hs.priceRefMin ? 'đêm' : null}
                     // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
                     onIntent={() => prefetchHomestay(hs.id)}
-                    badge={hs.tagBadge ? <CompactCardBadge className="bg-[#0a7d64]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
+                    badge={hs.tagBadge ? <CompactCardBadge className="bg-[#052620]/90">{hs.tagBadge}</CompactCardBadge> : undefined}
                     compact={true}
                     frame="house"
                   />
@@ -638,7 +642,7 @@ export default function HomePage() {
             {/* Cột 1: Tiện ích cho chuyến đi — tấm sáng */}
             <div className="flex flex-col rounded-3xl bg-gradient-to-b from-[#f2f7f4] to-white p-4 sm:p-5 md:p-6 ring-1 ring-slate-900/[0.05]">
               <Reveal delay={40} className="mb-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white ring-1 ring-emerald-600/15 shadow-[0_4px_10px_-6px_rgba(10,125,100,0.5)] flex items-center justify-center text-[#0a7d64]">
+                <div className="w-9 h-9 rounded-xl bg-white ring-1 ring-emerald-600/15 shadow-[0_4px_10px_-6px_rgba(5,38,32,0.5)] flex items-center justify-center text-[#052620]">
                   <Compass className="w-[18px] h-[18px]" />
                 </div>
                 <div>

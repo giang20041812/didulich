@@ -151,7 +151,7 @@ export default function SharedJourneyPage() {
           </span>
           <p className="mt-3 text-sm font-semibold text-slate-700">{error}</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Link to="/lich-trinh" className="inline-flex h-10 items-center rounded-xl bg-[#0a7d64] px-4 text-sm font-bold text-white">Xem lịch trình khác</Link>
+            <Link to="/lich-trinh" className="inline-flex h-10 items-center rounded-xl bg-[#052620] px-4 text-sm font-bold text-white">Xem lịch trình khác</Link>
             <Link to="/" className="inline-flex h-10 items-center rounded-xl px-4 text-sm font-bold text-slate-600 ring-1 ring-slate-200">Về trang chủ</Link>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function SharedJourneyPage() {
   const toggleHelpful = () => { void votes.toggle(token, journey.helpfulCount ?? 0); };
 
   const applyButton = (className: string) => (
-    <button type="button" onClick={() => { setApplyError(''); setApplyOpen(true); }} className={`inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0a7d64] font-extrabold text-white shadow-sm transition-colors hover:bg-[#06604a] cursor-pointer ${className}`}>
+    <button type="button" onClick={() => { setApplyError(''); setApplyOpen(true); }} className={`inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#052620] font-extrabold text-white shadow-sm transition-colors hover:bg-[#0a3a31] cursor-pointer ${className}`}>
       <Copy className="h-4 w-4" /> Áp dụng lịch trình này
     </button>
   );
@@ -243,7 +243,7 @@ export default function SharedJourneyPage() {
                     <span className="flex h-full w-full items-center justify-center bg-[#f3f6ee] text-[#9fb0a8]"><Quote className="h-6 w-6" aria-hidden /></span>
                   )}
                 </span>
-                <span className="mt-1.5 block truncate text-[13px] font-extrabold text-slate-900 group-hover:text-[#0a7d64]">{stop.placeName}</span>
+                <span className="mt-1.5 block truncate text-[13px] font-extrabold text-slate-900 group-hover:text-[#052620]">{stop.placeName}</span>
                 {stop.checkinNote && <span className="mt-0.5 line-clamp-2 text-xs leading-snug text-slate-600">“{stop.checkinNote}”</span>}
               </button>
             </li>
@@ -267,7 +267,7 @@ export default function SharedJourneyPage() {
         <Link
           to="/lich-trinh"
           onClick={(e) => { if (fromFeed) { e.preventDefault(); navigate(-1); } }}
-          className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-bold text-[#0a7d64] hover:underline"
+          className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-bold text-[#052620] hover:underline"
         >
           <ArrowLeft className="h-4 w-4" /> Lịch trình du khách
         </Link>
@@ -368,7 +368,7 @@ export default function SharedJourneyPage() {
           ? 'Chép nguyên lịch trình (mọi mục, giờ, ghi chú, dịch vụ) thành lịch trình của bạn — sửa thoải mái sau đó.'
           : 'Đăng nhập để chép nguyên lịch trình thành lịch trình của bạn — miễn phí.'}
         footer={(
-          <button type="button" onClick={() => { void apply(); }} disabled={applying} className="inline-flex h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-[#0a7d64] text-sm font-extrabold text-white shadow-sm hover:bg-[#06604a] disabled:opacity-50 cursor-pointer">
+          <button type="button" onClick={() => { void apply(); }} disabled={applying} className="inline-flex h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-[#052620] text-sm font-extrabold text-white shadow-sm hover:bg-[#0a3a31] disabled:opacity-50 cursor-pointer">
             {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />} Áp dụng{startDate ? ` từ ${formatVnDayShort(startDate)}` : ''}
           </button>
         )}
@@ -380,7 +380,7 @@ export default function SharedJourneyPage() {
             min={todayKey()}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="mt-2 block h-12 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-[#0a7d64] focus:outline-none"
+            className="mt-2 block h-12 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-[#052620] focus:outline-none"
           />
         </label>
         <p className="mt-2 text-xs leading-relaxed text-slate-500">

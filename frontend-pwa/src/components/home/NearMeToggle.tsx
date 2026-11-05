@@ -22,19 +22,19 @@ export default function NearMeToggle({ active, onToggle, noun, className = '' }:
       className={`${className} group relative inline-flex shrink-0 items-center gap-2.5 rounded-full py-1.5 pl-1.5 text-left transition-all duration-200 active:scale-[0.97] cursor-pointer ${
         active
           ? 'bg-[#054d3d] pr-2 text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.25)] ring-2 ring-[var(--color-sun)]/70'
-          : 'bg-gradient-to-r from-[#0a7d64] to-[#0d9b7c] pr-4 text-white shadow-[0_6px_16px_-6px_rgba(10,125,100,0.65)] ring-1 ring-[#06604a]/30 hover:-translate-y-px hover:shadow-[0_10px_22px_-8px_rgba(10,125,100,0.75)]'
+          : 'bg-gradient-to-r from-[#052620] to-[#0d4a3c] pr-4 text-white shadow-[0_6px_16px_-6px_rgba(5,38,32,0.65)] ring-1 ring-[#0a3a31]/30 hover:-translate-y-px hover:shadow-[0_10px_22px_-8px_rgba(5,38,32,0.75)]'
       }`}
     >
       <span
         className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-          active ? 'bg-[var(--color-sun)] text-[#0a2e26]' : 'bg-white text-[#0a7d64]'
+          active ? 'bg-[var(--color-sun)] text-[#0a2e26]' : 'bg-white text-[#052620]'
         }`}
       >
         <LocateFixed className="h-[18px] w-[18px]" strokeWidth={2.4} />
         {!active && (
           <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5" aria-hidden>
             <span className="absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75 motion-safe:animate-ping" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-[#0a7d64]" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-[#052620]" />
           </span>
         )}
       </span>

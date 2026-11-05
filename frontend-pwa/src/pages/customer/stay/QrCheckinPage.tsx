@@ -95,7 +95,7 @@ export default function QrCheckinPage() {
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><AlertCircle className="h-7 w-7" /></span>
         <h1 className="mt-4 text-xl font-extrabold text-slate-900">Mã QR không dùng được</h1>
         <p className="mt-2 text-sm text-slate-600">{placeError} Hãy báo chủ nhà, hoặc mở đơn đặt phòng để nhận phòng bằng mã in dưới QR.</p>
-        <Link to="/bookings" className="mt-5 inline-flex h-11 items-center gap-2 rounded-xl bg-[#0a7d64] px-5 text-sm font-bold text-white">
+        <Link to="/bookings" className="mt-5 inline-flex h-11 items-center gap-2 rounded-xl bg-[#052620] px-5 text-sm font-bold text-white">
           <ReceiptText className="h-4 w-4" /> Đơn đặt phòng của tôi
         </Link>
       </div>

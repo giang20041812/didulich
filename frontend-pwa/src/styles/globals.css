@@ -1000,3 +1000,12 @@ img[data-loading]:not([data-no-skeleton]) {
     animation: none !important;
   }
 }
+
+/* Bảng tìm kiếm (máy tính): hiện ra từ mép trên, mờ + phóng nhẹ; đổi tab thì nội dung trượt nhẹ theo chiều chuyển. */
+.search-pop { animation: searchPop 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.search-panel-next { animation: searchPanelNext 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.search-panel-prev { animation: searchPanelPrev 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+@keyframes searchPop { from { opacity: 0; transform: scale(0.96) translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes searchPanelNext { from { opacity: 0; transform: translate3d(18px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes searchPanelPrev { from { opacity: 0; transform: translate3d(-18px, 0, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .search-pop, .search-panel-next, .search-panel-prev { animation: none !important; } }

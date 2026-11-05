@@ -535,7 +535,7 @@ export default function HomestayListPage() {
 
         {/* Tiêu đề trang kiểu editorial — dẫn dắt trước khi vào bộ lọc */}
         <div className="mb-5">
-          <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#0a7d64] to-[#d97706] bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#052620] to-[#d97706] bg-clip-text text-transparent">
             Chốn nghỉ giữa ruộng bậc thang
           </h1>
         </div>
@@ -581,7 +581,7 @@ export default function HomestayListPage() {
               <button
                 onClick={() => setShowMap(!showMap)}
                 className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl border transition-all shadow-2xs active:scale-95 cursor-pointer ${showMap
-                    ? 'border-[#0a7d64] bg-[#0a7d64] text-white shadow-xs'
+                    ? 'border-[#052620] bg-[#052620] text-white shadow-xs'
                     : 'border-emerald-600/30 bg-emerald-50 text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white'
                   }`}
                 title="Bật/Tắt chế độ xem bản đồ VietMap"
@@ -801,7 +801,7 @@ export default function HomestayListPage() {
             {showMap && (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs mb-2 animate-in fade-in duration-300">
                 <div className="px-4 py-2.5 bg-[#edfbf7] border-b border-gray-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#0a7d64] flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-[#052620] flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5" /> Bản đồ vị trí homestay (Nguồn: VietMap)
                   </span>
                   <button

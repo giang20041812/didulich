@@ -5,7 +5,7 @@
  * Bố cục 3 cột (grid-cols-3) trên máy tính/laptop (lg), 2 cột trên tablet (sm/md), 1 cột trên mobile.
  * `_COLS` là phần cột/khoảng cách (không kèm `grid`) cho FramerSwipeCardStack.
  */
-export const COMPACT_GRID_WITH_SIDEBAR_COLS = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5';
+export const COMPACT_GRID_WITH_SIDEBAR_COLS = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4';
 export const COMPACT_GRID_WITH_SIDEBAR = `grid ${COMPACT_GRID_WITH_SIDEBAR_COLS}`;
 export const COMPACT_GRID_FULL = 'grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4';
 

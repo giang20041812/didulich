@@ -70,7 +70,7 @@ export default function TripsHubPage() {
           </div>
           <Link
             to="/lich-trinh/tao"
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0a7d64] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(10,125,100,0.8)] transition-colors hover:bg-[#06604a]"
+            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#052620] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(5,38,32,0.8)] transition-colors hover:bg-[#0a3a31]"
           >
             <Plus className="h-5 w-5" strokeWidth={2.75} aria-hidden /> Tạo lịch trình
           </Link>
