@@ -575,6 +575,13 @@
  * cong êm (chậm vào – nhanh giữa – chậm ra). Nét đứt (đường đi) không dùng được dash nên hiện dần bằng opacity; hình tô sẵn
  * (kim la bàn) hiện màu sau khi nét viền đã vẽ xong. Chỉ chạy một lần, vẽ xong không còn animation nào.
  */
+/* Animation stroke-dashoffset không chạy trên GPU: mỗi khung hình phải vẽ lại SVG trên luồng chính, và nếu không cô lập thì
+   vùng vẽ lại lan ra cả nền gradient / nội dung chồng lên → giật đúng lúc cuộn tới phần mới. Mỗi họa tiết thành một lớp riêng
+   (kích thước cố định theo class) để chỉ vẽ lại chính nó. */
+.motif {
+  contain: strict;
+  will-change: transform;
+}
 .motif[data-ink] :is(path, circle, ellipse):not([stroke-dasharray]) {
   stroke-dasharray: var(--len) calc(var(--len) + 4px);
   stroke-dashoffset: calc(var(--len) + 2px);
