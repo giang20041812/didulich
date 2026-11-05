@@ -18,12 +18,18 @@ export default function HeroBackdrop() {
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(([entry]) => {
-      root.toggleAttribute('data-paused', !entry?.isIntersecting);
-    });
-    io.observe(root);
-    return () => io.disconnect();
+    if (!root) return;
+    // Dừng animation ngay khi người dùng bắt đầu cuộn (không đợi hero khuất hẳn): đang cuộn mà 7 lớp nền còn chạy thì
+    // tranh luồng vẽ với việc cuộn → giật. Về lại đầu trang thì chạy tiếp.
+    let visible = true;
+    const update = () => root.toggleAttribute('data-paused', !visible || window.scrollY > 24);
+    const io = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; update(); })
+      : null;
+    io?.observe(root);
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+    return () => { io?.disconnect(); window.removeEventListener('scroll', update); };
   }, []);
 
 

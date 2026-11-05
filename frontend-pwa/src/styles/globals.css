@@ -510,11 +510,10 @@
   animation: heroGrassSway 4.8s ease-in-out infinite alternate;
   will-change: transform;
 }
-@media (max-width: 767.98px) {
-  .hero-grass,
-  .hero-rays {
-    display: none;
-  }
+/* Lớp có mask-image chạy liên tục là lớp đắt nhất của hero → tắt trên mọi màn hình. */
+.hero-grass,
+.hero-rays {
+  display: none;
 }
 .hero-rise {
   animation: heroRise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
