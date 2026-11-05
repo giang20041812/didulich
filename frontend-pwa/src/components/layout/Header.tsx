@@ -316,7 +316,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
 
   // Cỡ chữ / đệm / độ đậm của mục menu desktop: dùng chung cho mục thật và bản sao đo bề rộng. Mọi thứ làm đổi bề rộng
   // phải giống hệt nhau giữa hai bên (kể cả mục đang chọn), nếu không mục cuối sẽ tràn vào nút chuông.
-  const navItemSize = 'px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-semibold';
+  const navItemSize = 'px-2.5 xl:px-3 py-1.5 rounded-full text-sm font-medium';
   // Mục đang chọn: viên thuốc nền nhạt + chữ màu nhấn. Nền trắng dùng xanh thương hiệu (vàng trên trắng không đọc được),
   // nền ảnh hero dùng vàng nắng trên kính mờ.
   const navItemTone = (active: boolean) =>
@@ -369,7 +369,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 onClick={handleOpen}
                 aria-label="Mở menu điều hướng"
                 title="Mở menu điều hướng"
-                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center ${
+                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center md:hidden ${
                   isSidebarOpen
                     ? 'opacity-0 pointer-events-none invisible'
                     : 'opacity-100'

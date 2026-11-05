@@ -55,6 +55,12 @@ export default function TripsHubPage() {
     <div className="relative isolate min-h-screen overflow-x-clip pb-16 bg-[linear-gradient(180deg,var(--color-canvas)_0%,#f1faf6_45%,#fbf7ee_100%)]">
       <HomeMotifs variant="journey" className="inset-0" />
       <div className="mx-auto w-full max-w-5xl px-4 pt-5 md:px-8 md:pt-8">
+        <div className="mb-3 flex items-center gap-2 text-xs text-[var(--color-muted)] md:text-sm">
+          <Link to="/" className="transition-colors hover:text-[var(--color-primary)]">Trang chủ</Link>
+          <span>/</span>
+          <span className="font-semibold text-[var(--color-ink-deep)]">Lịch trình</span>
+        </div>
+        <div aria-hidden="true" className="mb-5 h-1 w-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-[28px] font-black leading-tight tracking-tight text-[var(--color-ink-deep)] md:text-[34px]">Lịch trình</h1>

@@ -31,6 +31,7 @@ export default function Footer() {
             <div className="flex items-center mb-4">
               <VietTrackLogo variant="horizontal" tone="light" size={42} className="-ml-2" />
             </div>
+            <p className="-mt-2 mb-3 text-lg italic text-[var(--color-sun)]" style={{ fontFamily: 'var(--font-brush)' }}>đi như người bản địa</p>
             <p className="text-sm leading-relaxed text-slate-400 mb-6 max-w-sm">
               Nền tảng du lịch sinh thái & lưu trú bản địa kết nối du khách với văn hóa vùng cao Việt Nam. Giữ trọn sự nguyên bản, minh bạch và phát triển bền vững.
             </p>

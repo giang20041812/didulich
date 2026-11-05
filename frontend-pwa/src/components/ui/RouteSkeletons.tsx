@@ -146,7 +146,6 @@ export function HomestayListFallback() {
           <h1 className="text-2xl md:text-3xl lg:text-[36px] font-extrabold tracking-tight bg-gradient-to-r from-[#0a2e26] via-[#0a7d64] to-[#d97706] bg-clip-text text-transparent">
             Chốn nghỉ giữa ruộng bậc thang
           </h1>
-          <div className="mt-2 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
         </div>
         <ToolbarSkeleton {...spec.toolbar} />
         <SidebarBody filter={<FilterPanelSkeleton {...spec.filter} />} mobileFilter={<MobileFilterButton label="Lọc kết quả homestay" homestay />} count={spec.count} />

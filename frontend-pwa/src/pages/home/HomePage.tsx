@@ -96,7 +96,7 @@ const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[90
  * Các phần sau hero là những "tấm" vuông vức nối tiếp nhau (không bo góc), đổ bóng nhẹ ngược lên phần trước để có chiều
  * sâu. Mỗi tấm là một màn hình (home-screen) và một điểm dừng của scroll-snap (home-snap-panel, xem globals.css).
  */
-const SHEET = 'home-snap-panel home-screen relative isolate pt-14 pb-20 md:pt-16 md:pb-24 shadow-[0_-14px_30px_-26px_rgba(10,46,38,0.45)]';
+const SHEET = 'home-snap-panel home-screen relative isolate pt-12 pb-10 md:pt-14 md:pb-12 shadow-[0_-14px_30px_-26px_rgba(10,46,38,0.45)]';
 
 /** Tiện ích cho chuyến đi (cột trái phần cuối trang). */
 const TRAVEL_TOOLS = [
@@ -401,14 +401,15 @@ export default function HomePage() {
       return 0;
     });
 
-    return list;
+    // Trang chủ chỉ giữ 2 trang (16 thẻ); muốn xem thêm thì bấm "Xem tất cả".
+    return list.slice(0, 16);
   }, [allDestinations]);
 
   // Homestay: mọi homestay API trả về — mỗi trang 8 thẻ, lướt sang để xem thêm.
-  const displayedHomestays = useMemo(() => homeData?.homestays ?? [], [homeData]);
+  const displayedHomestays = useMemo(() => (homeData?.homestays ?? []).slice(0, 16), [homeData]);
 
   // Đặc sản: hiện hết món API trả về (lưới 10 thẻ mỗi trang, 2 hàng × 5 cột)
-  const displayedSpecialties = useMemo(() => homeData?.specialties ?? [], [homeData]);
+  const displayedSpecialties = useMemo(() => (homeData?.specialties ?? []).slice(0, 20), [homeData]);
 
   if (loading) return null;
 
@@ -440,7 +441,7 @@ export default function HomePage() {
         <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-clip">
           <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-[clamp(0.5rem,4vh,3rem)]">
             <HeroTitle className="flex" />
-            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[clamp(1rem,2.7vh,1.5rem)] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
+            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[clamp(1rem,2.7vh,1.5rem)] font-normal text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
               <TypeText
                 text="Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn"
                 delay={700}
@@ -466,7 +467,7 @@ export default function HomePage() {
       <TimelySuggestion />
 
       {/* 3. Điểm Đến Thích Hợp Theo Mùa */}
-      <section className="home-snap-panel home-screen relative isolate pt-14 pb-20 md:pt-16 md:pb-24 home-glow-mint">
+      <section className="home-snap-panel home-screen relative isolate pt-12 pb-10 md:pt-14 md:pb-12 home-glow-mint">
         <HomeMotifs variant="destinations" />
         <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
           {/* Tiêu đề bên trái, "Khám phá thêm" ở góc phải (máy tính) / cạnh nhãn overline (điện thoại) */}
