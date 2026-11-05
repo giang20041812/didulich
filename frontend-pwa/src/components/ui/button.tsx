@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         primary: "cta cta-primary text-white",
         secondary: "cta cta-aqua text-white font-semibold",
-        accent: "cta cta-sun text-[var(--color-ink-deep)] font-semibold",
+        accent: "cta cta-sun text-white font-semibold",
         outline:
           "cta cta-outline border border-[var(--color-primary)] text-[var(--color-primary)]",
         ghost: "cta cta-ghost text-[var(--color-primary)]",

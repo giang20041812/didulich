@@ -63,10 +63,24 @@ function useSlidingPill(navRef: RefObject<HTMLElement | null>, deps: unknown[]) 
       );
     };
     measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(nav);
-    return () => observer.disconnect();
+    // Một số máy: font web tải xong / thang hiển thị (zoom 125%, 150%) khiến từng mục đổi bề rộng mà khung nav không đổi
+    // → viên thuốc lệch khỏi mục. Theo dõi cả từng mục con, sự kiện tải font và đổi cỡ cửa sổ để đo lại.
+    const raf = requestAnimationFrame(measure);
+    const fonts = typeof document !== 'undefined' ? document.fonts : undefined;
+    fonts?.ready.then(measure).catch(() => undefined);
+    fonts?.addEventListener?.('loadingdone', measure);
+    window.addEventListener('resize', measure);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (observer) {
+      observer.observe(nav);
+      Array.from(nav.children).forEach((child) => observer.observe(child));
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      fonts?.removeEventListener?.('loadingdone', measure);
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

@@ -1,19 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// Font tự host (@fontsource, subset vietnamese + latin) thay cho Google Fonts: cùng origin, có hash cache
-// bất biến, không còn CSS chặn render từ bên thứ 3. Giữ đúng bộ weight cũ để không đổi giao diện.
-import '@fontsource/nunito/vietnamese-300.css'
-import '@fontsource/nunito/vietnamese-400.css'
-import '@fontsource/nunito/vietnamese-500.css'
-import '@fontsource/nunito/vietnamese-600.css'
-import '@fontsource/nunito/vietnamese-300-italic.css'
-import '@fontsource/nunito/vietnamese-400-italic.css'
-import '@fontsource/nunito/latin-300.css'
-import '@fontsource/nunito/latin-400.css'
-import '@fontsource/nunito/latin-500.css'
-import '@fontsource/nunito/latin-600.css'
-import '@fontsource/nunito/latin-300-italic.css'
-import '@fontsource/nunito/latin-400-italic.css'
+// Font tự host thay cho Google Fonts: cùng origin, có hash cache bất biến, không còn CSS chặn render từ bên thứ 3.
+// Tiêu đề: DT Phudu, nội dung: Ganh (file trong src/assets/fonts, khai báo ở styles/fonts.css).
+import './styles/fonts.css'
 // Outfit không có subset vietnamese (Google Fonts cũng vậy — chữ tiếng Việt trong Outfit đã rơi về font
 // hệ thống từ trước), nên chỉ cần latin + latin-ext cho số/chữ không dấu.
 import '@fontsource/outfit/latin-ext-300.css'
@@ -42,6 +31,7 @@ import App from './App.tsx'
 import { installApiBase } from './lib/apiBase'
 import { installRoutePrefetch } from './lib/routePrefetch'
 import { installCtaFx } from './lib/ctaFx'
+import { installImageFx } from './lib/imageFx'
 import { initSentryLazy } from './lib/sentry'
 import { HERO_SIZES, HERO_SRCSET } from '@/lib/heroImages'
 
@@ -69,6 +59,8 @@ installApiBase()
 // Rê chuột / focus vào link nào thì tải trước chunk trang đó — lần đầu vào web chuyển trang gần như tức thì.
 installRoutePrefetch()
 installCtaFx()
+// Ảnh chưa tải xong: skeleton lấp lánh, tải xong mới hiện trọn ảnh (không vẽ dần từng dải, không giật).
+installImageFx()
 // Sentry chỉ tải khi đặt VITE_SENTRY_DSN (xem lib/sentry.ts) — không ảnh hưởng lượt tải đầu.
 initSentryLazy()
 

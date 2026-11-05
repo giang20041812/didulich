@@ -11,10 +11,11 @@
 /* ============================== Nút CTA ============================== */
 
 .cta {
-  --cta-a: #0a7d64;
-  --cta-b: #0e977a;
-  --cta-c: #12b886;
-  --cta-glow: 10, 125, 100;
+  /* Xanh rừng đậm (#062721) — màu CTA chung của toàn trang. */
+  --cta-a: #062721;
+  --cta-b: #0d4a3c;
+  --cta-c: #1f8a6d;
+  --cta-glow: 6, 39, 33;
   --cta-motif: linear-gradient(120deg, var(--cta-b), var(--cta-c));
 
   /* Họa tiết (dùng làm mask): lá nghiêng trái, lá nghiêng phải, hoa bốn cánh, chấm tròn. */
@@ -129,19 +130,12 @@
 }
 
 /* ---- Bảng màu ---- */
-.cta-primary { /* xanh ngọc (mặc định) */ }
-.cta-coral {
-  --cta-a: #e8590c; --cta-b: #f97316; --cta-c: #fb7185; --cta-glow: 232, 89, 12;
-}
-.cta-sun {
-  --cta-a: #f59e0b; --cta-b: #fbbf24; --cta-c: #f97316; --cta-glow: 217, 119, 6;
-}
-.cta-aqua {
-  --cta-a: #0284c7; --cta-b: #06b6d4; --cta-c: #38bdf8; --cta-glow: 2, 132, 199;
-}
-.cta-night {
-  --cta-a: #1d2d4f; --cta-b: #27406b; --cta-c: #12b886; --cta-glow: 29, 45, 79;
-}
+.cta-primary { /* xanh rừng đậm (mặc định) */ }
+/* Các bảng màu cũ (coral / sun / aqua / night) giờ dùng chung màu xanh rừng đậm để mọi CTA đồng bộ. */
+.cta-coral,
+.cta-sun,
+.cta-aqua,
+.cta-night { color: #fff; }
 
 /* ---- Viền (outline), kính mờ (glass), trong suốt (ghost): rê vào chỉ phủ một lớp màu nhạt ---- */
 .cta-outline,
