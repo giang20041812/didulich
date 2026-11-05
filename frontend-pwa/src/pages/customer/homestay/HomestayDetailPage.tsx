@@ -673,7 +673,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
           <button
             type="button"
             onClick={() => navigate(homestaysPath)}
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#086a55]"
+            className="inline-flex h-10 items-center justify-center rounded-xl cta cta-primary px-5 text-sm font-semibold text-white shadow-sm transition "
           >
             Quay lại danh sách
           </button>
@@ -829,7 +829,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                   whileTap={{ scale: 0.97 }}
                   type="button"
                   onClick={scrollToRooms}
-                  className="relative overflow-hidden flex h-9 items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 text-xs font-bold text-white shadow-xs transition hover:bg-[#086a55] cursor-pointer before:absolute before:inset-0 before:-translate-x-full hover:before:translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent before:transition-transform before:duration-700"
+                  className="flex h-9 items-center gap-1.5 rounded-xl cta cta-primary px-4 text-xs font-bold text-white shadow-xs transition cursor-pointer"
                 >
                   <span>Chọn phòng</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -1673,7 +1673,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={scrollToRooms}
-                  className="relative overflow-hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] font-bold text-white shadow-sm transition hover:bg-[#086a55] active:scale-[0.99] cursor-pointer before:absolute before:inset-0 before:-translate-x-full hover:before:translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/25 before:to-transparent before:transition-transform before:duration-700"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl cta cta-primary font-bold text-white shadow-sm transition active:scale-[0.99] cursor-pointer"
                 >
                   <span>Chọn phòng</span>
                   <ArrowRight className="h-4 w-4" />
@@ -1836,7 +1836,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
               <button
                 type="button"
-                className="w-full h-10 rounded-xl bg-[var(--color-primary)] text-xs font-bold text-white shadow-sm transition hover:bg-[#086a55] cursor-pointer"
+                className="w-full h-10 rounded-xl cta cta-primary text-xs font-bold text-white shadow-sm transition cursor-pointer"
                 onClick={() => {
                   if (interactionModal.type === 'heart') {
                     navigate('/homestays?saved=1');

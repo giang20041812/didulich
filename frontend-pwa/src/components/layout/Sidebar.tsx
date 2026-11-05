@@ -240,7 +240,7 @@ export default function Sidebar({
                         navigate(currentUser.role === 'ADMIN' ? '/admin' : '/partner');
                         handleClose();
                       }}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl hover:bg-[#06604a] transition-all shadow-xs active:scale-95 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 cta cta-primary text-white text-xs font-bold rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
                     >
                       <span>Vào Cổng {currentUser.role === 'ADMIN' ? 'Quản trị' : 'Đối tác'}</span>
                     </button>
@@ -251,7 +251,7 @@ export default function Sidebar({
                         navigate('/profile');
                         handleClose();
                       }}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl hover:bg-[#06604a] transition-all shadow-xs active:scale-95 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 cta cta-primary text-white text-xs font-bold rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
                     >
                       <span>Thông tin cá nhân</span>
                     </button>
@@ -265,7 +265,7 @@ export default function Sidebar({
                       navigate('/login'); 
                       handleClose(); 
                     }}
-                    className="flex items-center justify-center gap-1.5 h-9 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl hover:bg-[#06604a] transition-all shadow-xs active:scale-95 cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 h-9 cta cta-primary text-white text-xs font-bold rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
                   >
                     <LogIn className="w-3.5 h-3.5" />
                     <span>Đăng nhập</span>

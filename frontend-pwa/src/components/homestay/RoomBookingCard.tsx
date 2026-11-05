@@ -426,7 +426,7 @@ function PricedRoomBookingCard({
                   type="button"
                   onClick={onToggleExpanded}
                   aria-expanded={false}
-                  className="inline-flex h-9 md:h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-4 text-xs md:text-sm font-bold text-white transition-colors hover:bg-[var(--color-primary-600)] cursor-pointer"
+                  className="inline-flex h-9 md:h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl cta cta-primary px-4 text-xs md:text-sm font-bold text-white transition-colors cursor-pointer"
                 >
                   <CalendarDays className="h-4 w-4" /> Xem lịch phòng & đặt
                 </button>
@@ -559,7 +559,7 @@ function PricedRoomBookingCard({
                   onClick={onBook}
                   className={`inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold transition-colors sm:w-auto md:text-base ${
                     canBook
-                      ? 'bg-[var(--color-coral)] text-white shadow-sm hover:bg-[var(--color-coral-hover)] cursor-pointer'
+                      ? 'cta cta-coral text-white shadow-sm cursor-pointer'
                       : 'cursor-not-allowed bg-slate-100 text-slate-400'
                   }`}
                 >
@@ -589,7 +589,7 @@ function PricedRoomBookingCard({
               type="button"
               disabled={!canBook}
               onClick={onBook}
-              className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-4 text-sm font-bold transition-colors ${canBook ? 'bg-[var(--color-coral)] text-white hover:bg-[var(--color-coral-hover)] cursor-pointer' : 'cursor-not-allowed bg-slate-100 text-slate-400'}`}
+              className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-4 text-sm font-bold transition-colors ${canBook ? 'cta cta-coral text-white cursor-pointer' : 'cursor-not-allowed bg-slate-100 text-slate-400'}`}
             >
               {canBook && journeyTitle && <Route className="h-4 w-4" />}
               {canBook ? (journeyTitle ? 'Đặt cho lịch trình' : 'Đặt phòng') : !checkOut ? 'Chọn ngày trả' : rooms === 0 ? 'Chọn số phòng' : 'Không đủ phòng'}

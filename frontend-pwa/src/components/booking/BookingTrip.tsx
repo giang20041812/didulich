@@ -158,7 +158,7 @@ export function BookingTripResult({ result, journey, loggedIn, province, placeId
         </div>
         <Link
           to={savePath}
-          className="flex h-12 items-center justify-center gap-1.5 bg-[var(--color-primary)] text-sm font-extrabold text-white transition-colors hover:bg-[#06604a]"
+          className="flex h-12 items-center justify-center gap-1.5 cta cta-primary text-sm font-extrabold text-white transition-colors "
         >
           Xem & lưu lịch trình <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>

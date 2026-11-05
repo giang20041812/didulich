@@ -85,7 +85,7 @@ export default function SectionNavigator({ sections, badge = 0 }: SectionNavigat
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={open ? 'Đóng danh sách mục' : 'Đi tới mục của trang'}
-        className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-[0_8px_24px_rgba(10,46,38,0.32)] transition-transform hover:bg-[#03725e] active:scale-95 cursor-pointer"
+        className="relative flex h-12 w-12 items-center justify-center rounded-full cta cta-primary text-white shadow-[0_8px_24px_rgba(10,46,38,0.32)] transition-transform active:scale-95 cursor-pointer"
       >
         {open ? <X className="h-5 w-5" /> : <ListTree className="h-5 w-5" />}
         {!open && badge > 0 && (

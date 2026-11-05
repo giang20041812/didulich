@@ -37,9 +37,11 @@ import '@fontsource/playfair-display/latin-600.css'
 import '@fontsource/playfair-display/latin-700.css'
 import '@fontsource/playfair-display/latin-800.css'
 import './styles/globals.css'
+import './styles/cta.css'
 import App from './App.tsx'
 import { installApiBase } from './lib/apiBase'
 import { installRoutePrefetch } from './lib/routePrefetch'
+import { installCtaFx } from './lib/ctaFx'
 import { initSentryLazy } from './lib/sentry'
 import { HERO_SIZES, HERO_SRCSET } from '@/lib/heroImages'
 
@@ -66,6 +68,7 @@ if (typeof window !== 'undefined') {
 installApiBase()
 // Rê chuột / focus vào link nào thì tải trước chunk trang đó — lần đầu vào web chuyển trang gần như tức thì.
 installRoutePrefetch()
+installCtaFx()
 // Sentry chỉ tải khi đặt VITE_SENTRY_DSN (xem lib/sentry.ts) — không ảnh hưởng lượt tải đầu.
 initSentryLazy()
 

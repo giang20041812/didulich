@@ -600,7 +600,7 @@ export default function SearchHub() {
         role="search"
         aria-label="Tìm homestay"
         onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-        className={`w-full overflow-hidden rounded-2xl bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
+        className={`w-full rounded-2xl bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
           blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
@@ -624,7 +624,7 @@ export default function SearchHub() {
           <button
             type="submit"
             aria-label={ctaLabel}
-            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-b from-[#0e977a] to-[#08705a] px-3.5 text-sm font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_18px_-8px_rgba(8,112,90,0.8)] transition-[filter,transform] duration-200 active:scale-[0.97] cursor-pointer"
+            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl cta cta-primary px-3.5 text-sm font-extrabold text-white cursor-pointer"
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
             <span className="max-[359px]:hidden">{ctaLabel}</span>
@@ -687,7 +687,7 @@ export default function SearchHub() {
         <div className="hidden md:block">
           <button
             type="submit"
-            className="flex h-full w-[184px] items-center justify-center gap-2 rounded-[10px] bg-gradient-to-b from-[#0e977a] to-[#08705a] px-6 text-base font-extrabold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_18px_-8px_rgba(8,112,90,0.8)] transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer"
+            className="flex h-full w-[184px] items-center justify-center gap-2 rounded-[10px] cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
             {ctaLabel}
@@ -768,7 +768,7 @@ export default function SearchHub() {
                 onClick={goNext}
                 disabled={activeTab === 'guests'}
                 aria-label="Bước tiếp theo"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-xs transition-colors hover:bg-[#06604a] disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-primary)] cta cta-primary text-white shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -815,7 +815,7 @@ export default function SearchHub() {
                 <button
                   type="button"
                   onClick={handleSearch}
-                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-extrabold text-white transition-colors hover:bg-[#06604a] cursor-pointer"
+                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white transition-colors cursor-pointer"
                 >
                   <Search className="h-4 w-4" aria-hidden /> {ctaLabel}
                 </button>
@@ -875,7 +875,7 @@ export default function SearchHub() {
                   <button
                     type="button"
                     onClick={handleSearch}
-                    className="flex h-11 items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-extrabold text-white shadow-xs transition-colors hover:bg-[#06604a] active:scale-95 cursor-pointer"
+                    className="flex h-11 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white shadow-xs transition-colors active:scale-95 cursor-pointer"
                   >
                     <Search className="h-4 w-4" aria-hidden />
                     {ctaLabel}
@@ -885,7 +885,7 @@ export default function SearchHub() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
                     aria-label="Bước tiếp theo"
-                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-xs transition-colors hover:bg-[#06604a] cursor-pointer"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--color-primary)] cta cta-primary text-white shadow-xs transition-colors cursor-pointer"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>

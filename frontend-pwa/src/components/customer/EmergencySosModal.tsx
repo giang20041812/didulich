@@ -120,7 +120,7 @@ export default function EmergencySosModal({ isOpen, onClose }: EmergencySosModal
               <p className="mt-1 text-xs leading-relaxed text-slate-600">{done}</p>
               <p className="mt-2 text-[11px] text-slate-400">Hãy giữ điện thoại mở và di chuyển tới vị trí an toàn khi chờ trợ giúp.</p>
             </div>
-            <button type="button" onClick={onClose} className="w-full rounded-xl bg-[var(--color-primary)] py-2.5 text-xs font-bold text-white hover:bg-[#086350] transition-colors cursor-pointer">
+            <button type="button" onClick={onClose} className="w-full rounded-xl cta cta-primary py-2.5 text-xs font-bold text-white transition-colors cursor-pointer">
               Đóng
             </button>
           </div>

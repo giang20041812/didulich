@@ -4,20 +4,16 @@ import { cn } from "../../lib/cn"
 import { Loader2 } from "lucide-react"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-[var(--color-muted)] disabled:text-white disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary:
-          "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-600)] active:bg-[var(--color-primary-700)] shadow-sm",
-        secondary:
-          "bg-[var(--color-secondary)] text-[var(--color-ink-deep)] font-semibold hover:bg-[var(--color-secondary-600)] hover:text-white active:bg-[var(--color-secondary-700)] shadow-sm",
-        accent:
-          "bg-[var(--color-accent)] text-[var(--color-ink-deep)] hover:bg-[var(--color-accent-500)] active:bg-[var(--color-accent-600)] shadow-sm",
+        primary: "cta cta-primary text-white",
+        secondary: "cta cta-aqua text-white font-semibold",
+        accent: "cta cta-sun text-[var(--color-ink-deep)] font-semibold",
         outline:
-          "border border-[var(--color-primary)] text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary-50)] active:bg-[var(--color-primary-100)]",
-        ghost:
-          "text-[var(--color-primary)] bg-transparent hover:bg-[var(--color-primary-50)] active:bg-[var(--color-primary-100)]",
+          "cta cta-outline border border-[var(--color-primary)] text-[var(--color-primary)]",
+        ghost: "cta cta-ghost text-[var(--color-primary)]",
       },
       size: {
         lg: "h-12 px-8 text-[18px]",
