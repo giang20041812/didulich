@@ -15,7 +15,8 @@ import NearMePanel from "@/components/home/NearMePanel"
 import NearMeToggle from "@/components/home/NearMeToggle"
 import TimelySuggestion from "@/components/home/TimelySuggestion"
 import { SakuraBlossomIcon } from "@/components/ui/SakuraBlossomIcon"
-import Reveal from "@/components/ui/Reveal"
+import RevealBase from "@/components/ui/Reveal"
+import TypeText from "@/components/ui/TypeText"
 import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
 import { formatVnd } from "@/lib/compactCard"
 import { mediaUrl } from "@/lib/mediaUrl"
@@ -24,6 +25,11 @@ import { resolvePlacePhoto } from "@/lib/placeImages"
 import HeroBackdrop from "@/components/home/HeroBackdrop"
 import HomeMotifs from "@/components/home/HomeMotifs"
 import CardFrame from "@/components/ui/CardFrame"
+
+/** Trang chủ: các khối hiện ra khi cuộn tới và ẩn đi khi cuộn khuất (hiện lại khi quay lại). */
+function Reveal(props: Parameters<typeof RevealBase>[0]) {
+  return <RevealBase repeat {...props} />;
+}
 
 /**
  * Tiêu đề section kiểu editorial: nhãn overline nhỏ (gạch ngang dẫn) + tiêu đề lớn + mô tả dẫn dắt. `action` (vd. "Xem
@@ -37,7 +43,7 @@ function SectionHeading({ title, description, action }: { title: string; descrip
         {action && <div className="md:hidden">{action}</div>}
       </div>
       <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
-        {title}
+        <TypeText text={title} speed={45} delay={150} />
       </h2>
       {description && (
         <p className="mt-2 max-w-xl text-sm md:text-[15px] font-medium leading-relaxed text-slate-500">
@@ -176,10 +182,10 @@ function SuitableTimeTag({ place }: { place: PlaceSummaryDto }) {
  */
 function HeroTitle({ compact = false, className = '' }: { compact?: boolean; className?: string }) {
   return (
-    <div className={`${compact ? 'flex min-w-0 items-center gap-3' : 'flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 md:gap-5 mb-4 md:mb-5'} ${className}`}>
+    <div className={`${compact ? 'flex min-w-0 items-center gap-3' : 'flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 md:gap-5 mb-4 md:mb-[clamp(0.5rem,2vh,1.25rem)]'} ${className}`}>
       {/* Biểu tượng "Đi" + chữ "Du Lịch" bên dưới đọc liền thành "Đi Du Lịch". Không còn khung kính / viền trắng quanh logo. */}
       <div className="hero-rise relative shrink-0 drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)]">
-        <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32'} />
+        <LogoMark size={96} plate className={compact ? 'w-16 h-16 min-[420px]:w-20 min-[420px]:h-20' : 'w-20 h-20 sm:w-24 sm:h-24 md:w-[clamp(5rem,15vh,8rem)] md:h-[clamp(5rem,15vh,8rem)]'} />
       </div>
       <div className="min-w-0">
         {compact ? (
@@ -187,12 +193,12 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
             Du Lịch
           </h1>
         ) : (
-          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,8vw,7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.75rem,min(8vw,11vh),7.1875rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
             Du Lịch
           </h1>
         )}
         {/* Hiện sau ~3 giây như một nét viết tiếp; giữ chỗ ngay từ đầu nên không đẩy bố cục */}
-        <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,3.4vw,2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
+        <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,min(3.4vw,4.8vh),2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
           đi như người bản địa
         </p>
       </div>
@@ -200,7 +206,7 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
   );
 }
 
-/** Thẻ điểm đến: ảnh 4:3 + tag mùa đẹp + địa phương, tên và nút mũi tên. Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
+/** Thẻ điểm đến: ảnh vuông + tag mùa đẹp + địa phương và tên (cả thẻ là link, không cần nút mũi tên). Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
 function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
   const src = mediaUrl(resolvePlacePhoto(dest.coverImageUrl), 640);
   return (
@@ -223,7 +229,7 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
         </div>
 
         {/* Chữ đè lên glow ở chân thẻ */}
-        <div className="relative z-10 mt-auto flex items-end justify-between gap-2 px-3 pb-3 pt-10">
+        <div className="relative z-10 mt-auto px-3 pb-3 pt-10">
           <div className="min-w-0">
             {dest.regionName && (
               <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-100 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
@@ -238,9 +244,6 @@ function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
               <p className="mt-0.5 text-[11px] text-white/80 line-clamp-1">{dest.description}</p>
             )}
           </div>
-          <span className="w-8 h-8 shrink-0 rounded-full bg-white/90 flex items-center justify-center text-[#0a7d64] transition-transform duration-300 group-hover:translate-x-0.5">
-            <ArrowRight className="w-4 h-4" />
-          </span>
         </div>
       </Link>
     </CardFrame>
@@ -431,16 +434,20 @@ export default function HomePage() {
     // nó thay vì vào trang.
     <div className="w-full min-w-0 overflow-x-clip flex flex-col bg-white">
       {/* 1. Hero Section */}
-      <section className="home-snap-panel relative z-30 w-full min-h-[520px] md:min-h-[max(720px,100dvh)] flex flex-col pt-[calc(var(--app-header-height,130px)+16px)] pb-8 md:pb-28">
+      <section className="home-snap-panel relative z-30 w-full min-h-[520px] md:h-[100dvh] md:min-h-[540px] flex flex-col pt-[calc(var(--app-header-height,130px)+16px)] pb-8 md:pb-[clamp(1.25rem,8vh,7rem)]">
         {/* Ảnh ruộng bậc thang cũ + chuyển động: trôi chậm, nắng, mây, gió lướt ruộng lúa (xem HeroBackdrop).
             Mọi kích thước: ảnh phủ kín cả hero, header đè lên; điện thoại chỉ thu nhỏ lại và rút ngắn hero. */}
         <HeroBackdrop />
 
         <div className="relative z-30 flex min-w-0 flex-col max-md:gap-4 flex-1 px-4 md:px-8 max-w-[1280px] mx-auto w-full overflow-x-clip">
-          <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-12">
+          <div className="self-start w-full min-w-0 max-w-[760px] text-left my-auto py-4 md:py-[clamp(0.5rem,4vh,3rem)]">
             <HeroTitle className="flex" />
-            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[20px] lg:text-[24px] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
-              Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn
+            <p className="hero-rise block [animation-delay:260ms] mt-2 max-w-[640px] break-words [overflow-wrap:anywhere] text-sm sm:text-base md:text-[clamp(1rem,2.7vh,1.5rem)] font-bold text-white/95 leading-snug [text-shadow:0_2px_12px_rgba(0,0,0,0.4)] text-left">
+              <TypeText
+                text="Nền tảng đặt phòng Homestay & khám phá trải nghiệm du lịch di sản, sinh thái Việt Nam. Tìm nơi phù hợp cho chuyến đi của bạn"
+                delay={700}
+                speed={26}
+              />
             </p>
           </div>
 
@@ -623,7 +630,7 @@ export default function HomePage() {
           <Reveal className="mb-9 md:mb-12 text-center">
 
             <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
-              Tiện Ích Du Khách & Cam Kết Du Lịch
+              <TypeText text="Tiện Ích Du Khách & Cam Kết Du Lịch" speed={40} delay={150} />
             </h2>
 
           </Reveal>

@@ -59,9 +59,10 @@ export default function HeroBackdrop() {
             alt="Ruộng bậc thang mùa lúa chín giữa núi rừng Tây Bắc"
             fetchPriority="high"
             decoding="async"
+            data-no-skeleton
             className="absolute inset-0 h-full w-full"
           />
-          <img src={HERO_FALLBACK_SRC} srcSet={HERO_SRCSET} sizes={HERO_SIZES} alt="" aria-hidden className="hero-grass" />
+          <img src={HERO_FALLBACK_SRC} srcSet={HERO_SRCSET} sizes={HERO_SIZES} alt="" aria-hidden data-no-skeleton className="hero-grass" />
           <div className="hero-sun" aria-hidden />
           <div className="hero-rays" aria-hidden />
           <div className="hero-cloud hero-cloud-a" aria-hidden />

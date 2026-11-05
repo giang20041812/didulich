@@ -77,8 +77,8 @@
   --color-danger: #e05252;
 
   --font-brand: "Outfit", system-ui, sans-serif;
-  --font-display: "Nunito", system-ui, -apple-system, sans-serif;
-  --font-body: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "DT Phudu", system-ui, -apple-system, sans-serif;
+  --font-body: "Ganh", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-brush: "Dancing Script", cursive;
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
 
@@ -216,7 +216,8 @@
     background-color: var(--color-canvas);
     color: var(--color-ink);
     font-family: var(--font-body);
-    font-weight: 600;
+    /* Ganh chỉ có nét Regular thật (400); để 600 sẽ bị trình duyệt làm đậm giả */
+    font-weight: 400;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -274,10 +275,10 @@
   .h2 { font-size: 32px; font-weight: 800; }
   .h3 { font-size: 24px; font-weight: 800; }
   .h4 { font-size: 20px; font-weight: 800; }
-  .body-lg { font-size: 18px; font-weight: 600; }
-  .body { font-size: 16px; font-weight: 600; }
-  .body-sm { font-size: 14px; font-weight: 600; }
-  .caption { font-size: 13px; font-weight: 600; color: var(--color-muted); }
+  .body-lg { font-size: 18px; font-weight: 400; }
+  .body { font-size: 16px; font-weight: 400; }
+  .body-sm { font-size: 14px; font-weight: 400; }
+  .caption { font-size: 13px; font-weight: 400; color: var(--color-muted); }
   .font-editorial { font-family: var(--font-serif); }
   .overline { 
     font-size: 11px; 
@@ -813,4 +814,110 @@
 .card-pages a,
 .card-pages article {
   box-shadow: none !important;
+}
+
+/*
+ * Ảnh đang tải (lib/imageFx.ts gắn data-loading): giấu nội dung ảnh đang vẽ dở (đẩy object-position ra ngoài khung)
+ * và vẽ skeleton lấp lánh làm nền ngay trên khung <img>; tải xong thì ảnh mờ dần vào, trọn vẹn một lần.
+ * data-no-skeleton: chỉ chờ tải xong, không vẽ nền (ảnh trên nền tối như hero).
+ */
+img[data-loading] {
+  object-position: -99999px -99999px !important;
+  color: transparent;
+}
+img[data-loading]:not([data-no-skeleton]) {
+  background-color: #e8eeec;
+  background-image: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.65) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: imgShimmer 1.3s ease-in-out infinite;
+}
+/* Trong @layer base: ảnh nào tự có animation riêng (vd. .hero-grass, animate-*) thì animation đó được ưu tiên. */
+@layer base {
+  img[data-loaded] {
+    animation: imgReveal 0.45s ease-out;
+  }
+}
+@keyframes imgShimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@keyframes imgReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  img[data-loading]:not([data-no-skeleton]) {
+    animation: none;
+  }
+}
+
+/* Chữ gõ ra (components/ui/TypeText): con trỏ nhấp nháy, đứng yên khi đang gõ, gõ xong thì mờ dần rồi ẩn. */
+.type-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  border-radius: 2px;
+  background: currentColor;
+  animation: typeCaretBlink 0.9s steps(1) infinite;
+}
+.type-caret.is-typing {
+  animation: none;
+}
+.type-caret.is-done {
+  animation: typeCaretBlink 0.9s steps(1) 3, typeCaretOut 0.4s ease 2.7s forwards;
+}
+@keyframes typeCaretBlink {
+  50% { opacity: 0; }
+}
+@keyframes typeCaretOut {
+  to { opacity: 0; }
+}
+
+/* Pagination thẻ (components/ui/CardPages): số trang mới trượt lên thay số cũ. */
+.pager-num {
+  animation: pagerNumIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pagerNumIn {
+  from { opacity: 0; transform: translateY(70%); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Khối tìm kiếm (SearchHub): ban đầu chỉ là nút kính lúp tròn, rồi bung sang phải lộ ra các ô còn lại. */
+.search-unfold {
+  animation: searchUnfold 0.95s cubic-bezier(0.76, 0, 0.24, 1) 0.55s both;
+}
+.search-unfold-content {
+  animation: searchUnfoldContent 0.5s ease 1.25s both;
+}
+.search-unfold-icon {
+  animation: searchUnfoldIcon 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes searchUnfold {
+  from { clip-path: inset(0 calc(100% - var(--unfold-size, 78px)) 0 0 round 999px); }
+  to { clip-path: inset(0 0 0 0 round 999px); }
+}
+@keyframes searchUnfoldContent {
+  from { opacity: 0; transform: translateX(-14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes searchUnfoldIcon {
+  0% { opacity: 0; transform: scale(0.4) rotate(-40deg); }
+  30% { opacity: 1; transform: scale(1) rotate(0); }
+  45% { opacity: 1; transform: scale(1); }
+  75% { opacity: 1; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.9); }
+  100% { opacity: 0; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-caret,
+  .pager-num,
+  .search-unfold,
+  .search-unfold-content,
+  .search-unfold-icon {
+    animation: none !important;
+  }
+  .search-unfold-icon { display: none; }
 }
