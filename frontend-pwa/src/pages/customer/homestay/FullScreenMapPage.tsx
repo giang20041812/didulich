@@ -84,7 +84,7 @@ function MapMessage({ title, description, onRetry, children }: {
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl cta cta-primary text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" /> Thử lại
           </button>
@@ -159,7 +159,7 @@ function PlaceMapView({ slug }: { slug: string }) {
           <button
             type="button"
             onClick={goToDetail}
-            className="px-5 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl cta cta-primary text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
           >
             Quay lại chi tiết địa điểm
           </button>
@@ -320,7 +320,7 @@ function OverviewMapView() {
           title="Chưa có địa điểm nào trên bản đồ"
           description="Các địa điểm sẽ xuất hiện ở đây khi có toạ độ được xác minh."
         >
-          <Link to="/homestays" className="px-5 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95">
+          <Link to="/homestays" className="px-5 py-2.5 rounded-xl cta cta-primary text-white text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95">
             Xem danh sách homestay
           </Link>
         </MapMessage>

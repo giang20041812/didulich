@@ -269,7 +269,7 @@ export default function DateRangePicker({ checkInFrom, checkInTo, onChange }: Da
             <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 text-sm font-medium border border-gray-200 rounded-md hover:bg-slate-100 transition-colors cursor-pointer text-gray-800">
               Hủy
             </button>
-            <button type="button" onClick={handleApply} className="px-5 py-2 bg-[var(--color-primary)] text-white rounded-md text-sm font-bold shadow-xs hover:bg-[#03725e] transition-colors cursor-pointer">
+            <button type="button" onClick={handleApply} className="px-5 py-2 cta cta-primary text-white rounded-md text-sm font-bold shadow-xs transition-colors cursor-pointer">
               Áp dụng
             </button>
           </div>

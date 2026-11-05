@@ -381,7 +381,7 @@ export default function TransportListPage() {
                     <p className="text-slate-500 font-medium">Không tìm thấy dịch vụ di chuyển nào phù hợp.</p>
                     <button
                       onClick={handleClearFilters}
-                      className="mt-3 px-4 py-2 bg-[var(--color-primary)] text-white text-xs font-bold rounded-xl cursor-pointer hover:bg-[#086350] transition-colors"
+                      className="mt-3 px-4 py-2 cta cta-primary text-white text-xs font-bold rounded-xl cursor-pointer transition-colors"
                     >
                       Xem tất cả dịch vụ
                     </button>

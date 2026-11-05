@@ -439,7 +439,7 @@ export default function BookingPage() {
                 replace: true,
               })
             }
-            className="w-full bg-[var(--color-primary)] hover:bg-[#03725e] text-white font-bold rounded-md"
+            className="w-full cta cta-primary text-white font-bold rounded-md"
           >
             Đăng nhập ngay
           </Button>
@@ -601,7 +601,7 @@ export default function BookingPage() {
                         navigate('/bookings');
                       }
                     }}
-                    className="flex-1 py-2.5 h-11 bg-[var(--color-primary)] hover:bg-[#086350] text-white font-bold rounded-xl shadow-sm transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                    className="flex-1 py-2.5 h-11 cta cta-primary text-white font-bold rounded-xl shadow-sm transition-all text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 active:scale-95"
                   >
                     <span>Theo dõi đơn đặt</span>
                     <ArrowRight className="w-4 h-4" />
@@ -1123,7 +1123,7 @@ export default function BookingPage() {
                     className={`hidden lg:flex w-full h-12 font-bold rounded-xl shadow-xs transition-all items-center justify-center gap-2 active:scale-98 ${
                       bookingRestriction || !validation.isValid
                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                        : 'bg-[var(--color-primary)] hover:bg-[#086350] text-white cursor-pointer shadow-md shadow-emerald-700/20'
+                        : 'cta cta-primary text-white cursor-pointer shadow-md shadow-emerald-700/20'
                     }`}
                   >
                     {isSubmitting ? (
@@ -1197,7 +1197,7 @@ export default function BookingPage() {
             </p>
             <div className="mt-5 flex justify-end gap-2.5">
               <Button type="button" variant="outline" onClick={() => setShowBookingReview(false)} className="rounded-xl font-bold">Chỉnh sửa</Button>
-              <Button type="button" disabled={Boolean(bookingRestriction) || isSubmitting} onClick={(event) => { if (isSubmitting || submittingRef.current) return; setShowBookingReview(false); void handleSubmitBooking(event); }} className="rounded-xl font-bold bg-[var(--color-primary)] text-white hover:bg-[#086350] shadow-sm">{bookingRestriction ? 'Không thể đặt phòng' : isSubmitting ? 'Đang xử lý…' : 'Xác nhận đặt phòng'}</Button>
+              <Button type="button" disabled={Boolean(bookingRestriction) || isSubmitting} onClick={(event) => { if (isSubmitting || submittingRef.current) return; setShowBookingReview(false); void handleSubmitBooking(event); }} className="rounded-xl font-bold cta cta-primary text-white shadow-sm">{bookingRestriction ? 'Không thể đặt phòng' : isSubmitting ? 'Đang xử lý…' : 'Xác nhận đặt phòng'}</Button>
             </div>
           </div>
         </div>
@@ -1246,7 +1246,7 @@ export default function BookingPage() {
             }}
             className={`h-11 shrink-0 rounded-xl px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 ${
               !bookingRestriction && validation.isValid
-                ? 'bg-[var(--color-primary)] hover:bg-[#086350] cursor-pointer shadow-md shadow-emerald-700/20'
+                ? 'cta cta-primary cursor-pointer shadow-md shadow-emerald-700/20'
                 : 'cursor-not-allowed bg-slate-200 text-slate-400'
             }`}
           >

@@ -308,7 +308,7 @@ function NewTrip() {
             <AlertCircle className="h-6 w-6" aria-hidden="true" />
           </div>
           <p className="text-sm font-bold text-slate-800">{loadError}</p>
-          <button type="button" onClick={loadCatalog} className="mt-4 inline-flex h-11 items-center rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Thử lại</button>
+          <button type="button" onClick={loadCatalog} className="mt-4 inline-flex h-11 items-center rounded-xl cta cta-primary px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Thử lại</button>
         </div>
       ) : !draft || !catalog ? (
         <PlannerSkeleton />
@@ -400,7 +400,7 @@ function EditTrip({ journeyId }: { journeyId: number }) {
             <AlertCircle className="h-6 w-6" aria-hidden="true" />
           </div>
           <p className="text-sm font-bold text-slate-800">{loadError}</p>
-          <Link to="/lich-trinh?tab=cua-toi" className="mt-4 inline-flex h-11 items-center rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Về lịch trình của tôi</Link>
+          <Link to="/lich-trinh?tab=cua-toi" className="mt-4 inline-flex h-11 items-center rounded-xl cta cta-primary px-5 text-sm font-bold text-white shadow-xs transition-all active:scale-95 cursor-pointer">Về lịch trình của tôi</Link>
         </div>
       ) : !draft ? (
         <PlannerSkeleton label="Đang tải lịch trình" />

@@ -499,7 +499,7 @@ export default function BookingEditModal({
             <button
               type="submit"
               disabled={isSubmitting || !isPending || (availabilityResult !== null && !availabilityResult.available)}
-              className="px-5 py-2 text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-primary-600 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2 text-xs font-bold text-white cta cta-primary rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

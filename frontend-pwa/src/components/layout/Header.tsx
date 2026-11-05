@@ -32,7 +32,7 @@ function NavBadge({ text }: { text: string }) {
 /** Khung chung của các menu thả xuống trên header (Thêm, tài khoản). */
 const DROPDOWN_PANEL = 'rounded-xl border border-slate-200 bg-white p-1.5 shadow-[var(--shadow-lg)]';
 const DROPDOWN_ITEM =
-  'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-700 transition-colors text-left cursor-pointer hover:bg-slate-50 hover:text-[var(--color-primary)]';
+  'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-700 transition-colors text-left cursor-pointer menu-fx hover:text-[var(--color-primary)]';
 
 /** Từ md (48rem, cùng đơn vị với Tailwind để khớp khi trình duyệt đổi cỡ chữ mặc định) header dùng lưới 3 cột:
  *  logo | menu giữa | tài khoản. */
@@ -311,8 +311,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         ? 'text-[var(--color-primary)]'
         : 'text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]'
       : isSolid
-        ? 'text-slate-700 hover:bg-slate-900/[0.04] hover:text-[var(--color-primary)]'
-        : 'text-white hover:bg-white/10 hover:text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]';
+        ? 'text-slate-700 hover:text-[var(--color-primary)]'
+        : 'text-white hover:text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]';
 
   const desktopPill = useSlidingPill(desktopNavRef, [location.pathname, visibleCount, isSolid, searchCompact]);
   const mobilePill = useSlidingPill(mobileNavListRef, [location.pathname, isSolid]);
@@ -350,14 +350,14 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 onClick={handleOpen}
                 aria-label="Mở menu điều hướng"
                 title="Mở menu điều hướng"
-                className={`p-2 rounded-full transition-[background-color,color,opacity,transform] duration-200 cursor-pointer flex items-center justify-center ${
+                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center ${
                   isSidebarOpen
                     ? 'opacity-0 pointer-events-none invisible'
                     : 'opacity-100'
                 } ${
                   isSolid
-                    ? 'text-slate-800 hover:bg-emerald-50 hover:text-[var(--color-primary)] active:scale-95'
-                    : 'text-white drop-shadow-md hover:bg-white/20 active:scale-95'
+                    ? 'text-slate-800 hover:text-[var(--color-primary)]'
+                    : 'text-white drop-shadow-md'
                 }`}
               >
                 <Menu className="w-5 h-5 sm:w-5.5 sm:h-5.5" strokeWidth={2.4} />
@@ -392,8 +392,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 animate={desktopPill.animate}
                 className={
                   isSolid
-                    ? 'bg-[var(--color-primary-50)] shadow-[inset_0_0_0_1px_rgba(10,125,100,0.14)]'
-                    : 'bg-white/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
+                    ? 'bg-[linear-gradient(120deg,#e3faf0,#dcf6fb)] shadow-[inset_0_0_0_1px_rgba(10,125,100,0.16),0_6px_14px_-8px_rgba(10,125,100,0.5)]'
+                    : 'bg-[linear-gradient(120deg,rgba(255,255,255,0.22),rgba(250,204,21,0.2))] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28)]'
                 }
               />
               {visibleNav.map((item) => {
@@ -403,7 +403,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     key={item.id}
                     to={item.path}
                     aria-current={active ? 'page' : undefined}
-                    className={`relative flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors duration-200 ${navItemSize} ${navItemTone(active)}`}
+                    className={`nav-fx ${isSolid ? '' : 'nav-fx-light'} relative flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors duration-200 ${navItemSize} ${navItemTone(active)}`}
                   >
                     <item.Icon className="w-4 h-4 shrink-0" aria-hidden />
                     <span>{item.label}</span>
@@ -421,7 +421,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     aria-expanded={isMoreOpen}
                     aria-haspopup="true"
                     aria-current={overflowActive ? 'page' : undefined}
-                    className={`relative flex items-center gap-1 whitespace-nowrap transition-colors duration-200 cursor-pointer ${navItemSize} ${navItemTone(overflowActive)}`}
+                    className={`nav-fx ${isSolid ? '' : 'nav-fx-light'} relative flex items-center gap-1 whitespace-nowrap transition-colors duration-200 cursor-pointer ${navItemSize} ${navItemTone(overflowActive)}`}
                   >
                     Thêm
                     <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isMoreOpen ? 'rotate-180' : ''}`} aria-hidden />
@@ -482,10 +482,10 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     ref={accountButtonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen((v) => !v)}
-                    className={`flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full transition-colors duration-200 cursor-pointer border ${
+                    className={`icon-fx relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
                       isSolid
-                        ? 'bg-white/90 border-slate-200/80 hover:border-emerald-600/40 hover:bg-emerald-50/40 shadow-2xs'
-                        : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/30 shadow-xs'
+                        ? 'bg-white/90 border-slate-200/80 hover:border-emerald-500/50 shadow-2xs'
+                        : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:border-white/60 shadow-xs'
                     }`}
                     aria-label={`Tài khoản: ${user.fullName || user.email}`}
                     aria-expanded={isDropdownOpen}
@@ -599,7 +599,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                             setIsDropdownOpen(false);
                             navigate(user.role === 'ADMIN' ? '/admin' : '/partner');
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-amber-800 hover:bg-amber-50 transition-colors text-left cursor-pointer"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-amber-800 menu-fx menu-fx-warn text-left cursor-pointer"
                         >
                           <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
                           <span>Cổng {user.role === 'ADMIN' ? 'Quản trị hệ thống' : 'Nhà cung cấp đối tác'}</span>
@@ -612,7 +612,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-[var(--color-danger)] hover:bg-rose-50 transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-[var(--color-danger)] menu-fx menu-fx-danger text-left cursor-pointer"
                       >
                         <LogOut className="w-4 h-4 shrink-0" />
                         <span>Đăng xuất</span>
@@ -630,10 +630,10 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                   to="/login"
                   title="Đăng nhập"
                   aria-label="Đăng nhập"
-                  className={`inline-flex items-center justify-center gap-1.5 h-9 max-sm:w-9 sm:px-4 rounded-full text-xs font-bold transition-[background-color,border-color,transform] duration-200 shadow-xs active:scale-95 cursor-pointer ${
+                  className={`cta inline-flex items-center justify-center gap-1.5 h-9 max-sm:w-9 sm:px-4 rounded-full text-xs font-bold cursor-pointer ${
                     isSolid
-                      ? 'bg-[var(--color-primary)] text-white hover:bg-[#06604a]'
-                      : 'bg-white/20 backdrop-blur-md text-white border border-white/40 hover:bg-white/30'
+                      ? 'cta-primary text-white'
+                      : 'cta-glass backdrop-blur-md text-white border border-white/40'
                   }`}
                 >
                   <LogIn className="w-3.5 h-3.5 shrink-0" />
@@ -644,11 +644,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                   to="/register"
                   title="Đăng ký tài khoản"
                   aria-label="Đăng ký"
-                  className={`inline-flex items-center justify-center gap-1.5 h-9 max-sm:w-9 sm:px-4 rounded-full text-xs font-bold transition-[background-color,border-color,transform] duration-200 shadow-xs active:scale-95 cursor-pointer ${
-                    isSolid
-                      ? 'border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-emerald-50'
-                      : 'border border-white/60 text-white hover:bg-white/20'
-                  }`}
+                  className={`cta cta-coral inline-flex items-center justify-center gap-1.5 h-9 max-sm:w-9 sm:px-4 rounded-full text-xs font-bold text-white cursor-pointer`}
                 >
                   <UserPlus className="w-3.5 h-3.5 shrink-0" />
                   <span className="hidden sm:inline">Đăng ký</span>
@@ -676,7 +672,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 <SlidingPill
                   rect={mobilePill.rect}
                   animate={mobilePill.animate}
-                  className={isSolid ? 'bg-[var(--color-primary)]' : 'bg-white/20'}
+                  className={isSolid ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886,#06b6d4)] shadow-[0_6px_14px_-6px_rgba(10,125,100,0.6)]' : 'bg-[linear-gradient(120deg,rgba(255,255,255,0.28),rgba(250,204,21,0.24))]'}
                 />
                 {CUSTOMER_NAV.map((item) => {
                   const active = isCustomerNavActive(item, location.pathname);
@@ -685,13 +681,13 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                       key={item.id}
                       to={item.path}
                       aria-current={active ? 'page' : undefined}
-                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 shrink-0 rounded-full ${
+                      className={`nav-fx ${isSolid ? '' : 'nav-fx-light'} relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 shrink-0 rounded-full ${
                         active
                           ? isSolid
                             ? 'text-white'
                             : 'text-[var(--color-sun)]'
                           : isSolid
-                            ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                            ? 'text-slate-600 hover:text-[var(--color-primary)]'
                             : 'text-white/85 hover:text-white'
                       }`}
                     >

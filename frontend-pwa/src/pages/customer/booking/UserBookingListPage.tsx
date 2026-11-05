@@ -447,7 +447,7 @@ export default function UserBookingListPage() {
             <button
               type="button"
               onClick={() => void loadData()}
-              className="mt-4 px-4 py-2 text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[#086350] rounded-xl cursor-pointer inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-95"
+              className="mt-4 px-4 py-2 text-xs font-bold text-white cta cta-primary rounded-xl cursor-pointer inline-flex items-center gap-1.5 shadow-xs transition-all active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Thử lại</span>
@@ -488,7 +488,7 @@ export default function UserBookingListPage() {
               <button
                 type="button"
                 onClick={() => navigate('/homestays')}
-                className="px-5 py-2 text-xs font-bold text-white bg-[var(--color-coral)] hover:bg-[#ea580c] rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer flex items-center gap-1.5 active:scale-95"
+                className="px-5 py-2 text-xs font-bold text-white cta cta-coral rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer flex items-center gap-1.5 active:scale-95"
               >
                 <BedDouble className="w-3.5 h-3.5" />
                 <span>Khám phá Homestay</span>
@@ -634,7 +634,7 @@ export default function UserBookingListPage() {
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
                             hasReviewed
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
-                              : 'bg-[var(--color-sun)] hover:bg-[#d97706] text-white active:scale-95 shadow-xs'
+                              : 'cta cta-sun text-white active:scale-95 shadow-xs'
                           }`}
                         >
                           <Star className="w-3.5 h-3.5 fill-current" />
@@ -646,7 +646,7 @@ export default function UserBookingListPage() {
                       <button
                         type="button"
                         onClick={() => navigate(`/bookings/${b.bookingCode}`)}
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--color-primary)] hover:bg-[#086350] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl cta cta-primary text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Chi tiết</span>

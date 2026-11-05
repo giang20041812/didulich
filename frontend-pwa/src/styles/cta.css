@@ -1,0 +1,360 @@
+/*
+ * Hệ thống CTA "lung linh": nút gradient có ánh sáng quét ngang, quầng sáng đổ bóng màu, vòng sóng tỏa ra và họa tiết
+ * lấp lánh xổ ra từ vị trí con trỏ khi rê chuột (con trỏ lấy qua --mx/--my, xem lib/ctaFx.ts).
+ *
+ * Cố ý viết NGOÀI @layer để thắng các tiện ích Tailwind còn sót trên cùng phần tử (shadow-*, bg-*, transition-*).
+ * Chỉ động vào nền / bóng / chuyển động — không đụng màu chữ, bo góc, cỡ chữ để từng chỗ dùng vẫn tự quyết định.
+ * Mọi hiệu ứng rê chuột chỉ bật trên thiết bị có chuột (hover: hover); cảm ứng chỉ có hiệu ứng nhấn.
+ */
+
+/* ============================== Nút CTA ============================== */
+
+.cta {
+  --cta-a: #0a7d64;
+  --cta-b: #12b886;
+  --cta-c: #06b6d4;
+  --cta-glow: 16, 185, 129;
+  --cta-spark: 255, 255, 255;
+  background-color: var(--cta-a);
+  background-image:
+    linear-gradient(112deg, transparent 36%, rgba(255, 255, 255, 0.55) 50%, transparent 64%),
+    linear-gradient(120deg, var(--cta-a), var(--cta-b) 52%, var(--cta-c));
+  background-size: 260% 100%, 200% 100%;
+  background-position: 100% 0, 0% 0;
+  background-repeat: no-repeat;
+  box-shadow:
+    0 6px 16px -8px rgba(var(--cta-glow), 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  /* translateZ: tạo khung chứa cho lớp họa tiết (::before/::after) mà không đổi kiểu định vị của nút (fixed/sticky/absolute). */
+  transform: translateZ(0);
+  transition:
+    background-position 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Lớp họa tiết lấp lánh + đốm sáng theo con trỏ: nằm dưới chữ (z-index âm trong khung của nút), bung ra từ chỗ con trỏ. */
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.55);
+  transform-origin: var(--mx, 50%) var(--my, 50%);
+  background:
+    radial-gradient(circle 70px at var(--mx, 50%) var(--my, 50%), rgba(var(--cta-spark), 0.42), transparent 72%),
+    radial-gradient(circle at 10% 30%, rgba(var(--cta-spark), 0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 23% 74%, rgba(var(--cta-spark), 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 37% 24%, rgba(var(--cta-spark), 0.85) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 52% 80%, rgba(var(--cta-spark), 0.9) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 66% 22%, rgba(var(--cta-spark), 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 79% 66%, rgba(var(--cta-spark), 0.95) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 91% 28%, rgba(var(--cta-spark), 0.8) 0 1.1px, transparent 2.1px),
+    radial-gradient(circle at 30% 50%, rgba(var(--cta-spark), 0.22) 0 7px, transparent 12px),
+    radial-gradient(circle at 72% 44%, rgba(var(--cta-spark), 0.2) 0 9px, transparent 15px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Vòng sóng tỏa ra quanh nút, phát một lần mỗi lần rê vào. */
+.cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 0 2px rgba(var(--cta-glow), 0.55);
+}
+
+@media (hover: hover) {
+  .cta:hover:not(:disabled):not([aria-disabled="true"]) {
+    background-position: 0% 0, 100% 0;
+    transform: translateY(-2px) scale(1.025);
+    box-shadow:
+      0 14px 28px -10px rgba(var(--cta-glow), 0.8),
+      0 0 0 4px rgba(var(--cta-glow), 0.14),
+      0 0 22px -2px rgba(var(--cta-glow), 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    filter: saturate(1.12) brightness(1.04);
+  }
+  .cta:hover:not(:disabled):not([aria-disabled="true"])::before {
+    opacity: 1;
+    transform: scale(1);
+    animation: ctaTwinkle 2.6s ease-in-out 0.5s infinite;
+  }
+  .cta:hover:not(:disabled):not([aria-disabled="true"])::after {
+    animation: ctaRing 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.cta:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(0.96);
+  transition-duration: 0.12s;
+}
+
+.cta:focus-visible {
+  outline: 2px solid rgba(var(--cta-glow), 0.9);
+  outline-offset: 3px;
+}
+
+.cta:disabled,
+.cta[aria-disabled="true"] {
+  filter: grayscale(0.45) brightness(1.02);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@keyframes ctaRing {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.18, 1.55); }
+}
+@keyframes ctaTwinkle {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.45); }
+}
+
+/* ---- Bảng màu ---- */
+.cta-primary { /* xanh ngọc → lục bảo → thiên thanh (mặc định) */ }
+.cta-coral {
+  --cta-a: #f97316; --cta-b: #f43f5e; --cta-c: #ec4899; --cta-glow: 244, 63, 94;
+}
+.cta-sun {
+  --cta-a: #fbbf24; --cta-b: #f59e0b; --cta-c: #f97316; --cta-glow: 249, 115, 22;
+  --cta-spark: 255, 255, 255;
+}
+.cta-aqua {
+  --cta-a: #06b6d4; --cta-b: #3b82f6; --cta-c: #8b5cf6; --cta-glow: 59, 130, 246;
+}
+.cta-night {
+  --cta-a: #1d2d4f; --cta-b: #0a7d64; --cta-c: #06b6d4; --cta-glow: 6, 182, 212;
+}
+
+/* ---- Viền (outline) và kính mờ (glass): nền trong, rê vào thì gradient loang từ trái sang phải ---- */
+.cta-outline,
+.cta-glass,
+.cta-ghost {
+  background-color: transparent;
+  background-image: linear-gradient(120deg, var(--cta-a), var(--cta-b) 52%, var(--cta-c));
+  background-size: 0% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+.cta-glass {
+  background-color: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  --cta-spark: 255, 255, 255;
+}
+.cta-ghost {
+  background-image: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(6, 182, 212, 0.16));
+  --cta-spark: 16, 185, 129;
+}
+.cta-outline,
+.cta-ghost {
+  --cta-spark: 16, 185, 129;
+}
+.cta-outline::before,
+.cta-ghost::before {
+  /* Họa tiết màu trên nền sáng thì phải đậm hơn một chút mới thấy. */
+  filter: saturate(1.4);
+}
+@media (hover: hover) {
+  .cta-outline:hover:not(:disabled):not([aria-disabled="true"]),
+  .cta-glass:hover:not(:disabled):not([aria-disabled="true"]),
+  .cta-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+    background-size: 100% 100%;
+    background-position: 0 0;
+    box-shadow:
+      0 12px 24px -10px rgba(var(--cta-glow), 0.7),
+      0 0 0 4px rgba(var(--cta-glow), 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    filter: none;
+    transform: translateY(-2px);
+  }
+  .cta-outline:hover:not(:disabled):not([aria-disabled="true"]),
+  .cta-glass:hover:not(:disabled):not([aria-disabled="true"]) {
+    color: #fff;
+    border-color: transparent;
+    --cta-spark: 255, 255, 255;
+  }
+  .cta-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+    box-shadow: 0 8px 20px -12px rgba(var(--cta-glow), 0.6);
+  }
+}
+.cta-outline.cta-sun:hover { color: #3b2a00; }
+
+/* ============================== Mục điều hướng (navbar) ============================== */
+
+.nav-fx {
+  --nf-a: rgba(16, 185, 129, 0.16);
+  --nf-b: rgba(6, 182, 212, 0.2);
+  --nf-line-a: #10b981;
+  --nf-line-b: #06b6d4;
+  --nf-line-c: #facc15;
+  isolation: isolate;
+}
+.nav-fx-light {
+  --nf-a: rgba(255, 255, 255, 0.24);
+  --nf-b: rgba(250, 204, 21, 0.26);
+  --nf-line-a: #ffffff;
+  --nf-line-b: #fde047;
+  --nf-line-c: #fb923c;
+}
+/* Nền gradient mềm nở ra từ giữa mục */
+.nav-fx::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 70%, rgba(255, 255, 255, 0.85) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 60% 20%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
+    linear-gradient(120deg, var(--nf-a), var(--nf-b));
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity 0.3s ease,
+    transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+/* Gạch chân gradient mọc ra từ tâm */
+.nav-fx::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  height: 2px;
+  width: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--nf-line-a), var(--nf-line-b), var(--nf-line-c));
+  transform: translateX(-50%);
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-fx > svg {
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (hover: hover) {
+  .nav-fx:hover::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .nav-fx:hover:not([aria-current="page"])::after {
+    width: calc(100% - 1.5rem);
+  }
+  .nav-fx:hover > svg {
+    transform: translateY(-1px) rotate(-9deg) scale(1.18);
+  }
+}
+/* Mục đang chọn đã có viên thuốc trượt nên không phủ thêm lớp rê chuột. */
+.nav-fx[aria-current="page"]::before {
+  opacity: 0;
+}
+
+/* ============================== Mục trong menu thả xuống ============================== */
+
+.menu-fx {
+  background-image: linear-gradient(100deg, rgba(16, 185, 129, 0.14), rgba(6, 182, 212, 0.12) 60%, transparent);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition:
+    background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s ease,
+    padding-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.menu-fx > svg {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (hover: hover) {
+  .menu-fx:hover {
+    background-size: 100% 100%;
+    padding-left: 0.95rem;
+  }
+  .menu-fx:hover > svg {
+    transform: scale(1.18) rotate(-6deg);
+  }
+}
+.menu-fx-warn {
+  background-image: linear-gradient(100deg, rgba(245, 158, 11, 0.18), rgba(251, 146, 60, 0.12) 60%, transparent);
+}
+.menu-fx-danger {
+  background-image: linear-gradient(100deg, rgba(244, 63, 94, 0.14), rgba(251, 113, 133, 0.1) 60%, transparent);
+}
+
+/* ============================== Nút biểu tượng tròn (chuông, ☰…) ============================== */
+
+.icon-fx {
+  isolation: isolate;
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 0.25s ease,
+    box-shadow 0.35s ease;
+}
+.icon-fx::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, #10b981, #06b6d4, #facc15, #f97316, #10b981);
+  filter: blur(7px);
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.icon-fx > svg {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (hover: hover) {
+  .icon-fx:hover {
+    transform: translateY(-1px) scale(1.08);
+  }
+  .icon-fx:hover::before {
+    opacity: 0.55;
+    transform: scale(1.1);
+    animation: iconSpin 3.2s linear infinite;
+  }
+  .icon-fx:hover > svg {
+    transform: rotate(-10deg) scale(1.12);
+  }
+}
+.icon-fx:active {
+  transform: scale(0.92);
+}
+@keyframes iconSpin {
+  to { rotate: 360deg; }
+}
+
+/* ============================== Giảm chuyển động ============================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .cta,
+  .cta::before,
+  .nav-fx::before,
+  .nav-fx::after,
+  .nav-fx > svg,
+  .menu-fx,
+  .menu-fx > svg,
+  .icon-fx,
+  .icon-fx::before,
+  .icon-fx > svg {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+  .cta::after { display: none; }
+}

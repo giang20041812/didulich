@@ -93,7 +93,7 @@ export function ForgotPasswordModal({ initialIdentifier = '', onClose, onDone }:
   };
 
   const primaryBtn =
-    'flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm transition hover:bg-[#086350] disabled:opacity-60 cursor-pointer';
+    'flex h-11 flex-1 items-center justify-center gap-2 rounded-xl cta cta-primary text-sm font-bold text-white shadow-sm transition disabled:opacity-60 cursor-pointer';
   const ghostBtn =
     'h-11 flex-1 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer';
 

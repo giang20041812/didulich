@@ -137,7 +137,7 @@ export default function QrCheckinPage() {
                 ? 'Bạn đang dùng tài khoản quản trị / đối tác. Hãy đăng nhập bằng tài khoản khách đã đặt phòng.'
                 : staysError || 'Dùng tài khoản bạn đã đặt phòng — chỉ một chạm là xong.'}
             </p>
-            <button type="button" onClick={login} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] text-sm font-bold text-white shadow-md shadow-teal-900/10 hover:bg-[#086350] transition-all cursor-pointer">
+            <button type="button" onClick={login} className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl cta cta-primary text-sm font-bold text-white shadow-md shadow-teal-900/10 transition-all cursor-pointer">
               <LogIn className="h-4 w-4" /> Đăng nhập
             </button>
             <Link to={`/homestays/${place.placeId}`} className="mt-3.5 inline-block text-xs font-semibold text-[var(--color-primary)] hover:underline">Chưa đặt phòng? Xem phòng trống</Link>
@@ -162,7 +162,7 @@ export default function QrCheckinPage() {
               Tài khoản <strong>{traveler.email}</strong> chưa có đơn còn hiệu lực tại {place.placeName}. Nếu bạn đặt bằng tài khoản khác, hãy đăng nhập lại.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2.5">
-              <Link to={`/homestays/${place.placeId}`} className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-primary)] text-xs font-bold text-white shadow-sm hover:bg-[#086350] transition-colors">Đặt phòng</Link>
+              <Link to={`/homestays/${place.placeId}`} className="inline-flex h-11 items-center justify-center rounded-xl cta cta-primary text-xs font-bold text-white shadow-sm transition-colors">Đặt phòng</Link>
               <button type="button" onClick={login} className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">Tài khoản khác</button>
             </div>
           </section>
@@ -196,7 +196,7 @@ export default function QrCheckinPage() {
 
                     {stay.canCheckIn ? (
                       <button type="button" onClick={() => { void checkIn(stay); }} disabled={busyCode !== null}
-                        className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] text-sm font-bold text-white shadow-md shadow-teal-900/10 transition-all hover:bg-[#086350] active:scale-[0.99] disabled:opacity-60 cursor-pointer">
+                        className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl cta cta-primary text-sm font-bold text-white shadow-md shadow-teal-900/10 transition-all active:scale-[0.99] disabled:opacity-60 cursor-pointer">
                         {busyCode === stay.bookingCode ? <Loader2 className="h-4 w-4 animate-spin" /> : <DoorOpen className="h-5 w-5" />}
                         {busyCode === stay.bookingCode ? 'Đang nhận phòng…' : 'Nhận phòng'}
                       </button>

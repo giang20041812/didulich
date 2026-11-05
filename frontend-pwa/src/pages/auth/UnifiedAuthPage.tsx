@@ -597,7 +597,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
               className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white shadow-md shadow-teal-900/10 transition-all duration-200 cursor-pointer ${
                 !isLoginFormValid || isLoading
                   ? 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none'
-                  : 'bg-[var(--color-primary)] hover:bg-[#086350] hover:-translate-y-0.5 active:translate-y-0'
+                  : 'cta cta-primary hover:-translate-y-0.5 active:translate-y-0'
               }`}
             >
               {isLoading ? (
@@ -866,7 +866,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
               className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white shadow-md shadow-teal-900/10 transition-all duration-200 cursor-pointer ${
                 !isRegFormValid || isLoading
                   ? 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none'
-                  : 'bg-[var(--color-primary)] hover:bg-[#086350] hover:-translate-y-0.5 active:translate-y-0'
+                  : 'cta cta-primary hover:-translate-y-0.5 active:translate-y-0'
               }`}
             >
               {isLoading ? (

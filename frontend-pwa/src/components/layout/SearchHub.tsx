@@ -768,7 +768,7 @@ export default function SearchHub() {
                 onClick={goNext}
                 disabled={activeTab === 'guests'}
                 aria-label="Bước tiếp theo"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-xs transition-colors hover:bg-[#06604a] disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-primary)] cta cta-primary text-white shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -815,7 +815,7 @@ export default function SearchHub() {
                 <button
                   type="button"
                   onClick={handleSearch}
-                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-extrabold text-white transition-colors hover:bg-[#06604a] cursor-pointer"
+                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white transition-colors cursor-pointer"
                 >
                   <Search className="h-4 w-4" aria-hidden /> {ctaLabel}
                 </button>
@@ -875,7 +875,7 @@ export default function SearchHub() {
                   <button
                     type="button"
                     onClick={handleSearch}
-                    className="flex h-11 items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-extrabold text-white shadow-xs transition-colors hover:bg-[#06604a] active:scale-95 cursor-pointer"
+                    className="flex h-11 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white shadow-xs transition-colors active:scale-95 cursor-pointer"
                   >
                     <Search className="h-4 w-4" aria-hidden />
                     {ctaLabel}
@@ -885,7 +885,7 @@ export default function SearchHub() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
                     aria-label="Bước tiếp theo"
-                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-xs transition-colors hover:bg-[#06604a] cursor-pointer"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--color-primary)] cta cta-primary text-white shadow-xs transition-colors cursor-pointer"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>

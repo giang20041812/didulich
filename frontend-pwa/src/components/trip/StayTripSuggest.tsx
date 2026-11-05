@@ -198,7 +198,7 @@ export default function StayTripSuggest({
               onClick={openSuggestion}
               disabled={!suggestion}
               aria-describedby={suggestion ? undefined : `${id}-need-time`}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[var(--color-primary)] text-[15px] font-extrabold text-white transition-colors hover:bg-[#06604a] disabled:cursor-not-allowed disabled:bg-[#cfdac8] disabled:text-white cursor-pointer"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-md cta cta-primary text-[15px] font-extrabold text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#cfdac8] disabled:text-white cursor-pointer"
             >
               <Sparkles className="h-4 w-4" aria-hidden /> Gợi ý lịch trình
             </button>

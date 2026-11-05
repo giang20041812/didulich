@@ -271,7 +271,7 @@ export default function UserBookingDetailPage() {
             <button
               type="button"
               onClick={() => navigate('/bookings')}
-              className="px-4 py-2 text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[#06604a] rounded-md transition-colors shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold text-white cta cta-primary rounded-md transition-colors shadow-xs cursor-pointer inline-flex items-center gap-1.5"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Quay lại danh sách đơn</span>
@@ -496,7 +496,7 @@ export default function UserBookingDetailPage() {
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="px-5 py-2.5 rounded-xl bg-[var(--color-sun)] hover:bg-[#d97706] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer shrink-0 flex items-center justify-center gap-2"
+                  className="px-5 py-2.5 rounded-xl cta cta-sun text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer shrink-0 flex items-center justify-center gap-2"
                 >
                   <Star className="w-4 h-4 fill-current" />
                   <span>Viết đánh giá ngay</span>

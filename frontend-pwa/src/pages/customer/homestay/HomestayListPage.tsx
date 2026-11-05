@@ -843,7 +843,7 @@ export default function HomestayListPage() {
                         setTotalPages(data.totalPages);
                       }).catch((err: unknown) => setError(err instanceof Error ? err.message : 'Không thể tải danh sách Homestay.')).finally(() => setLoading(false));
                     }}
-                    className="mt-3 rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-white hover:bg-[var(--color-primary-600)]"
+                    className="mt-3 rounded-md cta cta-primary px-4 py-2 text-sm font-bold text-white "
                   >
                     Thử lại
                   </button>

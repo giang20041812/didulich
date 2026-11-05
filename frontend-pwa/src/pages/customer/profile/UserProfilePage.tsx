@@ -204,7 +204,7 @@ export default function UserProfilePage() {
                   <button
                     type="submit"
                     disabled={isSavingInfo}
-                    className="flex items-center gap-2 h-11 px-6 bg-[var(--color-primary)] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#086350] shadow-sm transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+                    className="flex items-center gap-2 h-11 px-6 cta cta-primary text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
                     <span>{isSavingInfo ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
@@ -253,7 +253,7 @@ export default function UserProfilePage() {
                   <button
                     type="submit"
                     disabled={isSavingPassword}
-                    className="flex items-center gap-2 h-11 px-6 bg-[var(--color-coral)] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#ea580c] shadow-sm transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+                    className="flex items-center gap-2 h-11 px-6 cta cta-coral text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
                   >
                     <Save className="w-4 h-4" />
                     <span>{isSavingPassword ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}</span>

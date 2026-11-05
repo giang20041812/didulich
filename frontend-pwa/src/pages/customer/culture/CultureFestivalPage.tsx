@@ -169,7 +169,7 @@ export default function CultureFestivalPage() {
                 Đội ngũ đang thu thập lịch lễ hội Mù Cang Chải – Yên Bái theo mùa. Hãy quay lại gần ngày hội Mùa Vàng (tháng 9–10)!
               </p>
             </div>
-            <Link to="/homestays" className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#086350]">
+            <Link to="/homestays" className="rounded-xl cta cta-primary px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-colors ">
               Xem homestay cho chuyến đi lễ hội →
             </Link>
           </div>
