@@ -1,29 +1,36 @@
 /**
- * Cho CSS biết con trỏ đang ở đâu trên nút CTA (--mx / --my, tính bằng %) để đốm sáng và họa tiết lấp lánh
- * bung ra đúng chỗ rê chuột. Một listener ủy quyền duy nhất cho cả trang; chỉ chạy trên thiết bị có chuột.
+ * Hiệu ứng bấm cho nút CTA: mỗi lần nhấn (chuột, chạm, hoặc Enter/Space) gắn tạm lớp .cta-pop để họa tiết quanh nút
+ * bung ra rồi tan (xem styles/cta.css). Một listener ủy quyền duy nhất cho cả trang.
  */
-export function installCtaFx(): void {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+const POP_MS = 720
 
-  let frame = 0
-  document.addEventListener(
-    'pointermove',
-    (event) => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const cta = target.closest<HTMLElement>('.cta')
-      if (!cta) return
-      const { clientX, clientY } = event
-      if (frame) cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        const rect = cta.getBoundingClientRect()
-        if (!rect.width || !rect.height) return
-        cta.style.setProperty('--mx', `${(((clientX - rect.left) / rect.width) * 100).toFixed(1)}%`)
-        cta.style.setProperty('--my', `${(((clientY - rect.top) / rect.height) * 100).toFixed(1)}%`)
-      })
-    },
-    { passive: true },
-  )
+export function installCtaFx(): void {
+  if (typeof document === 'undefined') return
+
+  const timers = new WeakMap<HTMLElement, number>()
+
+  const pop = (target: EventTarget | null) => {
+    if (!(target instanceof Element)) return
+    const cta = target.closest<HTMLElement>('.cta')
+    if (!cta || cta.matches(':disabled, [aria-disabled="true"]')) return
+    // Bấm liên tiếp: gỡ lớp, ép trình duyệt vẽ lại để animation chạy lại từ đầu.
+    cta.classList.remove('cta-pop')
+    void cta.offsetWidth
+    cta.classList.add('cta-pop')
+    const prev = timers.get(cta)
+    if (prev) window.clearTimeout(prev)
+    timers.set(
+      cta,
+      window.setTimeout(() => {
+        cta.classList.remove('cta-pop')
+        timers.delete(cta)
+      }, POP_MS),
+    )
+  }
+
+  document.addEventListener('pointerdown', (event) => pop(event.target), { passive: true })
+  document.addEventListener('keydown', (event) => {
+    if (event.repeat || (event.key !== 'Enter' && event.key !== ' ')) return
+    pop(event.target)
+  })
 }

@@ -1,197 +1,175 @@
 /*
- * Hệ thống CTA "lung linh": nút gradient có ánh sáng quét ngang, quầng sáng đổ bóng màu, vòng sóng tỏa ra và họa tiết
- * lấp lánh xổ ra từ vị trí con trỏ khi rê chuột (con trỏ lấy qua --mx/--my, xem lib/ctaFx.ts).
+ * Hệ thống CTA: nút gradient êm, rê chuột thì quanh nút nở ra họa tiết mềm (lá, hoa bốn cánh, chấm tròn) trôi nhẹ;
+ * bấm thì họa tiết bung ra rồi tan kèm một quầng sáng mềm (lớp .cta-pop do lib/ctaFx.ts gắn tạm khi nhấn).
  *
+ * Họa tiết nằm NGOÀI thân nút (một dải ~11–15px quanh viền), vẽ bằng mask SVG nên tự lấy màu theo bảng màu của nút.
  * Cố ý viết NGOÀI @layer để thắng các tiện ích Tailwind còn sót trên cùng phần tử (shadow-*, bg-*, transition-*).
  * Chỉ động vào nền / bóng / chuyển động — không đụng màu chữ, bo góc, cỡ chữ để từng chỗ dùng vẫn tự quyết định.
- * Mọi hiệu ứng rê chuột chỉ bật trên thiết bị có chuột (hover: hover); cảm ứng chỉ có hiệu ứng nhấn.
+ * Họa tiết khi rê chuột chỉ bật trên thiết bị có chuột (hover: hover); cảm ứng vẫn có hiệu ứng bấm.
  */
 
 /* ============================== Nút CTA ============================== */
 
 .cta {
   --cta-a: #0a7d64;
-  --cta-b: #12b886;
-  --cta-c: #06b6d4;
-  --cta-glow: 16, 185, 129;
-  --cta-spark: 255, 255, 255;
+  --cta-b: #0e977a;
+  --cta-c: #12b886;
+  --cta-glow: 10, 125, 100;
+  --cta-motif: linear-gradient(120deg, var(--cta-b), var(--cta-c));
+
+  /* Họa tiết (dùng làm mask): lá nghiêng trái, lá nghiêng phải, hoa bốn cánh, chấm tròn. */
+  --m-leaf-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 17C3 8 9 3 17 3c0 8-5 14-14 14z'/%3E%3C/svg%3E");
+  --m-leaf-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M17 17C17 8 11 3 3 3c0 8 5 14 14 14z'/%3E%3C/svg%3E");
+  --m-flower: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='5' r='4.2'/%3E%3Ccircle cx='15' cy='10' r='4.2'/%3E%3Ccircle cx='10' cy='15' r='4.2'/%3E%3Ccircle cx='5' cy='10' r='4.2'/%3E%3C/svg%3E");
+  --m-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='5'/%3E%3C/svg%3E");
+
   background-color: var(--cta-a);
-  background-image:
-    linear-gradient(112deg, transparent 36%, rgba(255, 255, 255, 0.55) 50%, transparent 64%),
-    linear-gradient(120deg, var(--cta-a), var(--cta-b) 52%, var(--cta-c));
-  background-size: 260% 100%, 200% 100%;
-  background-position: 100% 0, 0% 0;
-  background-repeat: no-repeat;
+  background-image: linear-gradient(135deg, var(--cta-b), var(--cta-a));
   box-shadow:
-    0 6px 16px -8px rgba(var(--cta-glow), 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 6px 16px -10px rgba(var(--cta-glow), 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   /* translateZ: tạo khung chứa cho lớp họa tiết (::before/::after) mà không đổi kiểu định vị của nút (fixed/sticky/absolute). */
   transform: translateZ(0);
   transition:
-    background-position 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.4s ease,
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
     filter 0.3s ease,
+    background-color 0.3s ease,
     color 0.3s ease,
     border-color 0.3s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Lớp họa tiết lấp lánh + đốm sáng theo con trỏ: nằm dưới chữ (z-index âm trong khung của nút), bung ra từ chỗ con trỏ. */
-.cta::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transform: scale(0.55);
-  transform-origin: var(--mx, 50%) var(--my, 50%);
-  background:
-    radial-gradient(circle 70px at var(--mx, 50%) var(--my, 50%), rgba(var(--cta-spark), 0.42), transparent 72%),
-    radial-gradient(circle at 10% 30%, rgba(var(--cta-spark), 0.95) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 23% 74%, rgba(var(--cta-spark), 0.75) 0 1px, transparent 2px),
-    radial-gradient(circle at 37% 24%, rgba(var(--cta-spark), 0.85) 0 1.2px, transparent 2.2px),
-    radial-gradient(circle at 52% 80%, rgba(var(--cta-spark), 0.9) 0 1.6px, transparent 2.6px),
-    radial-gradient(circle at 66% 22%, rgba(var(--cta-spark), 0.7) 0 1px, transparent 2px),
-    radial-gradient(circle at 79% 66%, rgba(var(--cta-spark), 0.95) 0 1.4px, transparent 2.4px),
-    radial-gradient(circle at 91% 28%, rgba(var(--cta-spark), 0.8) 0 1.1px, transparent 2.1px),
-    radial-gradient(circle at 30% 50%, rgba(var(--cta-spark), 0.22) 0 7px, transparent 12px),
-    radial-gradient(circle at 72% 44%, rgba(var(--cta-spark), 0.2) 0 9px, transparent 15px);
-  transition:
-    opacity 0.45s ease,
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Vòng sóng tỏa ra quanh nút, phát một lần mỗi lần rê vào. */
+/* Hai lớp họa tiết chung khuôn: ::before hiện khi rê chuột, ::after bung ra khi bấm. */
+.cta::before,
 .cta::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  inset: -11px -15px;
+  z-index: -1;
   pointer-events: none;
+  background: var(--cta-motif);
+  -webkit-mask-image: var(--m-leaf-l), var(--m-leaf-r), var(--m-flower), var(--m-flower), var(--m-dot), var(--m-dot), var(--m-dot), var(--m-dot);
+  mask-image: var(--m-leaf-l), var(--m-leaf-r), var(--m-flower), var(--m-flower), var(--m-dot), var(--m-dot), var(--m-dot), var(--m-dot);
+  -webkit-mask-position: 0% 60%, 100% 40%, 9% 0%, 92% 100%, 30% 100%, 70% 4%, 56% 100%, 40% 8%;
+  mask-position: 0% 60%, 100% 40%, 9% 0%, 92% 100%, 30% 100%, 70% 4%, 56% 100%, 40% 8%;
+  -webkit-mask-size: 11px, 11px, 9px, 9px, 4px, 5px, 3px, 3px;
+  mask-size: 11px, 11px, 9px, 9px, 4px, 5px, 3px, 3px;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   opacity: 0;
-  box-shadow: 0 0 0 2px rgba(var(--cta-glow), 0.55);
+}
+
+.cta::before {
+  transform: scale(0.82);
+  transition:
+    opacity 0.45s ease,
+    transform 0.6s cubic-bezier(0.34, 1.35, 0.64, 1);
 }
 
 @media (hover: hover) {
   .cta:hover:not(:disabled):not([aria-disabled="true"]) {
-    background-position: 0% 0, 100% 0;
-    transform: translateY(-2px) scale(1.025);
+    transform: translateY(-1px);
+    filter: brightness(1.05);
     box-shadow:
-      0 14px 28px -10px rgba(var(--cta-glow), 0.8),
-      0 0 0 4px rgba(var(--cta-glow), 0.14),
-      0 0 22px -2px rgba(var(--cta-glow), 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    filter: saturate(1.12) brightness(1.04);
+      0 10px 22px -12px rgba(var(--cta-glow), 0.75),
+      0 0 0 3px rgba(var(--cta-glow), 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.26);
   }
   .cta:hover:not(:disabled):not([aria-disabled="true"])::before {
-    opacity: 1;
+    opacity: 0.6;
     transform: scale(1);
-    animation: ctaTwinkle 2.6s ease-in-out 0.5s infinite;
-  }
-  .cta:hover:not(:disabled):not([aria-disabled="true"])::after {
-    animation: ctaRing 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: ctaDrift 3.4s ease-in-out 0.5s infinite;
   }
 }
 
 .cta:active:not(:disabled):not([aria-disabled="true"]) {
   transform: translateY(0) scale(0.97);
-  filter: brightness(0.96);
+  filter: brightness(0.97);
   transition-duration: 0.12s;
 }
 
+/* Bấm: họa tiết bung rộng ra rồi tan, kèm quầng sáng mềm lan khỏi viền nút. */
+.cta.cta-pop::after {
+  animation: ctaBloom 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cta.cta-pop {
+  animation: ctaHalo 0.7s ease-out;
+}
+
 .cta:focus-visible {
-  outline: 2px solid rgba(var(--cta-glow), 0.9);
+  outline: 2px solid rgba(var(--cta-glow), 0.85);
   outline-offset: 3px;
 }
 
 .cta:disabled,
 .cta[aria-disabled="true"] {
-  filter: grayscale(0.45) brightness(1.02);
+  filter: grayscale(0.4);
   box-shadow: none;
   cursor: not-allowed;
 }
-
-@keyframes ctaRing {
-  0% { opacity: 0.9; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.18, 1.55); }
+.cta:disabled::before,
+.cta:disabled::after,
+.cta[aria-disabled="true"]::before,
+.cta[aria-disabled="true"]::after {
+  display: none;
 }
-@keyframes ctaTwinkle {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.45); }
+
+@keyframes ctaDrift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -1.5px; }
+}
+@keyframes ctaBloom {
+  0% { opacity: 0.85; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(1.22, 1.35); }
+}
+@keyframes ctaHalo {
+  0% { outline: 0 solid rgba(var(--cta-glow), 0.3); outline-offset: 0; }
+  100% { outline: 8px solid rgba(var(--cta-glow), 0); outline-offset: 4px; }
 }
 
 /* ---- Bảng màu ---- */
-.cta-primary { /* xanh ngọc → lục bảo → thiên thanh (mặc định) */ }
+.cta-primary { /* xanh ngọc (mặc định) */ }
 .cta-coral {
-  --cta-a: #f97316; --cta-b: #f43f5e; --cta-c: #ec4899; --cta-glow: 244, 63, 94;
+  --cta-a: #e8590c; --cta-b: #f97316; --cta-c: #fb7185; --cta-glow: 232, 89, 12;
 }
 .cta-sun {
-  --cta-a: #fbbf24; --cta-b: #f59e0b; --cta-c: #f97316; --cta-glow: 249, 115, 22;
-  --cta-spark: 255, 255, 255;
+  --cta-a: #f59e0b; --cta-b: #fbbf24; --cta-c: #f97316; --cta-glow: 217, 119, 6;
 }
 .cta-aqua {
-  --cta-a: #06b6d4; --cta-b: #3b82f6; --cta-c: #8b5cf6; --cta-glow: 59, 130, 246;
+  --cta-a: #0284c7; --cta-b: #06b6d4; --cta-c: #38bdf8; --cta-glow: 2, 132, 199;
 }
 .cta-night {
-  --cta-a: #1d2d4f; --cta-b: #0a7d64; --cta-c: #06b6d4; --cta-glow: 6, 182, 212;
+  --cta-a: #1d2d4f; --cta-b: #27406b; --cta-c: #12b886; --cta-glow: 29, 45, 79;
 }
 
-/* ---- Viền (outline) và kính mờ (glass): nền trong, rê vào thì gradient loang từ trái sang phải ---- */
+/* ---- Viền (outline), kính mờ (glass), trong suốt (ghost): rê vào chỉ phủ một lớp màu nhạt ---- */
 .cta-outline,
-.cta-glass,
 .cta-ghost {
   background-color: transparent;
-  background-image: linear-gradient(120deg, var(--cta-a), var(--cta-b) 52%, var(--cta-c));
-  background-size: 0% 100%;
-  background-position: 0 0;
-  background-repeat: no-repeat;
+  background-image: none;
   box-shadow: none;
 }
 .cta-glass {
   background-color: rgba(255, 255, 255, 0.18);
+  background-image: none;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  --cta-spark: 255, 255, 255;
-}
-.cta-ghost {
-  background-image: linear-gradient(120deg, rgba(16, 185, 129, 0.14), rgba(6, 182, 212, 0.16));
-  --cta-spark: 16, 185, 129;
-}
-.cta-outline,
-.cta-ghost {
-  --cta-spark: 16, 185, 129;
-}
-.cta-outline::before,
-.cta-ghost::before {
-  /* Họa tiết màu trên nền sáng thì phải đậm hơn một chút mới thấy. */
-  filter: saturate(1.4);
+  --cta-motif: linear-gradient(#fff, #fff);
+  --cta-glow: 255, 255, 255;
 }
 @media (hover: hover) {
   .cta-outline:hover:not(:disabled):not([aria-disabled="true"]),
-  .cta-glass:hover:not(:disabled):not([aria-disabled="true"]),
   .cta-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
-    background-size: 100% 100%;
-    background-position: 0 0;
-    box-shadow:
-      0 12px 24px -10px rgba(var(--cta-glow), 0.7),
-      0 0 0 4px rgba(var(--cta-glow), 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    background-color: rgba(var(--cta-glow), 0.08);
+    box-shadow: none;
     filter: none;
-    transform: translateY(-2px);
   }
-  .cta-outline:hover:not(:disabled):not([aria-disabled="true"]),
   .cta-glass:hover:not(:disabled):not([aria-disabled="true"]) {
-    color: #fff;
-    border-color: transparent;
-    --cta-spark: 255, 255, 255;
-  }
-  .cta-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
-    box-shadow: 0 8px 20px -12px rgba(var(--cta-glow), 0.6);
+    background-color: rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    filter: none;
   }
 }
-.cta-outline.cta-sun:hover { color: #3b2a00; }
 
 /* ============================== Mục điều hướng (navbar) ============================== */
 
@@ -345,6 +323,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cta,
   .cta::before,
+  .cta.cta-pop,
   .nav-fx::before,
   .nav-fx::after,
   .nav-fx > svg,
