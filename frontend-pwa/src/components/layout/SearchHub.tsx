@@ -93,10 +93,10 @@ function initialProvince(params: URLSearchParams): { name: string; source: Provi
 }
 
 /** Khung ô của khối tìm kiếm: điện thoại xếp dọc đủ rộng, cao 76px; máy tính là một ô trong hàng 3 ô bằng nhau. */
-const FIELD = 'flex w-full min-w-0 min-h-[76px] items-center gap-3 px-3.5 py-3 text-left transition-colors md:h-full md:min-h-0 md:rounded-[10px] md:px-4 md:py-0';
+const FIELD = 'flex w-full min-w-0 min-h-[76px] items-center gap-3 px-3.5 py-3 text-left transition-colors md:h-full md:min-h-0 md:rounded-full md:px-5 md:py-0';
 const FIELD_BUTTON = `${FIELD} cursor-pointer hover:bg-[#f3f7f1]`;
 const FIELD_ACTIVE = 'md:bg-[var(--color-canvas)] md:shadow-[inset_0_0_0_1.5px_var(--color-primary)]';
-const ICON_TILE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-nav-active-bg)] text-[var(--color-primary)] md:h-auto md:w-auto md:bg-transparent';
+const ICON_TILE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-nav-active-bg)] text-[var(--color-primary)] md:h-auto md:w-auto md:bg-transparent';
 const FIELD_LABEL = 'text-[11px] font-extrabold uppercase tracking-[0.08em] text-[var(--color-muted)]';
 const FIELD_VALUE = 'truncate text-base font-extrabold text-[var(--color-ink-deep)]';
 
@@ -114,7 +114,12 @@ const chipClass = (active: boolean, padding = 'px-1.5') => `inline-flex h-10 min
  * header (kiểu Airbnb); máy tính mở popover theo từng bước, điện thoại chọn thời lượng / số người ngay trên khối, ô điểm
  * đến và lịch mở sheet.
  */
-export default function SearchHub() {
+interface SearchHubProps {
+  /** Hiệu ứng mở đầu (trang chủ): chỉ một nút kính lúp tròn hiện ra, rồi gạt sang phải lộ dần các ô còn lại. */
+  intro?: boolean;
+}
+
+export default function SearchHub({ intro = false }: SearchHubProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -596,22 +601,31 @@ export default function SearchHub() {
       {/* ---------------- KHU VỰC TÌM KIẾM GỐC TRÊN TRANG ----------------
           Điện thoại: MỘT hàng gọn — tóm tắt (tỉnh · ngày · số người) bấm vào mở bảng chọn từng bước + nút tìm. Máy tính: một
           hàng ba ô bằng nhau + nút tìm. */}
+      <div className="relative [--unfold-size:60px] md:[--unfold-size:78px]">
+      {intro && (
+        <span
+          aria-hidden
+          className="search-unfold-icon pointer-events-none absolute left-0 top-0 z-10 flex h-full aspect-square items-center justify-center rounded-full bg-[linear-gradient(135deg,#0a7d64,#12b886,#06b6d4)] text-white shadow-[0_12px_30px_-10px_rgba(10,125,100,0.8)] ring-4 ring-white/70"
+        >
+          <Search className="h-6 w-6 md:h-7 md:w-7" strokeWidth={2.75} />
+        </span>
+      )}
       <form
         role="search"
         aria-label="Tìm homestay"
         onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-        className={`w-full rounded-2xl bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
+        className={`${intro ? 'search-unfold' : ''} w-full rounded-full bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
           blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         {/* Điện thoại: một hàng — phần tóm tắt mở bảng chọn (điểm đến → thời gian → số người), nút tìm chạy tìm kiếm ngay */}
-        <div className="flex items-center gap-1.5 p-1.5 md:hidden">
+        <div className={`flex items-center gap-1.5 p-1.5 md:hidden ${intro ? 'search-unfold-content' : ''}`}>
           <button
             type="button"
             onClick={() => setActiveTab('location')}
             aria-haspopup="dialog"
             aria-label={`Sửa tìm kiếm: ${summary}`}
-            className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-xl pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer"
+            className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer"
           >
             <span className={ICON_TILE}><MapPin className="h-[18px] w-[18px]" aria-hidden /></span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -624,7 +638,7 @@ export default function SearchHub() {
           <button
             type="submit"
             aria-label={ctaLabel}
-            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl cta cta-primary px-3.5 text-sm font-extrabold text-white cursor-pointer"
+            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full cta cta-primary px-4 text-sm font-extrabold text-white cursor-pointer"
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
             <span className="max-[359px]:hidden">{ctaLabel}</span>
@@ -687,17 +701,18 @@ export default function SearchHub() {
         <div className="hidden md:block">
           <button
             type="submit"
-            className="flex h-full w-[184px] items-center justify-center gap-2 rounded-[10px] cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
+            className="flex h-full w-[184px] items-center justify-center gap-2 whitespace-nowrap rounded-full cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
           >
             <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
             {ctaLabel}
           </button>
         </div>
       </form>
+      </div>
 
       {/* Lối phụ: lên lịch trình trước (cùng tỉnh, ngày, số người) — ẩn khi đang chọn chỗ ở cho một lịch trình */}
       {!choosingForJourney && (
-        <div className={`mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`${intro ? 'search-unfold-content' : ''} mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
           <Link
             to={tripPath}
             onPointerEnter={prefetchTrip}

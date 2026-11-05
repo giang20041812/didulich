@@ -885,15 +885,19 @@ img[data-loading]:not([data-no-skeleton]) {
   to { opacity: 1; transform: none; }
 }
 
-/* Khối tìm kiếm (SearchHub): ban đầu chỉ là nút kính lúp tròn, rồi bung sang phải lộ ra các ô còn lại. */
+/* Khối tìm kiếm (SearchHub, trang chủ): ban đầu chỉ là nút kính lúp tròn ở mép trái; nút gạt sang phải, khối trắng mở
+   theo ngay sau nó (clip-path) lộ dần các ô, nút dừng ở mép phải đúng chỗ nút "Tìm homestay" rồi tan đi.
+   Nút: 0,45s bật ra → 1,0s bắt đầu gạt → 1,95s tới mép phải (cùng nhịp với khối trắng). Chỉ giữ clip-path trong lúc chạy
+   (fill backwards) để bóng đổ của khối không bị cắt sau đó. */
 .search-unfold {
-  animation: searchUnfold 0.95s cubic-bezier(0.76, 0, 0.24, 1) 0.55s both;
+  animation: searchUnfold 0.95s cubic-bezier(0.76, 0, 0.24, 1) 1s backwards;
 }
 .search-unfold-content {
-  animation: searchUnfoldContent 0.5s ease 1.25s both;
+  animation: searchUnfoldContent 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.55s backwards;
 }
 .search-unfold-icon {
-  animation: searchUnfoldIcon 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: searchUnfoldIcon 2.1s linear 0.45s both;
+  will-change: left, transform, opacity;
 }
 @keyframes searchUnfold {
   from { clip-path: inset(0 calc(100% - var(--unfold-size, 78px)) 0 0 round 999px); }
@@ -904,11 +908,11 @@ img[data-loading]:not([data-no-skeleton]) {
   to { opacity: 1; transform: none; }
 }
 @keyframes searchUnfoldIcon {
-  0% { opacity: 0; transform: scale(0.4) rotate(-40deg); }
-  30% { opacity: 1; transform: scale(1) rotate(0); }
-  45% { opacity: 1; transform: scale(1); }
-  75% { opacity: 1; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.9); }
-  100% { opacity: 0; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.6); }
+  0% { opacity: 1; left: 0; transform: scale(0.82) rotate(-120deg); animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  21% { opacity: 1; left: 0; transform: none; }
+  26% { opacity: 1; left: 0; transform: none; animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+  71% { opacity: 1; left: calc(100% - var(--unfold-size, 78px)); transform: none; animation-timing-function: ease; }
+  100% { opacity: 0; left: calc(100% - var(--unfold-size, 78px)); transform: scale(0.85); }
 }
 
 @media (prefers-reduced-motion: reduce) {

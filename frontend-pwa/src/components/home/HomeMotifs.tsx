@@ -26,7 +26,7 @@ const LAYOUT: Record<MotifVariant, { tone: string; items: Placement[] }> = {
     tone: '#0a7d64',
     items: [
       { motif: 'mountains', side: 'left', at: 'top-[3%]' },
-      { motif: 'cloudSea', side: 'right', at: 'top-[28%]' },
+      { motif: 'waterfall', side: 'right', at: 'top-[28%]' },
       { motif: 'terraces', side: 'left', at: 'top-[60%]' },
       { motif: 'pass', side: 'right', at: 'bottom-[2%]' },
     ],
