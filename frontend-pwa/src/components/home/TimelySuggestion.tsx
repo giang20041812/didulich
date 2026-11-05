@@ -59,7 +59,7 @@ function travelModes(km: number): { Icon: LucideIcon; label: string; time: strin
 }
 
 /** Lớp kính mờ dùng chung cho panel trên nền xanh rừng. */
-const GLASS = 'rounded-3xl bg-white/[0.06] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_-28px_rgba(0,0,0,0.7)] backdrop-blur-md';
+const GLASS = 'rounded-3xl bg-white/[0.06] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_48px_-28px_rgba(0,0,0,0.7)]';
 
 /**
  * Section "Gần bạn" (trang chủ, ngay trên "Hôm nay đi đâu"): mỗi lần mở trang lấy vị trí khách + giờ hiện tại để gợi ý
@@ -308,7 +308,7 @@ function FeatureCard({ place, km, from, slot, Icon }: { place: NearMePlace; km: 
           <span className={`inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r ${slot.tone} px-3 py-1 text-xs font-extrabold shadow-[0_8px_18px_-8px_rgba(0,0,0,0.7)]`}>
             <slot.Icon className="h-3.5 w-3.5" aria-hidden /> {slot.label}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-3 py-1 text-xs font-bold ring-1 ring-white/15 backdrop-blur-md">
+          <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-3 py-1 text-xs font-bold ring-1 ring-white/15">
             <MapPin className="h-3.5 w-3.5 text-emerald-300" aria-hidden /> Cách bạn {formatDistance(km)}
           </span>
         </div>
@@ -321,7 +321,7 @@ function FeatureCard({ place, km, from, slot, Icon }: { place: NearMePlace; km: 
 
           <ul className="mt-3 flex flex-wrap gap-2">
             {travelModes(km).map(({ Icon: ModeIcon, label, time }) => (
-              <li key={label} className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white/85 ring-1 ring-white/15 backdrop-blur-md">
+              <li key={label} className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white/85 ring-1 ring-white/15">
                 <ModeIcon className="h-4 w-4 text-emerald-300" aria-hidden />
                 {label} <span className="font-extrabold text-white">~{time}</span>
               </li>
@@ -340,7 +340,7 @@ function FeatureCard({ place, km, from, slot, Icon }: { place: NearMePlace; km: 
             {phone && (
               <a
                 href={telHref(phone)}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-white/12 px-4 text-sm font-bold ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-white/20"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-white/12 px-4 text-sm font-bold ring-1 ring-white/25 transition-colors hover:bg-white/20"
               >
                 <Phone className="h-4 w-4" aria-hidden /> Gọi quán
               </a>

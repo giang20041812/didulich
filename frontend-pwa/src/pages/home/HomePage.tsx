@@ -26,10 +26,8 @@ import HeroBackdrop from "@/components/home/HeroBackdrop"
 import HomeMotifs from "@/components/home/HomeMotifs"
 import CardFrame from "@/components/ui/CardFrame"
 
-/** Trang chủ: các khối hiện ra khi cuộn tới và ẩn đi khi cuộn khuất (hiện lại khi quay lại). */
-function Reveal(props: Parameters<typeof RevealBase>[0]) {
-  return <RevealBase repeat {...props} />;
-}
+/** Trang chủ: các khối hiện ra một lần khi cuộn tới, lướt qua rồi thì ở nguyên đó (không ẩn lại khi cuộn khuất). */
+const Reveal = RevealBase;
 
 /**
  * Tiêu đề section kiểu editorial: nhãn overline nhỏ (gạch ngang dẫn) + tiêu đề lớn + mô tả dẫn dắt. `action` (vd. "Xem
@@ -42,8 +40,8 @@ function SectionHeading({ title, description, action }: { title: string; descrip
 
         {action && <div className="md:hidden">{action}</div>}
       </div>
-      <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
-        <TypeText text={title} speed={45} delay={150} />
+      <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-medium leading-tight text-[#0a2e26] tracking-tight">
+        <TypeText repeat={false} text={title} speed={45} delay={150} />
       </h2>
       {description && (
         <p className="mt-2 max-w-xl text-sm md:text-[15px] font-medium leading-relaxed text-slate-500">
@@ -629,8 +627,8 @@ export default function HomePage() {
         <div className="relative max-w-[1280px] mx-auto w-full px-4 md:px-8">
           <Reveal className="mb-9 md:mb-12 text-center">
 
-            <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-extrabold leading-tight text-[#0a2e26] tracking-tight">
-              <TypeText text="Tiện Ích Du Khách & Cam Kết Du Lịch" speed={40} delay={150} />
+            <h2 className="text-[26px] md:text-3xl lg:text-[36px] font-medium leading-tight text-[#0a2e26] tracking-tight">
+              <TypeText repeat={false} text="Tiện Ích Du Khách & Cam Kết Du Lịch" speed={40} delay={150} />
             </h2>
 
           </Reveal>

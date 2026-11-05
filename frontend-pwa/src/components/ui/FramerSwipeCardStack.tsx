@@ -29,7 +29,7 @@ function whenImageReady(img: HTMLImageElement): Promise<void> {
 /**
  * Cổng ảnh cho cả lưới thẻ: thay vì từng ảnh hiện lẻ tẻ khi tải xong (giật, nhảy từng ô), cả lưới là skeleton cho tới khi
  * mọi ảnh của trang đầu tải + giải mã xong, rồi các thẻ hiện ra cùng lúc (so le nhẹ). Ảnh đã có sẵn trong cache thì hiện
- * ngay, không nháy skeleton. Chờ tối đa 6 giây kể từ lúc khung lọt vào màn hình (mạng chậm vẫn có nội dung).
+ * ngay, không nháy skeleton. Ảnh được tải sẵn ở nền ngay khi trang dựng xong; chờ tối đa 6 giây (mạng chậm vẫn có nội dung).
  */
 function useImageGate(rootRef: React.RefObject<HTMLDivElement | null>, total: number): GateState {
   const [state, setState] = useState<GateState>('pending');
@@ -44,19 +44,15 @@ function useImageGate(rootRef: React.RefObject<HTMLDivElement | null>, total: nu
     const root = rootRef.current;
     if (!root || state !== 'pending') return undefined;
     let alive = true;
-    let timer = 0;
     const open = () => { if (alive) setState('ready'); };
-    void Promise.all(gatedImages(root).map(whenImageReady)).then(open);
-    const io = typeof IntersectionObserver !== 'undefined'
-      ? new IntersectionObserver((entries) => {
-          if (entries.some((e) => e.isIntersecting) && !timer) timer = window.setTimeout(open, 6000);
-        })
-      : null;
-    if (io) io.observe(root);
-    else timer = window.setTimeout(open, 6000);
+    const images = gatedImages(root);
+    // Tải ngay ở nền (không chờ cuộn tới): ảnh lazy chỉ tải khi gần màn hình nên trước đây ảnh vừa tải vừa hiện đúng lúc
+    // đang cuộn, gây giật. Giờ tải + giải mã xong trước, lúc cuộn tới chỉ còn vẽ ra.
+    images.forEach((img) => { img.loading = 'eager'; });
+    void Promise.all(images.map(whenImageReady)).then(open);
+    const timer = window.setTimeout(open, 6000);
     return () => {
       alive = false;
-      io?.disconnect();
       window.clearTimeout(timer);
     };
   }, [rootRef, state, total]);

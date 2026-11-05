@@ -6,51 +6,36 @@ import { HERO_FALLBACK_SRC, HERO_SIZES, HERO_SRCSET } from '@/lib/heroImages';
  *
  * Mọi lớp hiệu ứng nằm trong một "khung" cùng tỉ lệ 16:9 với ảnh và phủ kín vùng hero (như object-fit: cover),
  * nên vị trí theo % luôn trùng với ảnh ở mọi kích thước màn hình:
- * - cả khung trôi chậm (Ken Burns) và trượt nhẹ khi cuộn trang (parallax);
+ * - cả khung trôi chậm (Ken Burns). Không còn parallax khi cuộn: transform đặt bằng JS theo từng sự kiện cuộn luôn trễ
+ *   một nhịp so với luồng cuộn của trình duyệt nên ảnh nền rung, cuộn lên xuống qua hero bị giật;
  * - mặt trời ở góc phải (88%, 28,5%) sáng lên rồi dịu xuống, các tia nắng xoay rất chậm;
  * - hai dải mây trong thung lũng (cao 29–38%) lững lờ trôi ngang;
  * - một vệt nắng lướt qua ruộng lúa như gió thổi; khóm lúa cao góc phải đung đưa từ gốc.
- * Người dùng chọn giảm chuyển động: tất cả đứng yên (xem globals.css), không gắn parallax.
- * Màn cảm ứng không gắn parallax: cuộn trên điện thoại chạy ở luồng riêng, transform đặt bằng JS luôn trễ một nhịp nên
- * ảnh nền rung. Hero cuộn khuất thì dừng mọi chuyển động nền (data-paused) cho phần dưới trang cuộn mượt.
+ * Người dùng chọn giảm chuyển động: tất cả đứng yên (xem globals.css). Hero cuộn khuất thì dừng mọi chuyển động nền (data-paused) cho phần dưới trang cuộn mượt.
  */
 export default function HeroBackdrop() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const parallaxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(([entry]) => {
-      root.toggleAttribute('data-paused', !entry?.isIntersecting);
-    });
-    io.observe(root);
-    return () => io.disconnect();
+    if (!root) return;
+    // Dừng animation ngay khi người dùng bắt đầu cuộn (không đợi hero khuất hẳn): đang cuộn mà 7 lớp nền còn chạy thì
+    // tranh luồng vẽ với việc cuộn → giật. Về lại đầu trang thì chạy tiếp.
+    let visible = true;
+    const update = () => root.toggleAttribute('data-paused', !visible || window.scrollY > 24);
+    const io = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; update(); })
+      : null;
+    io?.observe(root);
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+    return () => { io?.disconnect(); window.removeEventListener('scroll', update); };
   }, []);
 
-  useEffect(() => {
-    const el = parallaxRef.current;
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce), (pointer: coarse)').matches) return;
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const y = window.scrollY;
-      // Chỉ tính khi hero còn trong tầm nhìn; ảnh lùi chậm hơn nội dung (0,25) tạo chiều sâu.
-      if (y < window.innerHeight * 1.2) el.style.transform = `translate3d(0, ${(y * 0.25).toFixed(1)}px, 0)`;
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, []);
 
   return (
     <div ref={rootRef} className="hero-backdrop absolute inset-0 z-0 overflow-hidden bg-[#07362c]">
-      <div ref={parallaxRef} className="absolute inset-0 will-change-transform">
+      <div className="absolute inset-0">
         <div className="hero-stage">
           <img
             src={HERO_FALLBACK_SRC}

@@ -214,7 +214,7 @@ export function CompactCardBadge({ children, className = 'bg-[#0a7d64]' }: { chi
 /** Nhãn kính mờ phong cách hiện đại (thời tiết, đánh giá, loại hình...). */
 export function GlassBadge({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <span className={`inline-flex max-w-full items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-semibold text-white/95 border border-white/20 shadow-xs md:text-[11px] ${className}`}>
+    <span className={`inline-flex max-w-full items-center gap-1 rounded-full bg-black/55 px-2.5 py-0.5 text-[10px] font-semibold text-white/95 border border-white/20 shadow-xs md:text-[11px] ${className}`}>
       {children}
     </span>
   );
