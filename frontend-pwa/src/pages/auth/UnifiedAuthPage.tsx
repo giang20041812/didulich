@@ -8,7 +8,6 @@ import {
   EyeOff,
   Lock,
   Mail,
-  Phone,
   RefreshCw,
   ShieldCheck,
   User,
@@ -35,7 +34,6 @@ import { emailError } from '@/lib/fieldValidation';
 installAxiosBoot();
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const VN_PHONE_REGEX = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
 
 export interface UnifiedAuthPageProps {
   initialMode?: 'login' | 'register';
@@ -140,7 +138,6 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
   // ─── REGISTER STATES ───
   const [fullName, setFullName] = useState('');
   const [regEmail, setRegEmail] = useState('');
-  const [regPhone, setRegPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
@@ -149,7 +146,6 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
   const [regServerError, setRegServerError] = useState<string | null>(null);
   const [duplicates, setDuplicates] = useState<{
     email?: { value: string; message: string };
-    phone?: { value: string; message: string };
   }>({});
 
   // ─── GENERAL STATES ───
@@ -191,9 +187,9 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
     const errs: { [key: string]: string } = {};
     const cleanId = loginIdentifier.trim();
     if (!cleanId) {
-      errs.identifier = 'Vui lòng nhập Email hoặc Số điện thoại.';
-    } else if (!EMAIL_REGEX.test(cleanId) && !VN_PHONE_REGEX.test(cleanId)) {
-      errs.identifier = 'Email hoặc Số điện thoại chưa đúng định dạng.';
+      errs.identifier = 'Vui lòng nhập Email.';
+    } else if (!EMAIL_REGEX.test(cleanId)) {
+      errs.identifier = 'Email chưa đúng định dạng.';
     }
 
     if (!loginPassword) {
@@ -226,15 +222,6 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
       errs.email = duplicates.email.message;
     }
 
-    const cleanPhone = regPhone.trim();
-    if (!cleanPhone) {
-      errs.phone = 'Vui lòng nhập số điện thoại.';
-    } else if (!VN_PHONE_REGEX.test(cleanPhone)) {
-      errs.phone = 'Số điện thoại không đúng định dạng (VD: 0912345678).';
-    } else if (duplicates.phone && duplicates.phone.value === cleanPhone) {
-      errs.phone = duplicates.phone.message;
-    }
-
     if (!regPassword) {
       errs.password = 'Vui lòng nhập mật khẩu.';
     } else if (regPassword.length < 8) {
@@ -248,7 +235,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
     }
 
     return errs;
-  }, [fullName, regEmail, regPhone, regPassword, confirmPassword, duplicates]);
+  }, [fullName, regEmail, regPassword, confirmPassword, duplicates]);
 
   // Độ an toàn mật khẩu khi đăng ký
   const passwordStrength = useMemo(() => {
@@ -317,7 +304,6 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
     setRegTouched({
       fullName: true,
       email: true,
-      phone: true,
       password: true,
       confirmPassword: true,
     });
@@ -329,12 +315,10 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
 
     setIsLoading(true);
     const submittedEmail = regEmail.trim().toLowerCase();
-    const submittedPhone = regPhone.trim();
     try {
       const res = await travelerRegister({
         fullName: fullName.trim(),
         email: submittedEmail,
-        phone: submittedPhone,
         password: regPassword,
         confirmPassword,
       });
@@ -342,11 +326,9 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
     } catch (err: unknown) {
       const fieldErrors = (err as AuthErrorResponse)?.fieldErrors ?? [];
       const emailDup = fieldErrors.find((f) => f.field === 'email');
-      const phoneDup = fieldErrors.find((f) => f.field === 'phone');
-      if (emailDup || phoneDup) {
+      if (emailDup) {
         setDuplicates({
-          ...(emailDup ? { email: { value: submittedEmail, message: emailDup.message } } : {}),
-          ...(phoneDup ? { phone: { value: submittedPhone, message: phoneDup.message } } : {}),
+          email: { value: submittedEmail, message: emailDup.message },
         });
         return;
       }
@@ -483,7 +465,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
                 htmlFor="loginIdentifier"
                 className="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-800"
               >
-                <span>Email hoặc Số điện thoại <span className="text-rose-500">*</span></span>
+                <span>Email <span className="text-rose-500">*</span></span>
                 {loginTouched.identifier && !loginErrors.identifier && (
                   <span className="flex items-center gap-1 text-xs text-emerald-600">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Hợp lệ
@@ -501,7 +483,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
                     setLoginError(null);
                   }}
                   onBlur={() => setLoginTouched((prev) => ({ ...prev, identifier: true }))}
-                  placeholder="ban@gmail.com hoặc 09xxxxxxxx"
+                  placeholder="ban@gmail.com"
                   autoComplete="username"
                   className={`${authInputClass} ${
                     loginTouched.identifier && loginErrors.identifier
@@ -690,45 +672,6 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
               {regTouched.email && regErrors.email && (
                 <p className="mt-1 flex items-center gap-1 text-xs font-medium text-rose-600">
                   <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {regErrors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Số điện thoại */}
-            <div>
-              <label htmlFor="regPhone" className="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-800">
-                <span>Số điện thoại <span className="text-rose-500">*</span></span>
-                {regTouched.phone && !regErrors.phone && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-600">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Hợp lệ
-                  </span>
-                )}
-              </label>
-              <div className="relative">
-                <Phone className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-                <input
-                  id="regPhone"
-                  type="tel"
-                  value={regPhone}
-                  onChange={(e) => {
-                    setRegPhone(e.target.value);
-                    setRegServerError(null);
-                  }}
-                  onBlur={() => setRegTouched((prev) => ({ ...prev, phone: true }))}
-                  placeholder="09xxxxxxxx (10 chữ số)"
-                  autoComplete="tel"
-                  className={`${authInputClass} ${
-                    regTouched.phone && regErrors.phone
-                      ? '!border-rose-400 !ring-rose-200'
-                      : regTouched.phone && !regErrors.phone
-                      ? '!border-emerald-500 !ring-emerald-200'
-                      : ''
-                  }`}
-                />
-              </div>
-              {regTouched.phone && regErrors.phone && (
-                <p className="mt-1 flex items-center gap-1 text-xs font-medium text-rose-600">
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {regErrors.phone}
                 </p>
               )}
             </div>
