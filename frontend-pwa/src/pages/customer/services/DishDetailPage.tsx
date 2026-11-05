@@ -1,26 +1,23 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   BookOpen,
-  Check,
   ExternalLink,
   Info,
   Leaf,
   MapPin,
-  Share2,
   Soup,
   Sparkles,
   Store,
   UtensilsCrossed,
   Video,
-  Images,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import DetailSection from '@/components/common/DetailSection';
-import ImageCarousel from '@/components/common/ImageCarousel';
+import DetailPageShell, { DetailAsideCard, DetailFact } from '@/components/common/DetailPageShell';
 import TikTokEmbedPlayer from '@/components/homestay/TikTokEmbedPlayer';
 import PlaceHighlights from '@/components/common/PlaceHighlights';
 import { fetchDishDetail, peekDishDetail, type DishDetailDto } from '@/services/specialtyService';
@@ -47,7 +44,6 @@ function DishDetailContent({ identifier }: { identifier?: string }) {
   // Đã xem trước đó (quay lại từ trang khác) thì vẽ ngay từ bộ nhớ, làm mới ở nền.
   const [dish, setDish] = useState<DishDetailDto | null>(() => (identifier ? peekDishDetail(identifier) ?? null : null));
   const [loading, setLoading] = useState(() => !(identifier && peekDishDetail(identifier)));
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!identifier) return undefined;
@@ -101,175 +97,166 @@ function DishDetailContent({ identifier }: { identifier?: string }) {
   ] as { label: string; value?: string | null; Icon: LucideIcon }[]).filter((fact) => fact.value?.trim());
   const servedAt = dish.servedAt ?? [];
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: dish.name, text: dish.description ?? undefined, url: window.location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
+  const hasHighlights = (dish.highlights ?? []).some((h) => ['PRO', 'CON', 'PAIN_POINT', 'TIP'].includes(h.type));
+  const hasWhere = Boolean(dish.whereToEat) || servedAt.length > 0;
+  const tabs = [
+    { id: 'about', label: 'Giới thiệu' },
+    ...(tiktokVideo ? [{ id: 'video', label: 'Video' }] : []),
+    ...(hasHighlights ? [{ id: 'experience', label: 'Kinh nghiệm' }] : []),
+    ...(hasWhere ? [{ id: 'where', label: 'Nơi thưởng thức' }] : []),
+  ];
+
+  const badges = (
+    <>
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 shadow-2xs">
+        <UtensilsCrossed className="h-3.5 w-3.5 text-emerald-600" />
+        Đặc sản địa phương
+      </span>
+      {dish.tagBadge && (
+        <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+          {dish.tagBadge}
+        </span>
+      )}
+    </>
+  );
+
+  const meta = (
+    <span className="inline-flex items-center gap-1.5 text-slate-700">
+      <MapPin className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+      Đặc sản vùng {region}
+    </span>
+  );
+
+  const goToWhere = () => document.getElementById('where')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const aside = (
+    <DetailAsideCard>
+      <div className="mb-4">
+        <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Giá tham khảo</span>
+        <p className="mt-0.5 text-2xl font-extrabold text-slate-900">{price ?? 'Chưa có giá'}</p>
+      </div>
+
+      <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 text-sm">
+        <DetailFact label="Danh mục">Đặc sản địa phương</DetailFact>
+        <DetailFact label="Khu vực">{region}</DetailFact>
+        {dish.origin?.trim() && <DetailFact label="Nguồn gốc">{dish.origin}</DetailFact>}
+      </div>
+
+      {hasWhere && (
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="button"
+          onClick={goToWhere}
+          className="mt-5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl cta cta-primary font-bold text-white shadow-sm transition "
+        >
+          <Store className="h-4 w-4" />
+          <span>Xem nơi thưởng thức</span>
+        </motion.button>
+      )}
+      {otherVideo && (
+        <a
+          href={otherVideo}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/50 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100/70"
+        >
+          <ExternalLink className="h-4 w-4 text-emerald-600" />
+          Xem video về món này
+        </a>
+      )}
+      <Link
+        to="/specialties"
+        className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+      >
+        <ArrowLeft className="h-4 w-4 text-[var(--color-primary)]" />
+        Quay lại danh sách đặc sản
+      </Link>
+    </DetailAsideCard>
+  );
 
   return (
-    <div className="w-full flex flex-col min-h-screen bg-gradient-to-b from-[#eef7f3] via-[var(--color-canvas)] to-[var(--color-canvas)]">
-      {/* Breadcrumb & thao tác — ghim ngay dưới Header khi cuộn */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-[var(--app-header-offset,88px)] z-20 shadow-xs">
-        <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-          <nav aria-label="Đường dẫn" className="flex min-w-0 items-center gap-2 text-xs md:text-sm text-[var(--color-muted)]">
-            <Link to="/" className="hover:text-[var(--color-primary)] transition-colors shrink-0">Trang chủ</Link>
-            <span aria-hidden>/</span>
-            <Link to="/specialties" className="hover:text-[var(--color-primary)] transition-colors shrink-0">Đặc sản địa phương</Link>
-            <span aria-hidden>/</span>
-            <span aria-current="page" className="text-[var(--color-ink-deep)] font-semibold truncate">{dish.name}</span>
-          </nav>
-          <button
-            onClick={handleShare}
-            className="p-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
-            title="Chia sẻ thông tin"
-          >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{copied ? 'Đã sao chép' : 'Chia sẻ'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Tiêu đề món */}
-      <section className="max-w-[1240px] mx-auto w-full px-4 md:px-8 pt-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#064e3b] via-[#0a7d64] to-[#042f2e] p-6 text-white shadow-md md:p-10">
-          <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-amber-400/15 blur-3xl" />
-          <div className="relative">
-            <div className="mb-3.5 flex flex-wrap items-center gap-2">
-              <Badge className="bg-white/15 text-white text-xs font-bold px-3 py-1 rounded-full ring-1 ring-white/25 flex items-center gap-1.5">
-                <UtensilsCrossed className="w-3.5 h-3.5 text-amber-300" />
-                <span>Đặc sản địa phương</span>
-              </Badge>
-              {dish.tagBadge && <Badge className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">{dish.tagBadge}</Badge>}
-            </div>
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight text-white mb-4">
-              {dish.name}
-            </h1>
-            <div className="flex items-center gap-2 text-sm text-white/90">
-              <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>Đặc sản vùng {region}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-[1240px] mx-auto w-full px-4 md:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cột trái: ảnh, video, mô tả, kinh nghiệm, nơi thưởng thức */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
-          <DetailSection icon={Sparkles} eyebrow="Giới thiệu" title="Về món đặc sản này" tone="sand">
-            <p className="text-[15px] md:text-base text-slate-800 leading-[1.8] whitespace-pre-line">
-              {dish.description || `Đặc sản của đồng bào vùng cao ${region} — thông tin chi tiết đang được cập nhật.`}
-            </p>
-            {facts.length > 0 && (
-              <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {facts.map(({ label, value, Icon }) => (
-                  <div key={label} className="rounded-xl border border-[#f4dfae] bg-white/80 p-3.5">
-                    <dt className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-ink-deep)]">
-                      <Icon className="w-4 h-4 text-[var(--color-primary)]" />
-                      {label}
-                    </dt>
-                    <dd className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </DetailSection>
-
-          {images.length > 0 && (
-            <DetailSection icon={Images} eyebrow="Thư viện" title="Hình ảnh">
-              <ImageCarousel
-                images={images}
-                alt={dish.name}
-                className="h-[240px] rounded-xl border border-slate-200 bg-slate-100 md:h-[380px]"
-                imageClassName="h-full w-full object-cover"
-              />
-            </DetailSection>
-          )}
-
-          {tiktokVideo && (
-            <DetailSection icon={Video} eyebrow="Xem trước" title="Video review" tone="sky">
-              <TikTokEmbedPlayer url={tiktokVideo} placeName={dish.name} className="mx-auto" />
-            </DetailSection>
-          )}
-
-          <PlaceHighlights highlights={dish.highlights} />
-
-          {(dish.whereToEat || servedAt.length > 0) && (
-            <DetailSection icon={Store} eyebrow="Ăn ở đâu" title="Nơi thưởng thức & mua" subtitle="Gợi ý nơi ăn hoặc mua món này làm quà" tone="mint">
-              {dish.whereToEat && (
-                <p className="mb-4 text-[15px] text-slate-800 leading-relaxed whitespace-pre-line">{dish.whereToEat}</p>
-              )}
-              {servedAt.length > 0 && (
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {servedAt.map((place) => (
-                    <li key={place.id}>
-                      <Link
-                        to={placeDetailPath(place.kind, place.id)}
-                        className="flex h-full items-start gap-2.5 rounded-xl border border-[#c6e8dc] bg-white p-3 transition-colors hover:border-[var(--color-primary)] hover:bg-[#edfbf7]"
-                      >
-                        <MapPin className="mt-0.5 w-4 h-4 shrink-0 text-[var(--color-primary)]" />
-                        <span className="min-w-0">
-                          <span className="flex flex-wrap items-center gap-1.5 text-sm font-bold text-[var(--color-ink-deep)]">
-                            {place.name}
-                            {place.signature && (
-                              <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-800">Món tủ</span>
-                            )}
-                          </span>
-                          {place.address && <span className="mt-0.5 block text-xs text-[var(--color-muted)]">{place.address}</span>}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </DetailSection>
-          )}
-        </div>
-
-        {/* Cột phải: thông tin khái quát */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border border-slate-200/80 border-t-4 border-t-[#0a7d64] p-6 shadow-xs lg:sticky lg:top-[calc(var(--app-header-offset,72px)+72px)]">
-            <h3 className="text-base font-bold text-[var(--color-ink-deep)] pb-3.5 mb-3.5 border-b border-slate-100">Thông Tin Khái Quát</h3>
-            <div className="flex flex-col gap-3 text-xs md:text-sm">
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500">Danh mục:</span>
-                <span className="font-semibold text-slate-800">Đặc sản địa phương</span>
-              </div>
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500">Khu vực:</span>
-                <span className="font-semibold text-slate-800">{region}</span>
-              </div>
-              {price && (
-                <div className="flex justify-between items-center gap-3 pb-2.5 border-b border-slate-50">
-                  <span className="text-slate-500 shrink-0">Giá tham khảo:</span>
-                  <span className="font-bold text-right text-amber-600">{price}</span>
+    <DetailPageShell
+      breadcrumb={[{ label: 'Trang chủ', to: '/' }, { label: 'Đặc sản địa phương', to: '/specialties' }, { label: dish.name }]}
+      badges={badges}
+      title={dish.name}
+      meta={meta}
+      images={images}
+      tabs={tabs}
+      cta={
+        hasWhere
+          ? {
+              label: 'Nơi thưởng thức',
+              onClick: goToWhere,
+              hint: price ? (
+                <>
+                  <span className="text-[11px] uppercase tracking-wide text-slate-500">Giá tham khảo</span>
+                  <p className="text-sm font-black leading-tight text-slate-900">{price}</p>
+                </>
+              ) : undefined,
+            }
+          : undefined
+      }
+      shareText={dish.description ?? undefined}
+      aside={aside}
+    >
+      <DetailSection id="about" variant="flat" icon={Sparkles} title="Về món đặc sản này">
+        <p className="whitespace-pre-line text-[15px] leading-[1.8] text-slate-700">
+          {dish.description || `Đặc sản của đồng bào vùng cao ${region} — thông tin chi tiết đang được cập nhật.`}
+        </p>
+        {facts.length > 0 && (
+          <dl className="grid gap-x-6 gap-y-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
+            {facts.map(({ label, value, Icon }) => (
+              <div key={label} className="flex gap-2.5">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                <div className="min-w-0">
+                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dd className="whitespace-pre-line text-sm text-slate-800">{value}</dd>
                 </div>
-              )}
-            </div>
+              </div>
+            ))}
+          </dl>
+        )}
+      </DetailSection>
 
-            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col gap-2.5">
-              {otherVideo && (
-                <a href={otherVideo} target="_blank" rel="noopener noreferrer">
-                  <Button variant="primary" className="w-full rounded-xl font-bold h-11 bg-[var(--color-primary)] hover:bg-[#086350] text-xs flex items-center justify-center gap-2 shadow-xs">
-                    <ExternalLink className="w-4 h-4" />
-                    Xem video về món này
-                  </Button>
-                </a>
-              )}
-              <Link to="/specialties">
-                <Button variant="outline" className="w-full rounded-xl font-bold h-11 border-slate-200 hover:bg-slate-50 text-slate-700 text-xs flex items-center justify-center gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Quay lại danh sách đặc sản
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {tiktokVideo && (
+        <DetailSection id="video" variant="flat" icon={Video} title="Video review">
+          <TikTokEmbedPlayer url={tiktokVideo} placeName={dish.name} className="mx-auto" />
+        </DetailSection>
+      )}
+
+      <PlaceHighlights id="experience" variant="flat" highlights={dish.highlights} />
+
+      {hasWhere && (
+        <DetailSection id="where" variant="flat" icon={Store} title="Nơi thưởng thức & mua" subtitle="Gợi ý nơi ăn hoặc mua món này làm quà">
+          {dish.whereToEat && (
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{dish.whereToEat}</p>
+          )}
+          {servedAt.length > 0 && (
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {servedAt.map((place) => (
+                <li key={place.id}>
+                  <Link
+                    to={placeDetailPath(place.kind, place.id)}
+                    className="flex h-full items-start gap-2.5 rounded-xl border border-slate-200 bg-white p-3 transition-colors hover:border-[var(--color-primary)] hover:bg-[#edfbf7]"
+                  >
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-1.5 text-sm font-bold text-slate-900">
+                        {place.name}
+                        {place.signature && (
+                          <span className="rounded-sm bg-amber-100 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-800">Món tủ</span>
+                        )}
+                      </span>
+                      {place.address && <span className="mt-0.5 block text-xs text-slate-500">{place.address}</span>}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </DetailSection>
+      )}
+    </DetailPageShell>
   );
 }

@@ -12,7 +12,7 @@ const GROUPS: { key: 'pro' | 'con' | 'tip'; label: string; Icon: LucideIcon; box
  * Kinh nghiệm thực tế của một địa điểm / món đặc sản (ưu điểm • lưu ý • mẹo hay), lấy từ bảng highlight qua API.
  * Không có mục nào thì không hiện gì.
  */
-export default function PlaceHighlights({ highlights }: { highlights: PlaceHighlightItem[] | null | undefined }) {
+export default function PlaceHighlights({ highlights, variant = 'card', id }: { highlights: PlaceHighlightItem[] | null | undefined; variant?: 'card' | 'flat'; id?: string }) {
   const lists = { pro: [] as string[], con: [] as string[], tip: [] as string[] };
   for (const h of highlights ?? []) {
     if (h.type === 'PRO') lists.pro.push(h.content);
@@ -23,6 +23,8 @@ export default function PlaceHighlights({ highlights }: { highlights: PlaceHighl
 
   return (
     <DetailSection
+      id={id}
+      variant={variant}
       icon={Lightbulb}
       eyebrow="Kinh nghiệm thực tế"
       title="Ưu điểm • Mẹo hay • Lưu ý"
