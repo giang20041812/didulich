@@ -342,7 +342,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
       <header
         ref={headerRef}
         id="app-header"
-        className={`fixed top-0 inset-x-0 z-50 flex flex-col w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ease-out pt-[var(--safe-top)] pl-[var(--safe-left)] pr-[var(--safe-right)] ${
+        className={`fixed top-0 inset-x-0 z-50 flex flex-col w-full border-b transition-[background-color,border-color] duration-300 ease-out pt-[var(--safe-top)] pl-[var(--safe-left)] pr-[var(--safe-right)] ${
           isSolid
             ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.985),rgba(236,253,245,0.97))] border-emerald-900/[0.08] shadow-[0_12px_32px_-18px_rgba(10,46,38,0.45)]'
             : 'bg-transparent border-transparent'
