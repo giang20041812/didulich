@@ -93,10 +93,10 @@ function initialProvince(params: URLSearchParams): { name: string; source: Provi
 }
 
 /** Khung ô của khối tìm kiếm: điện thoại xếp dọc đủ rộng, cao 76px; máy tính là một ô trong hàng 3 ô bằng nhau. */
-const FIELD = 'flex w-full min-w-0 min-h-[76px] items-center gap-3 px-3.5 py-3 text-left transition-colors md:h-full md:min-h-0 md:rounded-[10px] md:px-4 md:py-0';
+const FIELD = 'flex w-full min-w-0 min-h-[76px] items-center gap-3 px-3.5 py-3 text-left transition-colors md:h-full md:min-h-0 md:rounded-full md:px-5 md:py-0';
 const FIELD_BUTTON = `${FIELD} cursor-pointer hover:bg-[#f3f7f1]`;
 const FIELD_ACTIVE = 'md:bg-[var(--color-canvas)] md:shadow-[inset_0_0_0_1.5px_var(--color-primary)]';
-const ICON_TILE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-nav-active-bg)] text-[var(--color-primary)] md:h-auto md:w-auto md:bg-transparent';
+const ICON_TILE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-nav-active-bg)] text-[var(--color-primary)] md:h-auto md:w-auto md:bg-transparent';
 const FIELD_LABEL = 'text-[11px] font-extrabold uppercase tracking-[0.08em] text-[var(--color-muted)]';
 const FIELD_VALUE = 'truncate text-base font-extrabold text-[var(--color-ink-deep)]';
 
@@ -114,7 +114,15 @@ const chipClass = (active: boolean, padding = 'px-1.5') => `inline-flex h-10 min
  * header (kiểu Airbnb); máy tính mở popover theo từng bước, điện thoại chọn thời lượng / số người ngay trên khối, ô điểm
  * đến và lịch mở sheet.
  */
-export default function SearchHub() {
+interface SearchHubProps {
+  /**
+   * Hiệu ứng mở đầu (trang chủ): chính nút "Tìm homestay" bật ra thành nút kính lúp tròn, giãn sang trái hiện chữ, rồi khối
+   * trắng mở tiếp sang trái lộ các ô còn lại.
+   */
+  intro?: boolean;
+}
+
+export default function SearchHub({ intro = false }: SearchHubProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -139,6 +147,34 @@ export default function SearchHub() {
   const [provinceSearch, setProvinceSearch] = useState('');
 
   const searchRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const ctaMobileRef = useRef<HTMLButtonElement>(null);
+  const ctaDesktopRef = useRef<HTMLButtonElement>(null);
+
+  // Hiệu ứng mở đầu: đo nút "Tìm homestay" đang hiện (điện thoại / máy tính) — cỡ nút để khối trắng mở từ đúng hình nút,
+  // khoảng dời kính lúp để lúc còn là nút tròn, kính lúp nằm giữa vòng tròn ở mép phải. Đo bằng offset* (không tính
+  // transform của animation đang chạy).
+  useLayoutEffect(() => {
+    if (!intro) return undefined;
+    let alive = true;
+    const measure = () => {
+      const form = formRef.current;
+      if (!alive || !form) return;
+      for (const btn of [ctaMobileRef.current, ctaDesktopRef.current]) {
+        if (!btn || btn.offsetWidth === 0) continue;
+        const icon = btn.querySelector<HTMLElement>('[data-cta-icon]');
+        const w = btn.offsetWidth;
+        const h = btn.offsetHeight;
+        const iconCenter = icon ? icon.offsetLeft + icon.offsetWidth / 2 : w / 2;
+        btn.style.setProperty('--cta-shift', `${w - h / 2 - iconCenter}px`);
+        form.style.setProperty('--cta-w', `${w}px`);
+        form.style.setProperty('--cta-h', `${h}px`);
+      }
+    };
+    measure();
+    void document.fonts?.ready.then(measure);
+    return () => { alive = false; };
+  }, [intro]);
 
   // Đồng bộ với đường dẫn (quay lại / mở link kết quả tìm kiếm). Đường dẫn không có thì giữ giá trị mặc định đang có.
   useEffect(() => {
@@ -596,11 +632,13 @@ export default function SearchHub() {
       {/* ---------------- KHU VỰC TÌM KIẾM GỐC TRÊN TRANG ----------------
           Điện thoại: MỘT hàng gọn — tóm tắt (tỉnh · ngày · số người) bấm vào mở bảng chọn từng bước + nút tìm. Máy tính: một
           hàng ba ô bằng nhau + nút tìm. */}
+      <div className="relative">
       <form
+        ref={formRef}
         role="search"
         aria-label="Tìm homestay"
         onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-        className={`w-full rounded-2xl bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
+        className={`${intro ? 'search-unfold' : ''} w-full rounded-full bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
           blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
@@ -611,7 +649,7 @@ export default function SearchHub() {
             onClick={() => setActiveTab('location')}
             aria-haspopup="dialog"
             aria-label={`Sửa tìm kiếm: ${summary}`}
-            className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-xl pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer"
+            className={`flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer ${intro ? 'search-unfold-content' : ''}`}
           >
             <span className={ICON_TILE}><MapPin className="h-[18px] w-[18px]" aria-hidden /></span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -622,12 +660,15 @@ export default function SearchHub() {
             </span>
           </button>
           <button
+            ref={ctaMobileRef}
             type="submit"
             aria-label={ctaLabel}
-            className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl cta cta-primary px-3.5 text-sm font-extrabold text-white cursor-pointer"
+            className="relative flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full cta cta-primary px-4 text-sm font-extrabold text-white cursor-pointer"
           >
-            <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            <span className="max-[359px]:hidden">{ctaLabel}</span>
+            <span data-cta-icon className={`flex shrink-0 ${intro ? 'search-cta-icon' : ''}`}>
+              <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
+            </span>
+            <span className={`max-[359px]:hidden ${intro ? 'search-cta-label' : ''}`}>{ctaLabel}</span>
           </button>
         </div>
 
@@ -638,7 +679,7 @@ export default function SearchHub() {
           aria-haspopup="dialog"
           aria-expanded={activeTab === 'location'}
           aria-label={`Điểm đến: ${province}, ${areasLine}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${activeTab === 'location' ? FIELD_ACTIVE : ''}`}
+          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'location' ? FIELD_ACTIVE : ''}`}
         >
           <span className={ICON_TILE}><MapPin className="h-5 w-5" aria-hidden /></span>
           <span className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-px">
@@ -657,7 +698,7 @@ export default function SearchHub() {
           aria-haspopup="dialog"
           aria-expanded={activeTab === 'dates'}
           aria-label={`Thời gian: ${dayLabel(checkIn)} đến ${dayLabel(checkOut)}, ${nightsText}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${activeTab === 'dates' ? FIELD_ACTIVE : ''}`}
+          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'dates' ? FIELD_ACTIVE : ''}`}
         >
           <span className={ICON_TILE}><Calendar className="h-5 w-5" aria-hidden /></span>
           <span className="flex min-w-0 flex-1 flex-col gap-px">
@@ -675,7 +716,7 @@ export default function SearchHub() {
           aria-haspopup="dialog"
           aria-expanded={activeTab === 'guests'}
           aria-label={`Số người: ${guestText}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${activeTab === 'guests' ? FIELD_ACTIVE : ''}`}
+          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'guests' ? FIELD_ACTIVE : ''}`}
         >
           <span className={ICON_TILE}><Users className="h-5 w-5" aria-hidden /></span>
           <span className="flex min-w-0 flex-1 flex-col gap-px">
@@ -686,18 +727,22 @@ export default function SearchHub() {
 
         <div className="hidden md:block">
           <button
+            ref={ctaDesktopRef}
             type="submit"
-            className="flex h-full w-[184px] items-center justify-center gap-2 rounded-[10px] cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
+            className="relative flex h-full w-[184px] items-center justify-center gap-2 whitespace-nowrap rounded-full cta cta-primary px-6 text-base font-extrabold text-white cursor-pointer"
           >
-            <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
-            {ctaLabel}
+            <span data-cta-icon className={`flex shrink-0 ${intro ? 'search-cta-icon' : ''}`}>
+              <Search className="h-[18px] w-[18px]" strokeWidth={2.5} aria-hidden />
+            </span>
+            <span className={intro ? 'search-cta-label' : undefined}>{ctaLabel}</span>
           </button>
         </div>
       </form>
+      </div>
 
       {/* Lối phụ: lên lịch trình trước (cùng tỉnh, ngày, số người) — ẩn khi đang chọn chỗ ở cho một lịch trình */}
       {!choosingForJourney && (
-        <div className={`mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`${intro ? 'search-unfold-content' : ''} mt-2 flex justify-center px-1 transition-opacity duration-200 md:justify-start ${blockUnderHeader ? 'opacity-0' : 'opacity-100'}`}>
           <Link
             to={tripPath}
             onPointerEnter={prefetchTrip}

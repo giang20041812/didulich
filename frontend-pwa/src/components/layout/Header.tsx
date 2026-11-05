@@ -322,10 +322,10 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
   const navItemTone = (active: boolean) =>
     active
       ? isSolid
-        ? 'text-[var(--color-primary)]'
-        : 'text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]'
+        ? 'text-white'
+        : 'text-[#06604a]'
       : isSolid
-        ? 'text-slate-700 hover:text-[var(--color-primary)]'
+        ? 'text-[#123f35] hover:text-[var(--color-primary)]'
         : 'text-white hover:text-[var(--color-sun)] [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]';
 
   const desktopPill = useSlidingPill(desktopNavRef, [location.pathname, visibleCount, isSolid, searchCompact]);
@@ -344,10 +344,15 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
         id="app-header"
         className={`fixed top-0 inset-x-0 z-50 flex flex-col w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ease-out pt-[var(--safe-top)] pl-[var(--safe-left)] pr-[var(--safe-right)] ${
           isSolid
-            ? 'bg-white/85 backdrop-blur-xl backdrop-saturate-150 border-slate-900/[0.06] shadow-[0_10px_30px_-18px_rgba(10,46,38,0.35)]'
+            ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(236,253,245,0.9))] backdrop-blur-xl backdrop-saturate-150 border-emerald-900/[0.08] shadow-[0_12px_32px_-18px_rgba(10,46,38,0.45)]'
             : 'bg-transparent border-transparent'
         }`}
       >
+        {/* Vạch gradient thương hiệu ở chân header khi header nền sáng: tách header khỏi nội dung, tạo điểm nhấn màu */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 bottom-[-1px] h-[2px] bg-[linear-gradient(90deg,#0a7d64,#12b886_35%,#06b6d4_65%,#facc15)] transition-opacity duration-300 ${isSolid ? 'opacity-100' : 'opacity-0'}`}
+        />
         {/* Chiều cao hàng cố định, không co lại khi cuộn: co chiều cao / đổi cỡ logo làm cả trang dàn lại từng khung hình
             (header, khối tìm kiếm, đo menu "Thêm") nên cuộn bị giật — giờ cuộn chỉ đổi nền header.
             Hàng chính. Điện thoại: [☰ logo] … [tài khoản]; khi cuộn qua ô tìm kiếm: [☰] [ô tìm kiếm] [tài khoản].
@@ -406,8 +411,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 animate={desktopPill.animate}
                 className={
                   isSolid
-                    ? 'bg-[linear-gradient(120deg,#e3faf0,#dcf6fb)] shadow-[inset_0_0_0_1px_rgba(10,125,100,0.16),0_6px_14px_-8px_rgba(10,125,100,0.5)]'
-                    : 'bg-[linear-gradient(120deg,rgba(255,255,255,0.22),rgba(250,204,21,0.2))] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.28)]'
+                    ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886_55%,#06b6d4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_18px_-8px_rgba(10,125,100,0.85)]'
+                    : 'bg-white/95 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.45)]'
                 }
               />
               {visibleNav.map((item) => {

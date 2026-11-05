@@ -7,14 +7,16 @@ interface RevealProps {
   className?: string;
   /** Nhảy cách bao nhiêu px khi hiện (mặc định 24px — nhẹ, không gây choáng). */
   offset?: number;
+  /** Cuộn khuất thì ẩn lại, cuộn tới lại thì hiện lại (mặc định chỉ hiện một lần). */
+  repeat?: boolean;
 }
 
 /**
  * Hiệu ứng hiện dần khi cuộn tới (fade + nhấc nhẹ) — nhịp chuyển động kiểu sản phẩm cao cấp.
  * Tự tắt khi người dùng bật "giảm chuyển động" (prefers-reduced-motion): nội dung hiện ngay.
- * Chỉ chạy một lần khi phần tử vào khung nhìn, không lặp lại khi cuộn qua lại.
+ * Mặc định chạy một lần; `repeat` thì ẩn đi khi phần tử ra khỏi khung nhìn và hiện lại khi quay lại.
  */
-export default function Reveal({ children, delay = 0, className = '', offset = 24 }: RevealProps) {
+export default function Reveal({ children, delay = 0, className = '', offset = 24, repeat = false }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -28,27 +30,32 @@ export default function Reveal({ children, delay = 0, className = '', offset = 2
     }
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
+        const entry = entries[entries.length - 1];
+        if (!entry) return;
+        if (entry.isIntersecting) {
           setVisible(true);
-          io.disconnect();
+          if (!repeat) io.disconnect();
+        } else if (repeat) {
+          setVisible(false);
         }
       },
       { threshold: 0.12, rootMargin: '0px 0px -48px 0px' },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [repeat]);
 
   return (
     <div
       ref={ref}
       // will-change chỉ khi còn chờ hiện: giữ mãi thì mỗi khối thành một layer GPU riêng suốt đời trang, cuộn nặng dần.
       className={`${className} transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        // Không dùng blur: filter trên cả khối thẻ có ảnh bắt trình duyệt vẽ lại toàn khối mỗi khung hình → cuộn giật.
         visible ? 'opacity-100' : 'opacity-0 will-change-[opacity,transform]'
       }`}
       style={{
-        transitionDelay: `${delay}ms`,
-        transform: visible ? undefined : `translate3d(0, ${offset}px, 0)`,
+        transitionDelay: visible ? `${delay}ms` : '0ms',
+        transform: visible ? undefined : `translate3d(0, ${offset}px, 0) scale(0.98)`,
       }}
     >
       {children}

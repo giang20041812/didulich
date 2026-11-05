@@ -455,7 +455,7 @@ export default function HomePage() {
             {/* SearchHub (đặt phòng trước): tỉnh / thành · thời gian · số người → "Tìm homestay" (/homestays); lối phụ
                 "Hoặc lên lịch trình trước" (/lich-trinh/tao) */}
             <div className="w-full max-w-5xl mx-auto relative z-20">
-              <SearchHub />
+              <SearchHub intro />
             </div>
           </div>
         </div>

@@ -852,6 +852,50 @@ img[data-loading]:not([data-no-skeleton]) {
   }
 }
 
+/*
+ * Cổng ảnh của lưới thẻ (components/ui/FramerSwipeCardStack): chưa đủ ảnh trang đầu thì mỗi ô là một khung skeleton
+ * lấp lánh, thẻ thật ẩn (vẫn bố cục + tải ảnh bên dưới); đủ ảnh thì các thẻ hiện cùng lúc, so le nhẹ theo --gate-i.
+ * Chỉ animate opacity / transform; animation không giữ lại (không fill forwards) nên không để lại layer GPU.
+ */
+.img-gate-cell {
+  position: relative;
+  min-width: 0;
+}
+[data-img-gate="pending"] .img-gate-cell > * {
+  opacity: 0;
+}
+[data-img-gate="pending"] .img-gate-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  pointer-events: none;
+  background-color: #e8eeec;
+  background-image: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.65) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: imgShimmer 1.3s ease-in-out infinite;
+}
+[data-img-gate="ready"] .img-gate-cell > * {
+  animation: gateIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--gate-i, 0) * 45ms);
+}
+/* Ảnh trong lưới đã chờ đủ rồi mới hiện: không mờ dần thêm lần nữa từng ảnh. */
+[data-img-gate="ready"] img[data-loaded],
+[data-img-gate="instant"] img[data-loaded] {
+  animation: none;
+}
+@keyframes gateIn {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-img-gate="pending"] .img-gate-cell::after,
+  [data-img-gate="ready"] .img-gate-cell > * {
+    animation: none;
+  }
+}
+
 /* Chữ gõ ra (components/ui/TypeText): con trỏ nhấp nháy, đứng yên khi đang gõ, gõ xong thì mờ dần rồi ẩn. */
 .type-caret {
   display: inline-block;
@@ -885,30 +929,58 @@ img[data-loading]:not([data-no-skeleton]) {
   to { opacity: 1; transform: none; }
 }
 
-/* Khối tìm kiếm (SearchHub): ban đầu chỉ là nút kính lúp tròn, rồi bung sang phải lộ ra các ô còn lại. */
+/* Khối tìm kiếm (SearchHub, trang chủ): chính nút "Tìm homestay" bật ra thành nút kính lúp tròn ở mép phải, giãn sang trái
+   hiện chữ (kính lúp trượt về chỗ cũ), rồi khối trắng mở tiếp sang trái lộ các ô. Chỉ animate clip-path của khối + transform /
+   opacity của kính lúp, chữ — không đụng tới bố cục. --cta-w / --cta-h (cỡ nút) và --cta-shift (khoảng dời kính lúp về giữa
+   vòng tròn) do SearchHub đo. 6px = lề trong của khối quanh nút. Chỉ giữ clip-path trong lúc chạy (fill backwards) để bóng
+   đổ của khối không bị cắt sau đó.
+   Nhịp (tính từ lúc tải): 0,5s bật ra → 0,84s thành nút tròn → 1,04s giãn hiện chữ → 1,49s mở khối → 2,2s xong. */
 .search-unfold {
-  animation: searchUnfold 0.95s cubic-bezier(0.76, 0, 0.24, 1) 0.55s both;
+  --cta-r: calc(var(--cta-h, 66px) / 2 + 6px);
+  animation: searchUnfold 1.7s linear 0.5s backwards;
+}
+.search-cta-icon {
+  animation: searchCtaIcon 1.7s linear 0.5s backwards;
+}
+.search-cta-label {
+  animation: searchCtaLabel 1.7s linear 0.5s backwards;
 }
 .search-unfold-content {
-  animation: searchUnfoldContent 0.5s ease 1.25s both;
-}
-.search-unfold-icon {
-  animation: searchUnfoldIcon 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: searchUnfoldContent 0.55s cubic-bezier(0.22, 1, 0.36, 1) 1.7s backwards;
 }
 @keyframes searchUnfold {
-  from { clip-path: inset(0 calc(100% - var(--unfold-size, 78px)) 0 0 round 999px); }
-  to { clip-path: inset(0 0 0 0 round 999px); }
+  0% {
+    clip-path: inset(var(--cta-r) var(--cta-r) var(--cta-r) calc(100% - var(--cta-r)) round 999px);
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  20%, 32% {
+    clip-path: inset(6px 6px 6px calc(100% - 6px - var(--cta-h, 66px)) round 999px);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  58% {
+    clip-path: inset(6px 6px 6px calc(100% - 6px - var(--cta-w, 184px)) round 999px);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  100% { clip-path: inset(0 0 0 0 round 999px); }
+}
+@keyframes searchCtaIcon {
+  0% {
+    transform: translate3d(var(--cta-shift, 0px), 0, 0) scale(0.4) rotate(-90deg);
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  20%, 32% {
+    transform: translate3d(var(--cta-shift, 0px), 0, 0) scale(1.15);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  58%, 100% { transform: none; }
+}
+@keyframes searchCtaLabel {
+  0%, 34% { opacity: 0; transform: translate3d(-22px, 0, 0); clip-path: inset(0 100% 0 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  66%, 100% { opacity: 1; transform: none; clip-path: inset(0 -2px 0 0); }
 }
 @keyframes searchUnfoldContent {
-  from { opacity: 0; transform: translateX(-14px); }
+  from { opacity: 0; transform: translate3d(-12px, 0, 0); }
   to { opacity: 1; transform: none; }
-}
-@keyframes searchUnfoldIcon {
-  0% { opacity: 0; transform: scale(0.4) rotate(-40deg); }
-  30% { opacity: 1; transform: scale(1) rotate(0); }
-  45% { opacity: 1; transform: scale(1); }
-  75% { opacity: 1; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.9); }
-  100% { opacity: 0; transform: translateX(calc(var(--unfold-travel, 600px))) scale(0.6); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -916,8 +988,8 @@ img[data-loading]:not([data-no-skeleton]) {
   .pager-num,
   .search-unfold,
   .search-unfold-content,
-  .search-unfold-icon {
+  .search-cta-icon,
+  .search-cta-label {
     animation: none !important;
   }
-  .search-unfold-icon { display: none; }
 }

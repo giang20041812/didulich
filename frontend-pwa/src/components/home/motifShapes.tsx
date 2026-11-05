@@ -343,6 +343,38 @@ export const MOTIFS = {
       <path d={BIRD} transform="translate(48 46) scale(0.6)" />
     </>
   ),
+  /** Thác nước đổ giữa hai vách đá: dòng suối trên đỉnh, các dải nước rơi, bọt tung và mặt hồ gợn sóng, thông trên vách. */
+  waterfall: () => (
+    <>
+      {/* vách đá hai bên */}
+      <path d="M-6 52 Q 40 40 90 48 L96 66 L90 96 L98 128 L90 160 L96 176" />
+      <path d="M266 40 Q 214 32 164 46 L158 66 L166 98 L158 130 L166 160 L160 176" />
+      <path d="M30 70 L44 86 M58 64 L70 82 M20 100 L34 114 M214 64 L200 82 M236 76 L222 92 M226 110 L212 124" strokeOpacity="0.16" />
+      {/* dòng suối chảy tới mép thác */}
+      <path d="M90 48 Q 126 58 164 46" />
+      <path d="M100 42 Q 126 48 152 40 M112 34 Q 130 38 146 32" strokeOpacity="0.2" />
+      {/* các dải nước rơi */}
+      <path d="M102 54 C 100 92, 106 132, 102 168" />
+      <path d="M114 57 C 112 98, 118 134, 114 170" />
+      <path d="M127 58 C 127 100, 124 134, 128 170" />
+      <path d="M140 57 C 142 96, 136 134, 141 170" />
+      <path d="M152 52 C 155 90, 148 130, 154 168" />
+      <path d="M108 70 V84 M121 92 V108 M134 76 V90 M146 104 V118 M110 120 V134 M133 128 V142" strokeOpacity="0.2" />
+      {/* bọt nước tung ở chân thác */}
+      <path d="M84 176 c 4 -10 16 -12 22 -4 c 4 -10 18 -10 22 -1 c 5 -9 18 -9 22 0 c 5 -8 16 -8 20 2" />
+      <path d="M92 164 q 2 -6 6 -4 M160 162 q 3 -6 7 -3 M126 160 q 2 -5 6 -3" strokeOpacity="0.22" />
+      {/* mặt hồ gợn sóng */}
+      <path d="M40 190 C 90 180, 170 180, 222 190" />
+      <path d="M62 202 C 100 195, 160 195, 200 202" />
+      <path d="M90 212 C 112 208, 148 208, 170 212" strokeOpacity="0.18" />
+      {/* đá bên hồ */}
+      <path d="M18 196 q 6 -14 20 -10 q 10 3 8 12 Z M226 194 q 8 -12 20 -6 q 8 5 2 10 Z" />
+      {/* thông trên vách, chim bay */}
+      <path d={`${pineTree(26, 46, 0.8)} ${pineTree(48, 44, 0.6)} ${pineTree(214, 36, 0.8)} ${pineTree(236, 38, 0.6)}`} />
+      <path d={BIRD} transform="translate(150 12) scale(0.7)" />
+      <path d={BIRD} transform="translate(176 22) scale(0.5)" />
+    </>
+  ),
   /** Dù lượn bay trên đỉnh núi (đèo Khau Phạ): cánh dù chia ô, dây dù, phi công ngồi ghế; mây và núi tuyết. */
   paraglider: () => {
     const top = [[66, 74], [130, 18], [194, 74]] as const;
