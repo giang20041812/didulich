@@ -975,8 +975,8 @@ img[data-loading]:not([data-no-skeleton]) {
   58%, 100% { transform: none; }
 }
 @keyframes searchCtaLabel {
-  0%, 38% { opacity: 0; transform: translate3d(10px, 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-  60%, 100% { opacity: 1; transform: none; }
+  0%, 34% { opacity: 0; transform: translate3d(-22px, 0, 0); clip-path: inset(0 100% 0 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  66%, 100% { opacity: 1; transform: none; clip-path: inset(0 -2px 0 0); }
 }
 @keyframes searchUnfoldContent {
   from { opacity: 0; transform: translate3d(-12px, 0, 0); }
