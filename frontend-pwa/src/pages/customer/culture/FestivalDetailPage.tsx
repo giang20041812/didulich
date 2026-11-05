@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchFestivalByIdOrSlug } from '@/services/festivalService';
 import { FestivalDto } from '@/types/festival';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import VietmapView from '@/components/map/VietmapView';
 import type { VietmapMarkerItem } from '@/types/integrations/vietmap';
@@ -12,22 +12,19 @@ import {
   Sparkles,
   ShieldAlert,
   ArrowLeft,
-  Share2,
-  Bookmark,
   CheckCircle2,
-  AlertTriangle,
   Lightbulb,
-  ThumbsUp,
   Map as MapIcon,
   Compass,
-  Check,
+  Navigation,
   Flame,
   Info,
-  Images
 } from 'lucide-react';
 import { openGoogleMapsDirections } from '@/lib/mapUtils';
-import ImageCarousel from '@/components/common/ImageCarousel';
 import DetailSection from '@/components/common/DetailSection';
+import PlaceHighlights from '@/components/common/PlaceHighlights';
+import DetailPageShell, { DetailAsideCard, DetailFact } from '@/components/common/DetailPageShell';
+import type { PlaceHighlightItem } from '@/types/homestay';
 import { DetailSkeleton } from '@/components/ui/PageSkeleton';
 
 // Tọa độ GPS chuẩn cho từng lễ hội tại Mù Cang Chải
@@ -155,8 +152,6 @@ export default function FestivalDetailPage() {
 
   const [festival, setFestival] = useState<FestivalDto | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -224,360 +219,221 @@ export default function FestivalDetailPage() {
     }
   ];
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: festival.name,
-        text: festival.coreValue,
-        url: window.location.href
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
+  // PRO / CON / TIP dựng sẵn cho từng lễ hội → cùng dạng dữ liệu highlight với địa điểm & đặc sản.
+  const highlightItems: PlaceHighlightItem[] = highlights
+    ? ([
+        ['PRO', highlights.pros],
+        ['CON', highlights.cons],
+        ['TIP', highlights.tips],
+      ] as const).flatMap(([type, list], g) => list.map((content, i) => ({ id: g * 100 + i, type, content })))
+    : [];
 
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${geoInfo.lat},${geoInfo.lng}`;
+  const openDirections = () => openGoogleMapsDirections(geoInfo.lat, geoInfo.lng, geoInfo.address || festival.name);
+  const timeText = festival.timeRange || festival.seasonNote;
+  const images = festival.coverImageUrl ? [festival.coverImageUrl] : [];
+
+  const tabs = [
+    { id: 'about', label: 'Ý nghĩa' },
+    ...(festival.suitableExperience || (festival.activities?.length ?? 0) > 0 ? [{ id: 'experience', label: 'Trải nghiệm' }] : []),
+    ...(highlightItems.length > 0 ? [{ id: 'tips', label: 'Kinh nghiệm' }] : []),
+    ...(festival.etiquetteDont ? [{ id: 'etiquette', label: 'Quy tắc' }] : []),
+    { id: 'map', label: 'Bản đồ' },
+  ];
+
+  const badges = (
+    <>
+      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200/60 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 shadow-2xs">
+        <Sparkles className="h-3 w-3 text-emerald-600" />
+        {festival.highlightTag || 'Di sản văn hóa'}
+      </span>
+      {festival.isCurrentSeason && (
+        <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+          <Flame className="h-3.5 w-3.5 text-amber-600" />
+          Thời điểm đẹp nhất đang diễn ra
+        </span>
+      )}
+    </>
+  );
+
+  const meta = (
+    <>
+      <span className="inline-flex items-center gap-1.5 font-semibold text-slate-900">
+        <Calendar className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+        {timeText}
+      </span>
+      <span className="text-slate-300" aria-hidden>·</span>
+      <button
+        type="button"
+        onClick={openDirections}
+        className="group inline-flex cursor-pointer items-center gap-1 text-left text-slate-700 transition-colors hover:text-[var(--color-primary)]"
+        title="Xem chỉ đường trên Google Maps"
+      >
+        <MapPin className="h-4 w-4 shrink-0 text-[var(--color-primary)] transition-transform duration-200 group-hover:scale-110" />
+        <span className="underline decoration-slate-300 underline-offset-4 group-hover:decoration-[var(--color-primary)]">
+          {festival.location || geoInfo.address}
+        </span>
+      </button>
+    </>
+  );
+
+  const aside = (
+    <DetailAsideCard>
+      <div className="mb-4">
+        <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Thời gian tổ chức</span>
+        <p className="mt-0.5 text-xl font-extrabold leading-snug text-slate-900">{timeText}</p>
+      </div>
+
+      <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 text-sm">
+        <DetailFact label="Trạng thái">
+          <span className="font-bold text-[var(--color-primary)]">
+            {festival.isCurrentSeason ? 'Đang vào mùa nở rộ' : 'Theo lịch thường niên'}
+          </span>
+        </DetailFact>
+        <DetailFact label="Khu vực">{festival.regionName || 'Mù Cang Chải'}</DetailFact>
+        <DetailFact label="Giá vé tham gia">
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
+            Miễn phí mở cửa tự do
+          </span>
+        </DetailFact>
+        <DetailFact label="Loại hình">Di sản văn hóa phi vật thể</DetailFact>
+      </div>
+
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        type="button"
+        onClick={openDirections}
+        className="mt-5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl cta cta-primary font-bold text-white shadow-sm transition "
+      >
+        <Navigation className="h-4 w-4" />
+        <span>Chỉ đường tới điểm lễ hội</span>
+      </motion.button>
+      <Link
+        to="/experiences"
+        className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+      >
+        <ArrowLeft className="h-4 w-4 text-[var(--color-primary)]" />
+        Xem tất cả lễ hội khác
+      </Link>
+    </DetailAsideCard>
+  );
 
   return (
-    <div className="w-full flex flex-col min-h-screen bg-gradient-to-b from-[#eef7f3] via-[var(--color-canvas)] to-[var(--color-canvas)]">
-      {/* Top Breadcrumb & Navigation - ghim ngay dưới Header khi scroll */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-[var(--app-header-offset,88px)] z-20 shadow-xs">
-        <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs md:text-sm text-[var(--color-muted)] truncate">
-            <Link to="/" className="hover:text-[var(--color-primary)] transition-colors shrink-0">
-              Trang chủ
-            </Link>
-            <span>/</span>
-            <Link to="/experiences" className="hover:text-[var(--color-primary)] transition-colors shrink-0">
-              Văn hóa & Lễ hội
-            </Link>
-            <span>/</span>
-            <span className="text-[var(--color-ink-deep)] font-semibold truncate">
-              {festival.name}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setSaved(!saved)}
-              className={`p-2 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                saved
-                  ? 'bg-rose-50 border-rose-200 text-rose-600'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-              title="Lưu lễ hội"
-            >
-              <Bookmark className={`w-4 h-4 ${saved ? 'fill-rose-600' : ''}`} />
-              <span className="hidden sm:inline">{saved ? 'Đã lưu' : 'Lưu lại'}</span>
-            </button>
-
-            <button
-              onClick={handleShare}
-              className="p-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Chia sẻ thông tin"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
-              <span className="hidden sm:inline">{copied ? 'Đã chép link' : 'Chia sẻ'}</span>
-            </button>
+    <DetailPageShell
+      breadcrumb={[{ label: 'Trang chủ', to: '/' }, { label: 'Văn hóa & Lễ hội', to: '/experiences' }, { label: festival.name }]}
+      badges={badges}
+      title={festival.name}
+      meta={meta}
+      images={images}
+      tabs={tabs}
+      cta={{
+        label: 'Chỉ đường',
+        onClick: openDirections,
+        hint: (
+          <>
+            <span className="text-[11px] uppercase tracking-wide text-slate-500">Thời gian</span>
+            <p className="max-w-[200px] truncate text-sm font-black leading-tight text-slate-900">{timeText}</p>
+          </>
+        ),
+      }}
+      shareText={festival.coreValue}
+      saveLabel="Lưu lại"
+      aside={aside}
+    >
+      <DetailSection id="about" variant="flat" icon={Sparkles} title="Ý nghĩa lịch sử & văn hóa">
+        <p className="whitespace-pre-line text-[15px] leading-[1.8] text-slate-700">{festival.coreValue}</p>
+        <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+          <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+          <div>
+            <span className="font-bold text-slate-900">Chu kỳ thời gian mùa vụ: </span>
+            <span>{festival.seasonNote}</span>
           </div>
         </div>
-      </div>
+      </DetailSection>
 
-      {/* Tiêu đề lễ hội */}
-      <section className="max-w-[1240px] mx-auto w-full px-4 md:px-8 pt-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#064e3b] via-[#0a7d64] to-[#042f2e] p-6 text-white shadow-md md:p-10">
-          <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-amber-400/15 blur-3xl" />
-          <div className="relative">
-            <div className="mb-3.5 flex flex-wrap items-center gap-2">
-              <Badge className="bg-white/15 text-white text-xs font-bold px-3 py-1 rounded-full ring-1 ring-white/25">
-                {festival.highlightTag || 'Di Sản Văn Hóa'}
-              </Badge>
-              {festival.isCurrentSeason && (
-                <Badge className="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5 fill-white" />
-                  Thời điểm đẹp nhất đang diễn ra
-                </Badge>
-              )}
-              <span className="text-xs font-semibold bg-black/25 px-3 py-1 rounded-full ring-1 ring-white/20">
-                {festival.regionName || 'Mù Cang Chải, Yên Bái'}
-              </span>
-            </div>
-
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight text-white mb-4">
-              {festival.name}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/90">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>Thời gian: <strong>{festival.timeRange || festival.seasonNote}</strong></span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>{festival.location || geoInfo.address}</span>
+      {(festival.suitableExperience || (festival.activities?.length ?? 0) > 0) && (
+        <DetailSection id="experience" variant="flat" icon={Compass} title="Trải nghiệm đề xuất & hoạt động tiêu biểu">
+          {festival.suitableExperience && (
+            <div className="whitespace-pre-line text-[15px] leading-[1.8] text-slate-700">{festival.suitableExperience}</div>
+          )}
+          {festival.activities && festival.activities.length > 0 && (
+            <div>
+              <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Các hoạt động chính</h3>
+              <div className="flex flex-wrap gap-2">
+                {festival.activities.map((act, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 rounded-lg border border-emerald-200/70 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    {act}
+                  </span>
+                ))}
               </div>
             </div>
+          )}
+        </DetailSection>
+      )}
+
+      <PlaceHighlights id="tips" variant="flat" highlights={highlightItems} />
+
+      {festival.etiquetteDont && (
+        <DetailSection id="etiquette" variant="flat" icon={ShieldAlert} title="Quy tắc văn hóa & điều không nên làm">
+          <p className="text-[15px] font-medium leading-relaxed text-slate-800">{festival.etiquetteDont}</p>
+          <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-900">
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <p>
+              <strong>Lời khuyên du lịch có trách nhiệm:</strong> Luôn xin phép trước khi chụp ảnh người cao tuổi, không xả rác tại các khu di tích danh thắng và giữ gìn cảnh quan thiên nhiên sạch đẹp.
+            </p>
           </div>
-        </div>
-      </section>
+        </DetailSection>
+      )}
 
-      {/* Main Content Layout */}
-      <div className="max-w-[1240px] mx-auto w-full px-4 md:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column (2/3): Content, Pro/Con/Tip, Street Map */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
-          
-          {/* 1. Ý nghĩa & bản sắc */}
-          <DetailSection icon={Sparkles} eyebrow="Bản sắc cốt lõi" title="Ý nghĩa lịch sử & văn hóa" tone="sand">
-            <p className="text-[15px] md:text-base text-slate-800 leading-[1.8] whitespace-pre-line">
-              {festival.coreValue}
-            </p>
-
-            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-[#f4dfae] bg-white/80 p-3.5 text-sm text-slate-700">
-              <Calendar className="w-4 h-4 text-[var(--color-primary)] shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold text-[var(--color-ink-deep)]">Chu kỳ thời gian mùa vụ: </span>
-                <span>{festival.seasonNote}</span>
-              </div>
-            </div>
-          </DetailSection>
-
-          {/* 2. Hình ảnh */}
-          {festival.coverImageUrl && (
-            <DetailSection icon={Images} eyebrow="Thư viện" title="Hình ảnh">
-              <ImageCarousel
-                images={[festival.coverImageUrl]}
-                alt={festival.name}
-                className="h-[240px] rounded-xl border border-slate-200 bg-slate-100 md:h-[380px]"
-                imageClassName="h-full w-full object-cover"
-              />
-            </DetailSection>
-          )}
-
-          {/* 3. Trải nghiệm đề xuất */}
-          <DetailSection icon={Compass} eyebrow="Nên làm gì" title="Trải nghiệm đề xuất & hoạt động tiêu biểu" tone="mint">
-            <div className="text-[15px] text-slate-800 leading-[1.8] whitespace-pre-line">
-              {festival.suitableExperience}
-            </div>
-
-            {festival.activities && festival.activities.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-2">
-                  Các hoạt động chính
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {festival.activities.map((act, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1.5 bg-white text-[var(--color-primary)] text-xs font-bold rounded-lg border border-[#c6e8dc] flex items-center gap-1"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      #{act}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </DetailSection>
-
-          {/* 3. PRO - TIP - CON (Kinh nghiệm thực tế chuyên sâu) */}
-          {highlights && (
-            <DetailSection
-              icon={Lightbulb}
-              eyebrow="Kinh nghiệm thực tế"
-              title="Ưu điểm • Mẹo hay • Lưu ý"
-              subtitle="Ưu điểm, lưu ý chuẩn bị và kinh nghiệm bản địa để chuyến đi trọn vẹn nhất"
-              tone="white"
-            >
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* PRO: Ưu điểm */}
-                <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-2.5">
-                      <ThumbsUp className="w-4 h-4 text-emerald-600" />
-                      <span>Ưu điểm (Pro)</span>
-                    </div>
-                    <ul className="space-y-2 text-[13px] md:text-sm text-emerald-900 leading-relaxed">
-                      {highlights.pros.map((item, pIdx) => (
-                        <li key={pIdx} className="flex items-start gap-1.5">
-                          <span className="text-emerald-600 font-bold">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* CON: Hạn chế / Điểm lưu ý */}
-                <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-rose-800 font-bold text-xs uppercase tracking-wider mb-2.5">
-                      <AlertTriangle className="w-4 h-4 text-rose-600" />
-                      <span>Lưu ý (Con)</span>
-                    </div>
-                    <ul className="space-y-2 text-[13px] md:text-sm text-rose-900 leading-relaxed">
-                      {highlights.cons.map((item, cIdx) => (
-                        <li key={cIdx} className="flex items-start gap-1.5">
-                          <span className="text-rose-600 font-bold">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* TIP: Pro tip từ người bản địa */}
-                <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs uppercase tracking-wider mb-2.5">
-                      <Lightbulb className="w-4 h-4 text-amber-600" />
-                      <span>Mẹo hay (Pro Tip)</span>
-                    </div>
-                    <ul className="space-y-2 text-[13px] md:text-sm text-amber-900 leading-relaxed">
-                      {highlights.tips.map((item, tIdx) => (
-                        <li key={tIdx} className="flex items-start gap-1.5">
-                          <span className="text-amber-600 font-bold">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </DetailSection>
-          )}
-
-          {/* 4. Lưu ý văn hóa & điều cấm kỵ */}
-          <DetailSection icon={ShieldAlert} eyebrow="Ứng xử có văn hóa" title="Quy tắc văn hóa & điều không nên làm" tone="sand">
-            <p className="text-[15px] text-slate-800 font-medium leading-relaxed mb-3">
-              {festival.etiquetteDont}
-            </p>
-            <div className="text-sm text-amber-900 bg-white/80 rounded-xl p-3.5 border border-amber-200">
-              💡 <strong>Lời khuyên du lịch có trách nhiệm:</strong> Luôn xin phép trước khi chụp ảnh người cao tuổi, không xả rác tại các khu di tích danh thắng và giữ gìn cảnh quan thiên nhiên sạch đẹp.
-            </div>
-          </DetailSection>
-
-          {/* 5. Vị trí & bản đồ */}
-          <DetailSection
-            icon={MapIcon}
-            eyebrow="Vị trí"
-            title="Bản đồ & đường đi"
-            tone="sky"
-            aside={
-              <button
-                type="button"
-                onClick={() => openGoogleMapsDirections(geoInfo.lat, geoInfo.lng, geoInfo.address || festival.name)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-blue-700 text-xs font-bold rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shrink-0 cursor-pointer"
-                title="Mở Google Maps để chọn điểm xuất phát"
-              >
-                <MapIcon className="w-3.5 h-3.5 text-blue-600" />
-                <span>Chỉ đường Google Maps</span>
-              </button>
-            }
+      <DetailSection
+        id="map"
+        variant="flat"
+        icon={MapIcon}
+        title="Bản đồ & đường đi"
+        aside={
+          <button
+            type="button"
+            onClick={openDirections}
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/70 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-2xs transition hover:border-emerald-600/50 hover:bg-emerald-100"
+            title="Mở Google Maps để chọn điểm xuất phát"
           >
-            <div className="mb-4 rounded-xl border border-[#cddcf5] bg-white p-3.5 text-sm text-slate-700 flex flex-col gap-1.5">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-[var(--color-primary)] shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-[var(--color-ink-deep)]">Địa chỉ tổ chức: </span>
-                  <span>{geoInfo.address}</span>
-                </div>
-              </div>
-              <div className="flex items-start gap-2 pt-1.5 border-t border-slate-100">
-                <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-[var(--color-ink-deep)]">Chỉ dẫn tiếp cận: </span>
-                  <span className="text-slate-600">{geoInfo.accessNote}</span>
-                </div>
-              </div>
+            <Navigation className="h-3.5 w-3.5 text-emerald-600" />
+            <span>Chỉ đường Google Maps</span>
+          </button>
+        }
+      >
+        <div className="flex flex-col gap-1.5 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+          <div className="flex items-start gap-2">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+            <div>
+              <span className="font-bold text-slate-900">Địa chỉ tổ chức: </span>
+              <span>{geoInfo.address}</span>
             </div>
-
-            <div className="w-full h-[320px] md:h-[400px] rounded-xl overflow-hidden border border-[#cddcf5] relative">
-              <VietmapView
-                centerLat={geoInfo.lat}
-                centerLng={geoInfo.lng}
-                zoomLevel={14}
-                markers={markers}
-                className="w-full h-full"
-                mapClassName="min-h-0"
-              />
-            </div>
-          </DetailSection>
-        </div>
-
-        {/* Right Column (1/3): Summary Card & Useful Guide */}
-        <div className="flex flex-col gap-6">
-          
-          {/* Quick Summary Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 border-t-4 border-t-[#0a7d64] p-6 shadow-xs lg:sticky lg:top-[calc(var(--app-header-offset,72px)+72px)]">
-            <h3 className="text-lg font-black text-[var(--color-ink-deep)] pb-3.5 mb-3.5 border-b border-slate-100">
-              Tóm tắt lễ hội
-            </h3>
-
-            <div className="flex flex-col gap-3.5 text-xs md:text-sm">
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500">Trạng thái:</span>
-                <span className="font-bold text-[var(--color-primary)]">
-                  {festival.isCurrentSeason ? 'Đang vào mùa nở rộ' : 'Theo lịch thường niên'}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-start pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500 shrink-0">Thời gian tổ chức:</span>
-                <span className="font-semibold text-right text-[var(--color-ink-deep)]">
-                  {festival.timeRange || festival.seasonNote}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-start pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500 shrink-0">Khu vực:</span>
-                <span className="font-semibold text-right text-[var(--color-ink-deep)]">
-                  {festival.regionName || 'Mù Cang Chải'}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-50">
-                <span className="text-slate-500">Giá vé tham gia:</span>
-                <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Miễn phí mở cửa tự do
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500">Loại hình:</span>
-                <span className="font-semibold text-slate-800">Di sản văn hóa phi vật thể</span>
-              </div>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col gap-2.5">
-              <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
-                <Button
-                  variant="primary"
-                  className="w-full rounded-xl font-bold h-11 bg-[var(--color-primary)] hover:bg-[#086350] text-xs flex items-center justify-center gap-2 shadow-xs"
-                >
-                  <MapPin className="w-4 h-4" />
-                  Chỉ đường tới điểm lễ hội
-                </Button>
-              </a>
-
-              <Link to="/experiences">
-                <Button
-                  variant="outline"
-                  className="w-full rounded-xl font-bold h-11 border-slate-200 hover:bg-slate-50 text-slate-700 text-xs flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Xem tất cả lễ hội khác
-                </Button>
-              </Link>
+          </div>
+          <div className="flex items-start gap-2 border-t border-slate-200/70 pt-1.5">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+            <div>
+              <span className="font-bold text-slate-900">Chỉ dẫn tiếp cận: </span>
+              <span className="text-slate-600">{geoInfo.accessNote}</span>
             </div>
           </div>
         </div>
 
-      </div>
-    </div>
+        <div className="relative h-[320px] w-full overflow-hidden rounded-2xl border border-slate-200 md:h-[400px]">
+          <VietmapView
+            centerLat={geoInfo.lat}
+            centerLng={geoInfo.lng}
+            zoomLevel={14}
+            markers={markers}
+            className="h-full w-full"
+            mapClassName="min-h-0"
+          />
+        </div>
+      </DetailSection>
+    </DetailPageShell>
   );
 }

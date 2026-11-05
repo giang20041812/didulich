@@ -26,6 +26,11 @@ interface DetailSectionProps {
   className?: string;
   /** Bỏ viền ngoài để layout thanh thoát, phẳng hiện đại. */
   borderless?: boolean;
+  /**
+   * card (mặc định): thẻ bo tròn có viền. flat: mục phẳng ngăn bằng đường kẻ, tiêu đề + ô icon nhỏ — cùng kiểu các mục
+   * của trang chi tiết homestay (dùng với DetailPageShell).
+   */
+  variant?: 'card' | 'flat';
   children: ReactNode;
 }
 
@@ -34,9 +39,30 @@ interface DetailSectionProps {
  * mỗi phần tách bạch, nổi hẳn lên khỏi nền trang thay vì chữ trần trên nền trắng.
  */
 export default function DetailSection({
-  id, icon: Icon, eyebrow, title, subtitle, tone = 'white', aside, className = '', borderless = false, children,
+  id, icon: Icon, eyebrow, title, subtitle, tone = 'white', aside, className = '', borderless = false, variant = 'card', children,
 }: DetailSectionProps) {
   const t = TONES[tone];
+  if (variant === 'flat') {
+    return (
+      <section id={id} className={`scroll-mt-36 space-y-4 border-t border-slate-200 pt-8 first:border-t-0 first:pt-0 ${className}`}>
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            {Icon && (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[var(--color-primary)] shadow-2xs">
+                <Icon className="h-5 w-5" aria-hidden />
+              </span>
+            )}
+            <div className="min-w-0">
+              <h2 className="text-xl font-black leading-tight tracking-tight text-slate-900 sm:text-2xl">{title}</h2>
+              {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+            </div>
+          </div>
+          {aside}
+        </header>
+        {children}
+      </section>
+    );
+  }
   return (
     <section id={id} className={`scroll-mt-36 rounded-2xl ${borderless ? '' : 'border border-slate-200'} bg-white p-4 sm:p-5 ${className}`}>
       <header className="mb-3.5 flex flex-wrap items-start justify-between gap-3 md:mb-4">
