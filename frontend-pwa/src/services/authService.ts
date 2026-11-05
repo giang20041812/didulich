@@ -165,7 +165,7 @@ export const googleSignIn = async (idToken: string): Promise<GoogleSignInResult>
 };
 
 /** Bước 2 của lần đầu đăng nhập Google: tạo tài khoản từ form (cùng ID token Google, còn hiệu lực ~1 giờ). */
-export const googleRegister = (request: { idToken: string; firstName: string; lastName: string; phone: string }) =>
+export const googleRegister = (request: { idToken: string; firstName: string; lastName: string; phone?: string }) =>
   postTravelerAuth('/google/register', request);
 
 export const travelerLogin = (identifier: string, password: string) =>

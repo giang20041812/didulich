@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react';
 /** Phiên khách đang đăng nhập mà chưa có số điện thoại (đọc localStorage, không gọi mạng). */
 export function phoneMissing(): boolean {
   try {
-    if (!localStorage.getItem('traveler_token')) return false;
-    const user = JSON.parse(localStorage.getItem('traveler_user') ?? '{}') as { phone?: string | null };
-    return !user.phone;
+    // Không còn bắt khách bổ sung số điện thoại: đăng ký / đăng nhập chỉ cần email.
+    return false;
   } catch {
     return false;
   }

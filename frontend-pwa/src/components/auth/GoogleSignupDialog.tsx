@@ -5,11 +5,6 @@ import { googleRegister, type GoogleSignupProfile } from '@/services/authService
 import type { GoogleLoginResponse } from '@/types/integrations/google-identity';
 import type { AuthErrorResponse } from '@/types/user';
 
-const VN_PHONE_REGEX = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
-
-/** Khách hay gõ "0912 345 678" / "0912.345.678": bỏ khoảng trắng, chấm, gạch, ngoặc trước khi kiểm tra (backend cũng bỏ). */
-const normalizePhone = (value: string) => value.trim().replace(/[\s.()-]/g, '');
-
 interface GoogleSignupDialogProps {
   idToken: string;
   profile: GoogleSignupProfile;
@@ -53,50 +48,35 @@ export function GoogleSignupDialog({ idToken, profile, onClose, onCreated }: Goo
   const id = useId();
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
-  const [phone, setPhone] = useState('');
-  const [touched, setTouched] = useState({ firstName: false, phone: false });
-  /** SĐT máy chủ báo đã thuộc tài khoản khác — chỉ hiện lỗi khi ô vẫn là đúng số đó. */
-  const [takenPhone, setTakenPhone] = useState<{ phone: string; message: string } | null>(null);
+  const [touched, setTouched] = useState({ firstName: false });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const firstNameRef = useRef<HTMLInputElement>(null);
-  const phoneRef = useRef<HTMLInputElement>(null);
 
   const errors = useMemo(() => {
-    const result: { firstName?: string; phone?: string } = {};
+    const result: { firstName?: string } = {};
     if (!firstName.trim()) result.firstName = 'Vui lòng nhập tên của bạn.';
     else if (`${lastName.trim()} ${firstName.trim()}`.trim().length < 2) result.firstName = 'Họ và tên cần ít nhất 2 ký tự.';
-    const normalized = normalizePhone(phone);
-    if (!normalized) result.phone = 'Vui lòng nhập số điện thoại.';
-    else if (!VN_PHONE_REGEX.test(normalized)) result.phone = 'Số điện thoại chưa đúng định dạng (VD: 0912 345 678).';
-    else if (takenPhone && normalizePhone(takenPhone.phone) === normalized) result.phone = takenPhone.message;
     return result;
-  }, [firstName, lastName, phone, takenPhone]);
+  }, [firstName, lastName]);
 
   const nameError = touched.firstName ? errors.firstName : undefined;
-  const phoneError = touched.phone ? errors.phone : undefined;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    setTouched({ firstName: true, phone: true });
-    if (errors.firstName || errors.phone) {
-      (errors.firstName ? firstNameRef : phoneRef).current?.focus();
+    setTouched({ firstName: true });
+    if (errors.firstName) {
+      firstNameRef.current?.focus();
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
-      const session = await googleRegister({ idToken, firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim() });
+      const session = await googleRegister({ idToken, firstName: firstName.trim(), lastName: lastName.trim() });
       await onCreated(session);
     } catch (err: unknown) {
       const authError = err as AuthErrorResponse;
-      const phoneTaken = authError.fieldErrors?.find((f) => f.field === 'phone');
-      if (phoneTaken) {
-        setTakenPhone({ phone, message: phoneTaken.message });
-        phoneRef.current?.focus();
-      } else {
-        setError(authError.message || 'Không thể tạo tài khoản lúc này. Vui lòng thử lại sau.');
-      }
+      setError(authError.message || 'Không thể tạo tài khoản lúc này. Vui lòng thử lại sau.');
     } finally {
       setSubmitting(false);
     }
@@ -111,7 +91,7 @@ export function GoogleSignupDialog({ idToken, profile, onClose, onCreated }: Goo
           // Tên đã điền sẵn thì đưa con trỏ vào ô còn thiếu là số điện thoại.
           onOpenAutoFocus={(event) => {
             event.preventDefault();
-            (profile.firstName ? phoneRef : firstNameRef).current?.focus();
+            if (!profile.firstName) firstNameRef.current?.focus();
           }}
           className="fixed inset-0 z-[10010] flex flex-col bg-white sm:inset-auto sm:left-1/2 sm:top-1/2 sm:max-h-[min(820px,calc(100dvh-48px))] sm:w-[min(568px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:shadow-[var(--shadow-lg)]"
         >
@@ -174,34 +154,6 @@ export function GoogleSignupDialog({ idToken, profile, onClose, onCreated }: Goo
                 ) : (
                   <p id={`${id}-name-hint`} className="mt-2 text-xs leading-relaxed text-slate-500">
                     Hãy đảm bảo tên này khớp với tên trên giấy tờ tùy thân (CCCD hoặc hộ chiếu) để việc nhận phòng thuận lợi.
-                  </p>
-                )}
-              </section>
-
-              <section>
-                <h3 className="mb-3 text-base font-bold text-ink-deep">Số điện thoại</h3>
-                <div className={`rounded-xl border ${phoneError ? 'border-danger' : 'border-slate-300'}`}>
-                  <FramedInput
-                    ref={phoneRef}
-                    label="Số điện thoại"
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    placeholder="VD: 0912 345 678"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
-                    invalid={Boolean(phoneError)}
-                    aria-describedby={phoneError ? `${id}-phone-error` : `${id}-phone-hint`}
-                    maxLength={20}
-                    className="rounded-xl"
-                  />
-                </div>
-                {phoneError ? (
-                  <FieldError id={`${id}-phone-error`} message={phoneError} />
-                ) : (
-                  <p id={`${id}-phone-hint`} className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Số này được điền sẵn khi bạn đặt phòng để chủ nhà liên hệ với bạn.
                   </p>
                 )}
               </section>

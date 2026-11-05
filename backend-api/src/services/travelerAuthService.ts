@@ -220,12 +220,14 @@ export async function registerWithGoogle(
   const fullName = `${trimToEmpty(lastName)} ${first}`.trim();
   if (first === '') throw new InvalidRegistrationError('Vui lòng nhập tên của bạn.');
   if (fullName.length < 2 || fullName.length > 255) throw new InvalidRegistrationError('Vui lòng nhập họ và tên hợp lệ (2-255 ký tự).');
-  const normalizedPhone = trimToEmpty(phone).replace(/[\s.()-]/g, '');
-  if (normalizedPhone === '') throw new InvalidRegistrationError('Vui lòng nhập số điện thoại.');
-  if (!PHONE_REGEX.test(normalizedPhone)) throw new InvalidRegistrationError('Số điện thoại không đúng định dạng (VD: 0912345678).');
-  const alternate = normalizedPhone.startsWith('+84') ? `0${normalizedPhone.slice(3)}` : `+84${normalizedPhone.slice(1)}`;
-  if ((await accounts.existsByPhone(normalizedPhone)) || (await accounts.existsByPhone(alternate))) {
-    throw new DuplicateFieldsError([{ field: 'phone', message: 'Số điện thoại này đã được đăng ký' }]);
+  const cleanedPhone = trimToEmpty(phone).replace(/[\s.()-]/g, '');
+  const normalizedPhone = cleanedPhone === '' ? null : cleanedPhone;
+  if (normalizedPhone != null) {
+    if (!PHONE_REGEX.test(normalizedPhone)) throw new InvalidRegistrationError('Số điện thoại không đúng định dạng (VD: 0912345678).');
+    const alternate = normalizedPhone.startsWith('+84') ? `0${normalizedPhone.slice(3)}` : `+84${normalizedPhone.slice(1)}`;
+    if ((await accounts.existsByPhone(normalizedPhone)) || (await accounts.existsByPhone(alternate))) {
+      throw new DuplicateFieldsError([{ field: 'phone', message: 'Số điện thoại này đã được đăng ký' }]);
+    }
   }
   const now = nowLocal();
   const traveler = await accounts.insert({
@@ -293,7 +295,7 @@ export async function profile(identifier: string | null | undefined): Promise<Tr
     fullName: account.fullName,
     picture: account.avatarUrl,
     phone: account.phone,
-    phoneRequired: missing && account.role === 'TRAVELER',
+    phoneRequired: false,
   };
 }
 
