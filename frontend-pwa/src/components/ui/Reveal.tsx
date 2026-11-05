@@ -12,7 +12,7 @@ interface RevealProps {
 }
 
 /**
- * Hiệu ứng hiện dần khi cuộn tới (fade + nhấc nhẹ + bỏ nhòe) — nhịp chuyển động kiểu sản phẩm cao cấp.
+ * Hiệu ứng hiện dần khi cuộn tới (fade + nhấc nhẹ) — nhịp chuyển động kiểu sản phẩm cao cấp.
  * Tự tắt khi người dùng bật "giảm chuyển động" (prefers-reduced-motion): nội dung hiện ngay.
  * Mặc định chạy một lần; `repeat` thì ẩn đi khi phần tử ra khỏi khung nhìn và hiện lại khi quay lại.
  */
@@ -49,8 +49,9 @@ export default function Reveal({ children, delay = 0, className = '', offset = 2
     <div
       ref={ref}
       // will-change chỉ khi còn chờ hiện: giữ mãi thì mỗi khối thành một layer GPU riêng suốt đời trang, cuộn nặng dần.
-      className={`${className} transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        visible ? 'opacity-100' : 'opacity-0 blur-[6px] will-change-[opacity,transform]'
+      className={`${className} transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        // Không dùng blur: filter trên cả khối thẻ có ảnh bắt trình duyệt vẽ lại toàn khối mỗi khung hình → cuộn giật.
+        visible ? 'opacity-100' : 'opacity-0 will-change-[opacity,transform]'
       }`}
       style={{
         transitionDelay: visible ? `${delay}ms` : '0ms',
