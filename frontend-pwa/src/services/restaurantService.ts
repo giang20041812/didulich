@@ -128,7 +128,7 @@ export const fetchRestaurants = async (params?: RestaurantFilterParams): Promise
         coverImageUrl: cover,
         description: item.description || '',
         district: item.regionName || 'Mù Cang Chải',
-        address: item.address || 'Thị trấn Mù Cang Chải, Yên Bái',
+        address: item.address || 'Lào Cai',
         latitude: item.latitude || undefined,
         longitude: item.longitude || undefined,
         ratingScore: rating,

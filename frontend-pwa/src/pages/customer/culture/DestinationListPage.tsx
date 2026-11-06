@@ -467,7 +467,7 @@ export default function DestinationListPage() {
                       to={`/destinations/${dest.id}`}
                       name={dest.name}
                       imageUrl={dest.coverImageUrl}
-                      location={dest.address || dest.district || 'Mù Cang Chải, Yên Bái'}
+                      location={dest.address || dest.district || 'Lào Cai'}
                       description={dest.description}
                       price={dest.ticketPrice > 0 ? formatVnd(dest.ticketPrice) : 'Miễn phí'}
                       priceUnit={dest.ticketPrice > 0 ? 'lượt' : null}
