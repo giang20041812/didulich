@@ -113,7 +113,7 @@ function PlaceDetailContent({ identifier }: { identifier?: string }) {
   const hasCoordinates = Number.isFinite(place.latitude) && Number.isFinite(place.longitude);
   const lat = hasCoordinates ? place.latitude : 21.8588;
   const lng = hasCoordinates ? place.longitude : 104.0845;
-  const addressText = place.address || (place.regionName ? `Khu vực ${place.regionName}, Mù Cang Chải, Yên Bái` : 'Huyện Mù Cang Chải, Tỉnh Yên Bái');
+  const addressText = place.address || (place.regionName ? `Khu vực ${place.regionName}, Lào Cai` : 'Tỉnh Lào Cai');
   const tiktokContact = place.contacts.find((contact) => contact.channel === 'TIKTOK' && contact.value);
   // Link TikTok đã hiện thành khung video — không lặp lại như một kênh liên hệ.
   const inquiryContacts = place.contacts.filter((contact) => contact.channel !== 'TIKTOK');
@@ -346,7 +346,7 @@ function PlaceDetailContent({ identifier }: { identifier?: string }) {
       <DetailSection id="about" variant="flat" icon={Sparkles} title="Giới thiệu địa điểm">
         <p className="whitespace-pre-line text-[15px] leading-[1.8] text-slate-700">
           {place.description
-            || `Địa điểm nổi bật tọa lạc tại khu vực ${place.regionName || 'Mù Cang Chải'}, sở hữu vẻ đẹp hoang sơ kỳ vĩ và cảnh quan đặc trưng của vùng cao Yên Bái. Nơi đây là điểm dừng chân hấp dẫn dành cho du khách muốn trải nghiệm trọn vẹn thiên nhiên và nét sinh hoạt mộc mạc của đồng bào bản địa.`}
+            || `Địa điểm nổi bật tọa lạc tại khu vực ${place.regionName || 'Lào Cai'}, sở hữu vẻ đẹp hoang sơ kỳ vĩ và cảnh quan đặc trưng của vùng cao Lào Cai. Nơi đây là điểm dừng chân hấp dẫn dành cho du khách muốn trải nghiệm trọn vẹn thiên nhiên và nét sinh hoạt mộc mạc của đồng bào bản địa.`}
         </p>
 
         {place.suitableDateStart && place.suitableDateEnd && (

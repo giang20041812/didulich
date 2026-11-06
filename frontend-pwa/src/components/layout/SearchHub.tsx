@@ -8,7 +8,7 @@ import { foldVietnamese } from "@/lib/mapLink"
 import { addDaysKey, isDateKey, nightsBetween, parseDateKey, todayKey } from "@/lib/roomAvailability"
 import { tripPlannerPath } from "@/lib/tripLinks"
 import { fetchPublicRegions } from "@/services/homestayService"
-import { fetchTripCatalog, peekTripCatalog, prefetchTripCatalog } from "@/services/tripService"
+import { fetchTripCatalog, prefetchTripCatalog } from "@/services/tripService"
 import { setHeaderSearchCompact, useHeaderSearchSlot } from "@/lib/headerSearch"
 
 type Tab = 'location' | 'dates' | 'guests';
@@ -24,7 +24,9 @@ interface RegionOption {
  * Trước khi danh sách tỉnh tải xong (tải lúc trình duyệt rảnh để không chen nội dung chính) hoặc khi API lỗi: tỉnh đang có
  * dữ liệu kèm vùng nổi bật — lần vẽ đầu ô điểm đến đã có dòng phụ.
  */
-const FALLBACK_REGIONS: RegionOption[] = [{ name: 'Yên Bái', areas: ['Mù Cang Chải', 'Văn Chấn'] }];
+const FALLBACK_REGIONS: RegionOption[] = [
+  { name: 'Lào Cai', areas: ['Sa Pa', 'Bắc Hà', 'Bát Xát'] },
+];
 const MIN_GUESTS = 1;
 const MAX_GUESTS = 50;
 const GUEST_CHIPS = [2, 4, 6, 10];
@@ -84,12 +86,10 @@ const defaultRange = (): StayRange => {
 /** Nguồn của tỉnh đang chọn: đường dẫn / khách chọn thì giữ nguyên; mặc định thì danh mục lịch trình được phép thay. */
 type ProvinceSource = 'url' | 'user' | 'catalog' | 'default';
 
-/** Tỉnh lúc mở: đường dẫn → danh mục lịch trình đã tải (tỉnh đầu tiên có gói gợi ý) → Yên Bái. */
+/** Tỉnh lúc mở: đường dẫn → mặc định là Lào Cai. */
 function initialProvince(params: URLSearchParams): { name: string; source: ProvinceSource } {
   const fromUrl = params.get('province')?.trim();
   if (fromUrl) return { name: fromUrl, source: 'url' };
-  const fromCatalog = peekTripCatalog(null)?.region?.name?.trim();
-  if (fromCatalog) return { name: fromCatalog, source: 'catalog' };
   return { name: FALLBACK_REGIONS[0]!.name, source: 'default' };
 }
 
@@ -307,30 +307,32 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
         }))
         .filter((r) => r.name);
       if (mapped.length === 0) return;
-      setRegions(mapped);
-      // Tỉnh mặc định (chưa có danh mục lịch trình) không có trong dữ liệu: tạm chọn tỉnh đầu tiên.
+      const merged = [...mapped];
+      for (const fb of FALLBACK_REGIONS) {
+        if (!merged.some((m) => foldVietnamese(m.name) === foldVietnamese(fb.name))) {
+          merged.unshift(fb);
+        }
+      }
+      // Ưu tiên xếp Lào Cai lên đầu danh sách tỉnh
+      merged.sort((a, b) => {
+        if (foldVietnamese(a.name) === 'lao cai') return -1;
+        if (foldVietnamese(b.name) === 'lao cai') return 1;
+        return 0;
+      });
+      setRegions(merged);
+      // Tỉnh mặc định: giữ Lào Cai
       if (provinceSource.current === 'default') {
-        setProvince((current) => (mapped.some((r) => foldVietnamese(r.name) === foldVietnamese(current)) ? current : mapped[0]!.name));
+        setProvince('Lào Cai');
       }
     });
     return () => { alive = false; };
   }, [wantRegions]);
 
-  // Tỉnh mặc định = tỉnh đầu tiên có lịch trình gợi ý (danh mục không chỉ định tỉnh — backend tự chọn); không đè tỉnh trên
-  // đường dẫn hay tỉnh khách đã chọn.
+  // Tải trước danh mục lịch trình của tỉnh mặc định (Lào Cai) hoặc tỉnh đang chọn
   useEffect(() => {
-    if (!wantRegions || provinceSource.current === 'url' || provinceSource.current === 'user') return undefined;
-    let alive = true;
-    fetchTripCatalog(null)
-      .then((catalog) => {
-        const name = catalog.region?.name?.trim();
-        if (!alive || !name || provinceSource.current === 'url' || provinceSource.current === 'user') return;
-        provinceSource.current = 'catalog';
-        setProvince(name);
-      })
-      .catch(() => undefined);
-    return () => { alive = false; };
-  }, [wantRegions]);
+    if (!wantRegions) return undefined;
+    void fetchTripCatalog(province || 'Lào Cai').catch(() => undefined);
+  }, [wantRegions, province]);
 
   // Lối phụ "Lên lịch trình trước": tải trước danh mục gói của tỉnh khi khách mở bộ lọc — bấm là có ngay.
   useEffect(() => {

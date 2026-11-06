@@ -72,10 +72,16 @@ export async function getPublicRegions(): Promise<RegionHierarchyDto[]> {
 
   // Nhóm theo parentId để duyệt cây 3 level: 1 (Tỉnh) -> 2 (Huyện) -> 3 (Xã)
   const childrenByParent = groupBy(all, (r) => r.parentId);
-  const provinces = all.filter((r) => r.level === 1 || r.parentId == null);
+  const provinces = all
+    .filter((r) => r.level === 1 || r.parentId == null)
+    .sort((a, b) => {
+      if (a.name === 'Lào Cai') return -1;
+      if (b.name === 'Lào Cai') return 1;
+      return a.id - b.id;
+    });
   if (provinces.length === 0) {
     // Fallback nếu không có phân cấp
-    return [{ id: 1, name: 'Yên Bái', districts: [], province: 'Yên Bái' }];
+    return [{ id: 1, name: 'Lào Cai', districts: [], province: 'Lào Cai' }];
   }
   return provinces.map((prov) => ({
     id: prov.id,

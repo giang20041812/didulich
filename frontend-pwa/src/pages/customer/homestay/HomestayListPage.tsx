@@ -229,7 +229,7 @@ export default function HomestayListPage() {
 
   // Ngày ở + số khách (SearchHub luôn gửi kèm) cũng là bộ lọc thật: danh sách chỉ xếp trước chỗ nghỉ còn phòng, đủ chỗ.
   const hasActiveFilters = Boolean(
-    filters.amenities?.length || filters.maxPrice || filters.minPrice || filters.district || (filters.province && filters.province !== 'Yên Bái') || filters.attractions?.length || filters.guests || filters.checkIn
+    filters.amenities?.length || filters.maxPrice || filters.minPrice || filters.district || (filters.province && filters.province !== 'Lào Cai') || filters.attractions?.length || filters.guests || filters.checkIn
   );
 
   // Mở từ ô "Chỗ ở" của một lịch trình (?forJourney=): dải nhắc, link chi tiết giữ tham số này để đặt xong gắn vào lịch trình.
@@ -661,7 +661,7 @@ export default function HomestayListPage() {
                 Đang áp dụng:
               </span>
 
-              {filters.province && filters.province !== 'Yên Bái' && (
+              {filters.province && filters.province !== 'Lào Cai' && (
                 <button
                   onClick={() => handleFilterChange({ province: undefined })}
                   className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
@@ -878,7 +878,7 @@ export default function HomestayListPage() {
                         to={homestayDetailPath(hs.id)}
                         name={hs.name}
                         imageUrl={hs.coverImageUrl}
-                        location={hs.district || 'Yên Bái'}
+                        location={hs.district || 'Lào Cai'}
                         price={formatVnd(hs.price, 'Liên hệ')}
                         priceUnit={hs.price ? 'đêm' : null}
                         amenities={hs.amenities ?? []}
