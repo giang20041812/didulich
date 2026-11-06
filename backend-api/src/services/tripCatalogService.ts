@@ -156,7 +156,7 @@ export async function catalogFor(province: string | null | undefined) {
     for (const r of await query<{ regionId: number }>(`SELECT DISTINCT region_id FROM trip_template WHERE visibility = 'PUBLISHED'`)) {
       withTemplates.add(r.regionId);
     }
-    region = provinces.find((p) => withTemplates.has(p.id)) ?? (provinces.length ? provinces[0] : null);
+    region = pickProvince(provinces, 'Lào Cai') ?? provinces.find((p) => withTemplates.has(p.id)) ?? (provinces.length ? provinces[0] : null);
   }
   if (!region) return { region: null, templates: [], tags: [], addons: [], places: [], dishes: [] };
   const chosen = region;
