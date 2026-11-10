@@ -15,6 +15,7 @@ import { COMPACT_GRID_WITH_SIDEBAR_COLS, formatVnd } from '@/lib/compactCard';
 import FramerSwipeCardStack from '@/components/ui/FramerSwipeCardStack';
 import Reveal from '@/components/ui/Reveal'
 import HomeMotifs from '@/components/home/HomeMotifs';
+import Stepper from '@/components/ui/Stepper';
 import heroListBg from '@/assets/photos/banner-homestays.webp';
 import {
   MapPin,
@@ -22,6 +23,7 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   X,
   Search,
   ArrowUpDown,
@@ -34,6 +36,7 @@ import {
   Utensils,
   Flame,
   Users,
+  Home,
   type LucideIcon
 } from 'lucide-react';
 import VietmapView from '@/components/map/VietmapView';
@@ -50,7 +53,43 @@ const QUICK_AMENITY_ICONS: [string, LucideIcon][] = [
   ['BATHTUB', Bath],
   ['KITCHEN', Utensils],
   ['BREAKFAST', Utensils],
+  ['BBQ_AREA', Flame],
 ];
+
+const AREA_OPTIONS = [
+  { id: 'tt-mcc', label: 'Thị trấn Mù Cang Chải', keywords: ['thị trấn mù cang chải', 'tt. mù cang chải', 'tt mù cang chải', 'tổ 1', 'tổ 2', 'tổ 3', 'tổ 4', 'tổ 5'] },
+  { id: 'la-pan-tan', label: 'Xã La Pán Tẩn', keywords: ['la pán tẩn', 'mâm xôi'] },
+  { id: 'che-cu-nha', label: 'Xã Chế Cu Nha', keywords: ['chế cu nha'] },
+  { id: 'de-xu-phinh', label: 'Xã Dế Xu Phình', keywords: ['dế xu phình'] },
+  { id: 'tu-le', label: 'Xã Tú Lệ', keywords: ['tú lệ', 'lìm thái', 'nước nóng'] },
+  { id: 'cao-pha', label: 'Xã Cao Phạ', keywords: ['cao phạ', 'lìm mông', 'khau phạ'] },
+  { id: 'pung-luong', label: 'Xã Púng Luông', keywords: ['púng luông', 'móng ngựa'] },
+  { id: 'nam-khat', label: 'Xã Nậm Khắt', keywords: ['nậm khắt'] },
+  { id: 'kim-noi', label: 'Xã Kim Nọi', keywords: ['kim nọi', 'bản thái'] },
+  { id: 'mo-de', label: 'Xã Mồ Dề', keywords: ['mồ dề', 'rừng trúc'] },
+] as const;
+
+const PROPERTY_TYPE_OPTIONS = [
+  { id: 'nha-san', label: 'Nhà sàn', keywords: ['nhà sàn', 'sàn', 'stilt', 'cộng đồng', 'dorm', 'bản thái'] },
+  { id: 'bungalow', label: 'Bungalow', keywords: ['bungalow', 'chòi', 'cabin', 'wooden house'] },
+  { id: 'eco-lodge', label: 'Eco Lodge', keywords: ['eco', 'lodge', 'resort', 'retreat', 'glamping', 'sinh thái'] },
+  { id: 'homestay-ban-dia', label: 'Homestay bản địa', keywords: ['homestay', 'home', 'bản', 'h\'mông', 'mông', 'thái'] },
+  { id: 'khach-san', label: 'Khách sạn / Nhà nghỉ', keywords: ['khách sạn', 'nhà nghỉ', 'hotel', 'motel', 'guesthouse', 'guest house'] },
+] as const;
+
+const NEARBY_SPOT_OPTIONS = [
+  { id: 'mam-xoi', label: 'Đồi Mâm Xôi', keywords: ['la pán tẩn', 'mâm xôi', 'chế cu nha'] },
+  { id: 'khau-pha', label: 'Đèo Khau Phạ', keywords: ['cao phạ', 'khau phạ', 'lìm mông', 'tú lệ'] },
+  { id: 'mong-ngua', label: 'Đồi Móng Ngựa', keywords: ['púng luông', 'móng ngựa', 'sáng nhù'] },
+  { id: 'rung-truc', label: 'Rừng trúc Mồ Dề', keywords: ['mồ dề', 'thị trấn mù cang chải', 'kim nọi'] },
+  { id: 'lim-mong', label: 'Bản Lìm Mông', keywords: ['cao phạ', 'lìm mông'] },
+  { id: 'suoi-khoang-tu-le', label: 'Suối khoáng Tú Lệ', keywords: ['tú lệ'] },
+] as const;
+
+const matchesKeywords = (hs: HomestayDto, keywords: readonly string[]) => {
+  const hay = `${hs.name || ''} ${hs.district || ''} ${hs.address || ''} ${hs.roomType || ''} ${hs.description || ''}`.toLowerCase();
+  return keywords.some(kw => hay.includes(kw));
+};
 
 /** ?guests= hợp lệ (1–200, như backend) hoặc undefined. */
 const guestsParam = (value: string | null): number | undefined => {
@@ -62,20 +101,35 @@ export default function HomestayListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [homestays, setHomestays] = useState<HomestayDto[]>([]);
+  const [allHomestays, setAllHomestays] = useState<HomestayDto[]>([]);
   const [loading, setLoading] = useState(true);
   const firstLoad = useFirstLoad(loading);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recommended' | 'price_asc' | 'price_desc'>('recommended');
   const [keywordInput, setKeywordInput] = useState('');
   const [amenityCatalog, setAmenityCatalog] = useState<PublicAmenityItem[]>([]);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
+  const [roomCount, setRoomCount] = useState<number>(1);
+  const [selectedNearbySpot, setSelectedNearbySpot] = useState<string | null>(null);
+  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
     fetchHomestayAmenities()
       .then(items => { if (alive) setAmenityCatalog(items); })
       .catch(() => { if (alive) setAmenityCatalog([]); });
+    fetchHomestays({ size: 100 })
+      .then(res => { if (alive) setAllHomestays(res.content); })
+      .catch(() => { if (alive) setAllHomestays([]); });
     return () => { alive = false; };
   }, []);
+
+  const countSource = allHomestays.length > 0 ? allHomestays : homestays;
+  const getAmenityCount = (amenity: PublicAmenityItem) => {
+    if (typeof amenity.count === 'number') return amenity.count;
+    return countSource.filter(hs => hs.amenities?.some(a => a.toLowerCase() === amenity.name.toLowerCase())).length;
+  };
 
   const roomAmenities = amenityCatalog.filter(a => a.scope === 'ROOM');
   const placeAmenities = amenityCatalog.filter(a => a.scope === 'PLACE');
@@ -153,6 +207,11 @@ export default function HomestayListPage() {
 
   const handleClearFilters = () => {
     setFilters({});
+    setSelectedAreas([]);
+    setSelectedPropertyTypes([]);
+    setRoomCount(1);
+    setSelectedNearbySpot(null);
+    setNearbyDropdownOpen(false);
     // Giữ lịch trình đang chọn chỗ ở (không phải bộ lọc).
     const next = new URLSearchParams();
     const forJourney = searchParams.get('forJourney');
@@ -228,8 +287,11 @@ export default function HomestayListPage() {
   }, [filters, currentPage, sortBy]);
 
   // Ngày ở + số khách (SearchHub luôn gửi kèm) cũng là bộ lọc thật: danh sách chỉ xếp trước chỗ nghỉ còn phòng, đủ chỗ.
+  const hasClientFilters = Boolean(
+    selectedAreas.length > 0 || selectedPropertyTypes.length > 0 || roomCount > 1 || selectedNearbySpot
+  );
   const hasActiveFilters = Boolean(
-    filters.amenities?.length || filters.maxPrice || filters.minPrice || filters.district || (filters.province && filters.province !== 'Lào Cai') || filters.attractions?.length || filters.guests || filters.checkIn
+    filters.amenities?.length || filters.maxPrice || filters.minPrice || filters.district || (filters.province && filters.province !== 'Lào Cai') || filters.attractions?.length || filters.guests || filters.checkIn || hasClientFilters
   );
 
   // Mở từ ô "Chỗ ở" của một lịch trình (?forJourney=): dải nhắc, link chi tiết giữ tham số này để đặt xong gắn vào lịch trình.
@@ -241,8 +303,30 @@ export default function HomestayListPage() {
     setSearchParams(next, { replace: true });
   };
 
-  const paginatedHomestays = [...homestays]
+  const baseList = hasClientFilters && allHomestays.length > 0 ? allHomestays : homestays;
+  const paginatedHomestays = [...baseList]
     .filter((hs) => !showSavedOnly || savedIds.includes(hs.id))
+    .filter((hs) => {
+      if (selectedAreas.length > 0) {
+        const matched = selectedAreas.some(areaId => {
+          const opt = AREA_OPTIONS.find(a => a.id === areaId);
+          return opt ? matchesKeywords(hs, opt.keywords) : false;
+        });
+        if (!matched) return false;
+      }
+      if (selectedPropertyTypes.length > 0) {
+        const matched = selectedPropertyTypes.some(typeId => {
+          const opt = PROPERTY_TYPE_OPTIONS.find(t => t.id === typeId);
+          return opt ? matchesKeywords(hs, opt.keywords) : false;
+        });
+        if (!matched) return false;
+      }
+      if (selectedNearbySpot) {
+        const spot = NEARBY_SPOT_OPTIONS.find(s => s.id === selectedNearbySpot);
+        if (spot && !matchesKeywords(hs, spot.keywords)) return false;
+      }
+      return true;
+    })
     .sort((a, b) => {
       const score = (item: HomestayDto) =>
         item.operationStatus === 'TEMPORARILY_CLOSED' || item.availableForSelectedDates === false || item.hasOnlineRooms === false ? 1 : 0;
@@ -385,6 +469,112 @@ export default function HomestayListPage() {
         </div>
       </div>
 
+      {/* 0a. Địa điểm / Khu vực */}
+      <div className="p-4 border-b border-gray-100">
+        <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Địa điểm / Khu vực
+          </span>
+          {selectedAreas.length > 0 && (
+            <span className="text-[10px] bg-[var(--color-primary-50)] text-[var(--color-primary)] px-2 py-0.5 rounded-md font-bold">
+              {selectedAreas.length} đã chọn
+            </span>
+          )}
+        </h4>
+        <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+          {AREA_OPTIONS.map(area => {
+            const isChecked = selectedAreas.includes(area.id);
+            const count = countSource.filter(hs => matchesKeywords(hs, area.keywords)).length;
+            return (
+              <label key={area.id} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded-xs border-gray-300 accent-[var(--color-primary)] cursor-pointer"
+                  checked={isChecked}
+                  onChange={(e) => {
+                    setSelectedAreas(prev =>
+                      e.target.checked ? [...prev, area.id] : prev.filter(id => id !== area.id)
+                    );
+                    setCurrentPage(1);
+                  }}
+                />
+                <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
+                  {area.label} <span className="text-xs font-medium text-slate-400">({count})</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 0b. Số khách & Số phòng */}
+      <div className="p-4 border-b border-gray-100">
+        <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Số khách & Số phòng
+        </h4>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-[var(--color-ink)]">Số khách</span>
+            <Stepper
+              value={filters.guests ?? 2}
+              min={1}
+              max={50}
+              onChange={(val) => handleFilterChange({ guests: val > 1 ? val : undefined })}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-[var(--color-ink)]">Số phòng</span>
+            <Stepper
+              value={roomCount}
+              min={1}
+              max={20}
+              onChange={(val) => {
+                setRoomCount(val);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 0c. Loại hình lưu trú */}
+      <div className="p-4 border-b border-gray-100">
+        <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <Home className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Loại hình lưu trú
+          </span>
+          {selectedPropertyTypes.length > 0 && (
+            <span className="text-[10px] bg-[var(--color-primary-50)] text-[var(--color-primary)] px-2 py-0.5 rounded-md font-bold">
+              {selectedPropertyTypes.length} đã chọn
+            </span>
+          )}
+        </h4>
+        <div className="flex flex-col gap-2.5">
+          {PROPERTY_TYPE_OPTIONS.map(typeOpt => {
+            const isChecked = selectedPropertyTypes.includes(typeOpt.id);
+            const count = countSource.filter(hs => matchesKeywords(hs, typeOpt.keywords)).length;
+            return (
+              <label key={typeOpt.id} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded-xs border-gray-300 accent-[var(--color-primary)] cursor-pointer"
+                  checked={isChecked}
+                  onChange={(e) => {
+                    setSelectedPropertyTypes(prev =>
+                      e.target.checked ? [...prev, typeOpt.id] : prev.filter(id => id !== typeOpt.id)
+                    );
+                    setCurrentPage(1);
+                  }}
+                />
+                <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
+                  {typeOpt.label} <span className="text-xs font-medium text-slate-400">({count})</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
       {/* 1. Tiện nghi phòng ngủ (Room Scope) — chỉ hiện khi có homestay khai báo tiện nghi cấp phòng */}
       {roomAmenities.length > 0 && (
       <div className="p-4 border-b border-gray-100">
@@ -401,6 +591,7 @@ export default function HomestayListPage() {
         <div className="flex flex-col gap-2.5">
           {roomAmenities.map(amenity => {
             const isChecked = filters.amenities?.includes(amenity.code) || false;
+            const count = getAmenityCount(amenity);
             return (
               <label key={amenity.code} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
                 <input
@@ -417,7 +608,7 @@ export default function HomestayListPage() {
                   }}
                 />
                 <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
-                  {amenity.name}
+                  {amenity.name} <span className="text-xs font-medium text-slate-400">({count})</span>
                 </span>
                 <span className="text-[10px] uppercase font-bold text-[var(--color-muted)] bg-gray-100 px-1.5 py-0.5 rounded">
                   Phòng
@@ -447,6 +638,7 @@ export default function HomestayListPage() {
           )}
           {placeAmenities.map(amenity => {
             const isChecked = filters.amenities?.includes(amenity.code) || false;
+            const count = getAmenityCount(amenity);
             return (
               <label key={amenity.code} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
                 <input
@@ -463,7 +655,7 @@ export default function HomestayListPage() {
                   }}
                 />
                 <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
-                  {amenity.name}
+                  {amenity.name} <span className="text-xs font-medium text-slate-400">({count})</span>
                 </span>
               </label>
             );
@@ -609,15 +801,49 @@ export default function HomestayListPage() {
                       amenities: active ? current.filter(a => a !== item.code) : [...current, item.code]
                     });
                   }}
-                  className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 ${active
+                  className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${active
                       ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
                     }`}
                 >
-                  <Icon className="w-3.5 h-3.5" /> {item.name}
+                  <Icon className="w-3.5 h-3.5" /> {item.code === 'BBQ_AREA' ? 'Có BBQ' : item.name}
                 </button>
               );
             })}
+
+            {!quickAmenities.some(q => q.item.code === 'BBQ_AREA') && (
+              <button
+                onClick={() => {
+                  const current = filters.amenities || [];
+                  const active = current.includes('BBQ_AREA');
+                  handleFilterChange({
+                    amenities: active ? current.filter(a => a !== 'BBQ_AREA') : [...current, 'BBQ_AREA']
+                  });
+                }}
+                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.amenities?.includes('BBQ_AREA')
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
+                  }`}
+              >
+                <Flame className="w-3.5 h-3.5" /> Có BBQ
+              </button>
+            )}
+
+            {/* Quick filter: Gần địa điểm … */}
+            <button
+              type="button"
+              onClick={() => setNearbyDropdownOpen(v => !v)}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${selectedNearbySpot
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
+                }`}
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              {selectedNearbySpot
+                ? `Gần: ${NEARBY_SPOT_OPTIONS.find(s => s.id === selectedNearbySpot)?.label}`
+                : 'Gần địa điểm …'}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${nearbyDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
 
             {/* Quick Budget < 500k */}
             <button
@@ -628,7 +854,7 @@ export default function HomestayListPage() {
                   maxPrice: isUnder500k ? undefined : 500000
                 });
               }}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 ${filters.maxPrice === 500000 && !filters.minPrice
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.maxPrice === 500000 && !filters.minPrice
                   ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-white border-transparent shadow-md shadow-amber-500/25'
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-white hover:text-amber-700 hover:shadow-md'
                 }`}
@@ -640,7 +866,7 @@ export default function HomestayListPage() {
             {savedIds.length > 0 && (
               <button
                 onClick={() => setShowSavedOnly((v) => !v)}
-                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 ${showSavedOnly
+                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${showSavedOnly
                   ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
                   : 'bg-slate-50 text-rose-700 border-rose-200 hover:border-rose-300 hover:bg-white'
                 }`}
@@ -650,6 +876,48 @@ export default function HomestayListPage() {
               </button>
             )}
           </div>
+
+          {nearbyDropdownOpen && (
+            <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/70">
+              <span className="text-xs font-bold text-emerald-900 mr-1 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Chọn điểm tham quan gần chỗ nghỉ:
+              </span>
+              {NEARBY_SPOT_OPTIONS.map(spot => {
+                const active = selectedNearbySpot === spot.id;
+                const count = countSource.filter(hs => matchesKeywords(hs, spot.keywords)).length;
+                return (
+                  <button
+                    key={spot.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedNearbySpot(active ? null : spot.id);
+                      setNearbyDropdownOpen(false);
+                      setCurrentPage(1);
+                    }}
+                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[var(--color-primary)] text-white border-transparent shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:text-[var(--color-primary)]'
+                    }`}
+                  >
+                    {spot.label} ({count})
+                  </button>
+                );
+              })}
+              {selectedNearbySpot && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedNearbySpot(null);
+                    setNearbyDropdownOpen(false);
+                  }}
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
+                >
+                  Bỏ chọn
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Thanh tìm kiếm nằm ngay dưới các bộ lọc nhanh */}
           {renderKeywordSearch()}
