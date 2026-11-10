@@ -312,11 +312,17 @@ export default function UserBookingDetailPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => navigate('/bookings')}
+            onClick={() => {
+              if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+                navigate(-1);
+              } else {
+                navigate('/bookings');
+              }
+            }}
             className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-[var(--color-primary)] transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Danh sách đặt phòng</span>
+            <span>Quay về</span>
           </button>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400">Mã booking:</span>

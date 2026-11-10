@@ -26,6 +26,7 @@ const DETAIL_ROUTE_PREFIXES = [
  * Danh sách các trang danh sách có Hero Banner to tràn Header
  */
 const HERO_LIST_ROUTES = [
+  '/lich-trinh',
   '/destinations',
   '/restaurants',
   '/specialties',

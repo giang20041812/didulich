@@ -32,31 +32,31 @@ const FESTIVAL_COORDINATES: Record<string, { lat: number; lng: number; address: 
   'mua-vang-kham-pha-ruong-bac-thang': {
     lat: 21.8485,
     lng: 104.0912,
-    address: 'Đồi Mâm Xôi, Xã La Pán Tẩn, Huyện Mù Cang Chải, Tỉnh Yên Bái',
+    address: 'Đồi Mâm Xôi, Xã La Pán Tẩn, Huyện Mù Cang Chải, Tỉnh Lào Cai',
     accessNote: 'Từ Quốc lộ 32 rẽ vào đường liên thôn La Pán Tẩn. Ô tô đỗ tại bãi xe chân đồi, tiếp tục đi bộ hoặc xe ôm bản địa 1.5km lên đồi.'
   },
   'mung-com-moi': {
     lat: 21.7512,
     lng: 104.3184,
-    address: 'Bản Lìm Mông, Xã Tú Lệ & Bản Sáng Nhù, Mù Cang Chải, Yên Bái',
+    address: 'Bản Lìm Mông, Xã Tú Lệ & Bản Sáng Nhù, Mù Cang Chải, Lào Cai',
     accessNote: 'Đường bê tông liên bản ô tô vào tận nơi. Có bãi đỗ xe tại nhà văn hóa cộng đồng bản.'
   },
   'festival-khen-mong': {
     lat: 21.8588,
     lng: 104.0845,
-    address: 'Sân vận động Trung tâm Huyện Mù Cang Chải, Thị trấn Mù Cang Chải, Yên Bái',
+    address: 'Sân vận động Trung tâm Huyện Mù Cang Chải, Thị trấn Mù Cang Chải, Lào Cai',
     accessNote: 'Ngay trung tâm thị trấn, mặt đường Quốc lộ 32, chỗ đỗ xe máy và ô tô thuận tiện.'
   },
   'hoa-to-day': {
     lat: 21.7925,
     lng: 104.1432,
-    address: 'Khu vực rừng hoa Tớ Dày, Xã Púng Luông & Nậm Khắt, Mù Cang Chải, Yên Bái',
+    address: 'Khu vực rừng hoa Tớ Dày, Xã Púng Luông & Nậm Khắt, Mù Cang Chải, Lào Cai',
     accessNote: 'Đi theo đường tỉnh lộ hướng Nậm Khắt, đường dốc thoai thoải, cảnh quan hai bên đường ngập tràn sắc hoa đỏ thắm.'
   },
   'gau-tao': {
     lat: 21.8650,
     lng: 104.1120,
-    address: 'Đồi Gầu Tào truyền thống, Xã Chế Cu Nha, Huyện Mù Cang Chải, Tỉnh Yên Bái',
+    address: 'Đồi Gầu Tào truyền thống, Xã Chế Cu Nha, Huyện Mù Cang Chải, Tỉnh Lào Cai',
     accessNote: 'Đường đèo bê tông dốc vừa phải, ô tô gầm cao hoặc xe máy di chuyển dễ dàng.'
   }
 };
@@ -197,7 +197,7 @@ export default function FestivalDetailPage() {
   const geoInfo = FESTIVAL_COORDINATES[festival.slug] || {
     lat: 21.8588,
     lng: 104.0845,
-    address: festival.location || 'Huyện Mù Cang Chải, Tỉnh Yên Bái',
+    address: festival.location || 'Huyện Mù Cang Chải, Tỉnh Lào Cai',
     accessNote: 'Đường giao thông liên xã thuận tiện, di chuyển bằng xe máy hoặc ô tô.'
   };
 
@@ -310,6 +310,12 @@ export default function FestivalDetailPage() {
       </motion.button>
       <Link
         to="/experiences"
+        onClick={(e) => {
+          if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+            e.preventDefault();
+            navigate(-1);
+          }
+        }}
         className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
       >
         <ArrowLeft className="h-4 w-4 text-[var(--color-primary)]" />

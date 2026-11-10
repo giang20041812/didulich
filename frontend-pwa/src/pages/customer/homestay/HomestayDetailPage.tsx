@@ -27,6 +27,7 @@ import {
   BedDouble,
   Compass,
   MessagesSquare,
+  ArrowLeft,
   ArrowRight,
   PlayCircle,
   Images,
@@ -772,77 +773,23 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-emerald-50/25 via-white to-slate-50/50 text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
-      {/* ── STICKY SUB-NAV BAR (KHI CUỘN TRANG) ── */}
-      <AnimatePresence>
-        {showSubNav && (
-          <motion.div
-            initial={{ y: -64, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -64, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            // Bám ngay dưới header của trang (header cố định z-50 ở đỉnh; đặt top-0 thì thanh này bị header che mất).
-            className="fixed top-[var(--app-header-offset,64px)] left-0 right-0 z-40 border-b border-slate-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md"
-          >
-            <div className="mx-auto flex max-w-7xl items-center justify-between h-14">
-              <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-1">
-                {[
-                  { id: 'booking', label: 'Đặt phòng' },
-                  { id: 'about', label: 'Giới thiệu' },
-                  { id: 'amenities', label: 'Tiện ích' },
-                  ...(activeServices.length > 0 ? [{ id: 'services', label: 'Dịch vụ' }] : []),
-                  ...(showSuggest ? [{ id: 'suggest', label: 'Gợi ý' }] : []),
-                  { id: 'reviews', label: 'Đánh giá' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => scrollToSection(tab.id)}
-                    className={`relative px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer shrink-0 ${
-                      activeSection === tab.id
-                        ? 'text-[var(--color-primary)] bg-emerald-50/80'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    {tab.label}
-                    {activeSection === tab.id && (
-                      <motion.div
-                        layoutId="activeSubNavTab"
-                        className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--color-primary)] rounded-full"
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <div className="hidden md:flex items-center gap-4 shrink-0 pl-4 border-l border-slate-100">
-                {priceText && (
-                  <div className="text-right">
-                    <span className="text-[11px] text-slate-500 uppercase tracking-wide">Giá từ</span>
-                    <p className="text-sm font-black text-slate-900 leading-tight">
-                      {priceText}đ <span className="text-xs font-normal text-slate-500">/đêm</span>
-                    </p>
-                  </div>
-                )}
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  type="button"
-                  onClick={scrollToRooms}
-                  className="flex h-9 items-center gap-1.5 rounded-xl cta cta-primary px-4 text-xs font-bold text-white shadow-xs transition cursor-pointer"
-                >
-                  <span>Chọn phòng</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 pt-4 pb-24 lg:pb-16">
-        {/* Breadcrumb */}
+        {/* Breadcrumb + Nút quay về */}
         <nav aria-label="Đường dẫn" className="mb-4 flex items-center gap-2 text-xs text-slate-500">
+          <button
+            type="button"
+            onClick={() => {
+              if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+                navigate(-1);
+              } else {
+                navigate(homestaysPath);
+              }
+            }}
+            className="mr-1 inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-emerald-300 hover:text-[var(--color-primary)] cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Quay về</span>
+          </button>
           <Link to="/" className="hover:text-[var(--color-primary)] transition-colors shrink-0">
             Trang chủ
           </Link>
@@ -920,31 +867,21 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                     {homestay.address || homestay.district}
                   </span>
                 </button>
-                <span className="text-slate-300" aria-hidden>·</span>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection('amenities')}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-200/80 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Chi tiết tiện nghi & dịch vụ</span>
-                </button>
-              </div>
 
-              {nearestAttraction ? (
-                <div className="relative pt-1 text-xs" ref={nearbyDropdownRef}>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-slate-700">
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <Navigation className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" aria-hidden />
+                {nearestAttraction ? (
+                  <div className="relative inline-flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-slate-700" ref={nearbyDropdownRef}>
+                    <span className="text-slate-300" aria-hidden>·</span>
+                    <div className="inline-flex items-center gap-1.5 font-medium">
+                      <Navigation className="h-4 w-4 text-[var(--color-primary)] shrink-0" aria-hidden />
                       <span className="text-slate-600">Điểm vui chơi:</span>
-                      <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                      <span className="text-[var(--color-primary)] font-bold leading-none shrink-0" aria-hidden>–</span>
                       <span className="font-bold text-slate-900">{nearestAttraction.name}{nearestAttraction.distanceText ? ':' : ''}</span>
                       {nearestAttraction.distanceText && (
-                        <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs">
+                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs border border-emerald-200/60 shadow-2xs">
                           {nearestAttraction.distanceText}
                         </span>
                       )}
-                      <span className="text-[10px] text-slate-400 font-medium">(gần nhất)</span>
+                      <span className="text-xs text-slate-400 font-medium">(gần nhất)</span>
                     </div>
 
                     {otherAttractions.length > 0 && (
@@ -966,57 +903,58 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                         />
                       </button>
                     )}
-                  </div>
 
-                  {/* Dropdown menu xổ xuống cho các điểm còn lại */}
-                  <AnimatePresence>
-                    {nearbyDropdownOpen && otherAttractions.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                        transition={{ duration: 0.16, ease: 'easeOut' }}
-                        className="absolute left-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-2xl bg-white p-3.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 backdrop-blur-md"
-                      >
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            Các điểm vui chơi khác
-                          </span>
-                          <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">
-                            từ gần đến xa
-                          </span>
-                        </div>
-                        <ul className="space-y-2">
-                          {otherAttractions.map((item, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-center justify-between gap-2 rounded-lg p-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
-                            >
-                              <span className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
-                                <span className="font-medium text-slate-800 truncate">{item.name}</span>
-                              </span>
-                              {item.distanceText && (
-                                <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs shrink-0">
-                                  {item.distanceText}
+                    {/* Dropdown menu xổ xuống cho các điểm còn lại */}
+                    <AnimatePresence>
+                      {nearbyDropdownOpen && otherAttractions.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                          transition={{ duration: 0.16, ease: 'easeOut' }}
+                          className="absolute left-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-2xl bg-white p-3.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 backdrop-blur-md"
+                        >
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                              Các điểm vui chơi khác
+                            </span>
+                            <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">
+                              từ gần đến xa
+                            </span>
+                          </div>
+                          <ul className="space-y-2">
+                            {otherAttractions.map((item, idx) => (
+                              <li
+                                key={idx}
+                                className="flex items-center justify-between gap-2 rounded-lg p-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                              >
+                                <span className="flex items-center gap-1.5 min-w-0">
+                                  <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
+                                  <span className="font-medium text-slate-800 truncate">{item.name}</span>
                                 </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : nearbyAttractions ? (
-                <p className="flex items-start gap-1.5 text-xs text-slate-500">
-                  <Navigation className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden />
-                  <span>
-                    <span className="font-medium text-slate-600">Điểm vui chơi: </span>
-                    {nearbyAttractions}
+                                {item.distanceText && (
+                                  <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs shrink-0">
+                                    {item.distanceText}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : nearbyAttractions ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                    <span className="text-slate-300" aria-hidden>·</span>
+                    <Navigation className="h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
+                    <span>
+                      <span className="font-medium text-slate-600">Điểm vui chơi: </span>
+                      <span className="font-semibold text-slate-800">{nearbyAttractions}</span>
+                    </span>
                   </span>
-                </p>
-              ) : null}
+                ) : null}
+              </div>
             </div>
 
             {/* Actions: Chia sẻ & Yêu thích */}
@@ -1131,38 +1069,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                     </p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => scrollToSection('amenities')}
-                  className="self-start sm:self-center inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/70 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-100 hover:border-emerald-600/50 transition cursor-pointer"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Xem tiện nghi & dịch vụ ↓</span>
-                </button>
               </div>
-
-              {/* Dải tiện nghi tóm tắt nhanh dưới tiêu đề chọn phòng */}
-              {amenityNames.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-xs font-bold text-slate-700 mr-1">Tiện nghi nổi bật:</span>
-                  {amenityNames.slice(0, 5).map((name) => (
-                    <span key={name} className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-0.5 text-xs font-medium text-slate-700 border border-slate-200/60 shadow-2xs">
-                      <Check className="h-3 w-3 text-emerald-600" />
-                      <span>{name}</span>
-                    </span>
-                  ))}
-                  {amenityNames.length > 5 && (
-                    <button
-                      type="button"
-                      onClick={() => scrollToSection('amenities')}
-                      className="text-xs font-bold text-[var(--color-primary)] hover:underline cursor-pointer ml-1"
-                    >
-                      + {amenityNames.length - 5} tiện nghi khác &rarr;
-                    </button>
-                  )}
-                </div>
-              )}
 
               <div ref={roomsSectionRef} className="flex flex-col gap-4">
                 {homestay.operationStatus === 'TEMPORARILY_CLOSED' ? (
@@ -1208,7 +1115,116 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </div>
             </motion.section>
 
-            {/* ── 2. GIỚI THIỆU CHỖ NGHỈ ── */}
+            {/* ── 2. GỢI Ý CHO CHUYẾN ĐI: hai bảng nhỏ "Lịch trình gợi ý" và "Xung quanh homestay" (EP02) ──
+                Đẩy lên trên ngay dưới phần Chọn phòng & Xem giá. Phần "Xung quanh" luôn nằm trong DOM để tự tải dữ liệu. */}
+            <motion.section
+              id="suggest"
+              hidden={!showSuggest}
+              aria-labelledby="suggest-title"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-40px' }}
+              variants={sectionVariants}
+              className="scroll-mt-28 pt-8 border-t border-slate-200"
+            >
+              <h2 id="suggest-title" className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                Gợi ý cho chuyến đi
+              </h2>
+
+              {showSuggestTabs ? (
+                <div
+                  role="tablist"
+                  aria-label="Loại gợi ý"
+                  className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-xl"
+                  onKeyDown={(event) => {
+                    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+                    event.preventDefault();
+                    focusSuggestTab(activeSuggestTab === 'trip' ? 'nearby' : 'trip');
+                  }}
+                >
+                  {SUGGEST_TABS.map((tab) => {
+                    const selected = activeSuggestTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        id={`suggest-tab-${tab.id}`}
+                        type="button"
+                        role="tab"
+                        aria-selected={selected}
+                        aria-controls={`suggest-panel-${tab.id}`}
+                        tabIndex={selected ? 0 : -1}
+                        onClick={() => setSuggestTab(tab.id)}
+                        className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
+                          selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)]' : 'border-slate-200 bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                            selected ? 'bg-[var(--color-primary)] text-white' : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          <tab.Icon className="h-[18px] w-[18px]" aria-hidden />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold leading-snug text-[var(--color-ink-deep)]">{tab.label}</span>
+                          {/* Điện thoại: hai thẻ chỉ còn ~170px mỗi thẻ — chỉ giữ tên, bỏ dòng gợi ý (bị cắt giữa chữ). */}
+                          <span className="hidden truncate text-xs text-slate-500 sm:block">{tab.hint}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                onlySuggestTab && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {onlySuggestTab.label} · {onlySuggestTab.hint}
+                  </p>
+                )
+              )}
+
+              <div className="mt-5">
+                {showTrip && (
+                  <div
+                    id="suggest-panel-trip"
+                    role={showSuggestTabs ? 'tabpanel' : undefined}
+                    aria-labelledby={showSuggestTabs ? 'suggest-tab-trip' : undefined}
+                    hidden={activeSuggestTab !== 'trip'}
+                  >
+                    <StayTripSuggest
+                      provinceName={homestay.provinceName}
+                      stay={{
+                        id: homestay.id,
+                        name: homestay.name,
+                        latitude: homestay.latitude ?? null,
+                        longitude: homestay.longitude ?? null,
+                      }}
+                      checkIn={stayRange.checkIn}
+                      checkOut={stayRange.checkOut}
+                      guests={guestCount}
+                      onPickChange={setTripPick}
+                      borderless
+                      hideHeading
+                      className="p-0! md:p-0!"
+                    />
+                  </div>
+                )}
+                <div
+                  id="suggest-panel-nearby"
+                  role={showSuggestTabs ? 'tabpanel' : undefined}
+                  aria-labelledby={showSuggestTabs ? 'suggest-tab-nearby' : undefined}
+                  hidden={activeSuggestTab !== 'nearby'}
+                >
+                  <ExploreNearbySection
+                    homestayId={homestay.id}
+                    onAvailabilityChange={setExploreAvailable}
+                    embedded
+                    active={showSuggest && activeSuggestTab === 'nearby'}
+                  />
+                </div>
+              </div>
+            </motion.section>
+
+            {/* ── 3. GIỚI THIỆU CHỖ NGHỈ ── */}
             <motion.section
               id="about"
               initial="hidden"
@@ -1357,115 +1373,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 </details>
               </motion.section>
             )}
-
-            {/* ── 5. GỢI Ý CHO CHUYẾN ĐI: hai bảng nhỏ "Lịch trình gợi ý" và "Xung quanh homestay" (EP02) ──
-                Phần "Xung quanh" luôn nằm trong DOM (kể cả khi ẩn) để tự tải dữ liệu và báo có / không có địa điểm. */}
-            <motion.section
-              id="suggest"
-              hidden={!showSuggest}
-              aria-labelledby="suggest-title"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-40px' }}
-              variants={sectionVariants}
-              className="scroll-mt-28 pt-8 border-t border-slate-200"
-            >
-              <h2 id="suggest-title" className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-                Gợi ý cho chuyến đi
-              </h2>
-
-              {showSuggestTabs ? (
-                <div
-                  role="tablist"
-                  aria-label="Loại gợi ý"
-                  className="mt-4 grid grid-cols-2 gap-2.5 sm:max-w-xl"
-                  onKeyDown={(event) => {
-                    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-                    event.preventDefault();
-                    focusSuggestTab(activeSuggestTab === 'trip' ? 'nearby' : 'trip');
-                  }}
-                >
-                  {SUGGEST_TABS.map((tab) => {
-                    const selected = activeSuggestTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        id={`suggest-tab-${tab.id}`}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        aria-controls={`suggest-panel-${tab.id}`}
-                        tabIndex={selected ? 0 : -1}
-                        onClick={() => setSuggestTab(tab.id)}
-                        className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
-                          selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)]' : 'border-slate-200 bg-white hover:border-slate-300'
-                        }`}
-                      >
-                        <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                            selected ? 'bg-[var(--color-primary)] text-white' : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          <tab.Icon className="h-[18px] w-[18px]" aria-hidden />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-semibold leading-snug text-[var(--color-ink-deep)]">{tab.label}</span>
-                          {/* Điện thoại: hai thẻ chỉ còn ~170px mỗi thẻ — chỉ giữ tên, bỏ dòng gợi ý (bị cắt giữa chữ). */}
-                          <span className="hidden truncate text-xs text-slate-500 sm:block">{tab.hint}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                onlySuggestTab && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {onlySuggestTab.label} · {onlySuggestTab.hint}
-                  </p>
-                )
-              )}
-
-              <div className="mt-5">
-                {showTrip && (
-                  <div
-                    id="suggest-panel-trip"
-                    role={showSuggestTabs ? 'tabpanel' : undefined}
-                    aria-labelledby={showSuggestTabs ? 'suggest-tab-trip' : undefined}
-                    hidden={activeSuggestTab !== 'trip'}
-                  >
-                    <StayTripSuggest
-                      provinceName={homestay.provinceName}
-                      stay={{
-                        id: homestay.id,
-                        name: homestay.name,
-                        latitude: homestay.latitude ?? null,
-                        longitude: homestay.longitude ?? null,
-                      }}
-                      checkIn={stayRange.checkIn}
-                      checkOut={stayRange.checkOut}
-                      guests={guestCount}
-                      onPickChange={setTripPick}
-                      borderless
-                      hideHeading
-                      className="p-0! md:p-0!"
-                    />
-                  </div>
-                )}
-                <div
-                  id="suggest-panel-nearby"
-                  role={showSuggestTabs ? 'tabpanel' : undefined}
-                  aria-labelledby={showSuggestTabs ? 'suggest-tab-nearby' : undefined}
-                  hidden={activeSuggestTab !== 'nearby'}
-                >
-                  <ExploreNearbySection
-                    homestayId={homestay.id}
-                    onAvailabilityChange={setExploreAvailable}
-                    embedded
-                    active={showSuggest && activeSuggestTab === 'nearby'}
-                  />
-                </div>
-              </div>
-            </motion.section>
 
             {/* ── 7. ĐÁNH GIÁ TỪ DU KHÁCH ── */}
             <motion.section
@@ -1677,17 +1584,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                 >
                   <span>Chọn phòng</span>
                   <ArrowRight className="h-4 w-4" />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  onClick={() => scrollToSection('about')}
-                  className="mt-2 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50/50 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100/70 cursor-pointer"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-                  <span>Xem tiện nghi & dịch vụ chi tiết</span>
                 </motion.button>
 
                 <motion.button

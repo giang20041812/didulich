@@ -146,7 +146,7 @@ export const fetchTransports = async (params?: TransportFilterParams): Promise<T
           rType = 'Hà Nội – Mù Cang Chải (Hàng ngày)';
         } else {
           vType = 'Xe taxi 7 chỗ ghép chuyến';
-          rType = 'TP Yên Bái ↔ Mù Cang Chải ↔ Các xã';
+          rType = 'Lào Cai ↔ Mù Cang Chải ↔ Các xã';
         }
       }
 
@@ -161,7 +161,7 @@ export const fetchTransports = async (params?: TransportFilterParams): Promise<T
         name: item.name,
         coverImageUrl: cover,
         description: item.description || '',
-        address: item.address || 'Huyện Mù Cang Chải, Tỉnh Yên Bái',
+        address: item.address || 'Huyện Mù Cang Chải, Tỉnh Lào Cai',
         latitude: item.latitude || undefined,
         longitude: item.longitude || undefined,
         ratingScore: Math.round(rating * 10) / 10,

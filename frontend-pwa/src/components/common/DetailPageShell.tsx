@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Bookmark, Check, Share2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Bookmark, Check, Share2 } from 'lucide-react';
 import DetailGallery from '@/components/common/DetailGallery';
 import SectionNavigator from '@/components/homestay/SectionNavigator';
 
@@ -43,12 +43,21 @@ interface DetailPageShellProps {
  * mục dính hiện sau khi cuộn qua phần đầu trang.
  */
 export default function DetailPageShell({
-  breadcrumb, badges, title, meta, images, tabs, cta, shareText, saveLabel, aside, children,
+  breadcrumb, badges, title, meta, images, tabs, shareText, saveLabel, aside, children,
 }: DetailPageShellProps) {
-  const [showSubNav, setShowSubNav] = useState(false);
-  const [activeSection, setActiveSection] = useState(tabs[0]?.id ?? '');
+  const navigate = useNavigate();
+  const [, setShowSubNav] = useState(false);
+  const [, setActiveSection] = useState(tabs[0]?.id ?? '');
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const fallbackBackTo = breadcrumb.length >= 2 ? (breadcrumb[breadcrumb.length - 2]?.to ?? '/') : '/';
+  const handleBack = () => {
+    if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+      navigate(-1);
+    } else {
+      navigate(fallbackBackTo);
+    }
+  };
 
   const tabKey = tabs.map((t) => t.id).join('|');
   useEffect(() => {
@@ -89,64 +98,17 @@ export default function DetailPageShell({
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-emerald-50/25 via-white to-slate-50/50 text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
-      {/* Thanh mục dính (khi cuộn trang) */}
-      <AnimatePresence>
-        {showSubNav && tabs.length > 0 && (
-          <motion.div
-            initial={{ y: -64, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -64, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="fixed top-[var(--app-header-offset,64px)] left-0 right-0 z-40 border-b border-slate-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md"
-          >
-            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between">
-              <div className="scrollbar-hide flex items-center gap-1 overflow-x-auto py-1 sm:gap-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => scrollToSection(tab.id)}
-                    className={`relative shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm ${
-                      activeSection === tab.id
-                        ? 'bg-emerald-50/80 text-[var(--color-primary)]'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    {tab.label}
-                    {activeSection === tab.id && (
-                      <motion.div
-                        layoutId="activeDetailTab"
-                        className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[var(--color-primary)]"
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {cta && (
-                <div className="hidden shrink-0 items-center gap-4 border-l border-slate-100 pl-4 md:flex">
-                  {cta.hint && <div className="text-right">{cta.hint}</div>}
-                  <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    type="button"
-                    onClick={cta.onClick}
-                    className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl cta cta-primary px-4 text-xs font-bold text-white shadow-xs transition "
-                  >
-                    <span>{cta.label}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </motion.button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6">
-        {/* Breadcrumb */}
+        {/* Breadcrumb + Nút quay về */}
         <nav aria-label="Đường dẫn" className="mb-4 flex items-center gap-2 text-xs text-slate-500">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mr-1 inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-emerald-300 hover:text-[var(--color-primary)] cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Quay về</span>
+          </button>
           {breadcrumb.map((crumb, index) => (
             <span key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-2">
               {index > 0 && <span className="text-slate-300" aria-hidden>/</span>}

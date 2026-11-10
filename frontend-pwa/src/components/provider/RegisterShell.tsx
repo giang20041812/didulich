@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check } from 'lucide-react';
 import { LogoMark, BRAND_NAME } from '@/components/ui/logo';
 import { PROVIDER_SERVICES, providerServiceByType } from '@/components/layout/providerServices';
@@ -41,6 +41,7 @@ export default function RegisterShell({ type, step, title, subtitle, children, f
   footer?: ReactNode;
 }) {
   const service = type ? providerServiceByType(type) : null;
+  const navigate = useNavigate();
   return (
     <div data-partner-type={type ?? 'NONE'} className="min-h-dvh bg-canvas font-body text-ink">
       <header className="border-b border-border bg-white pt-[var(--safe-top)]">
@@ -51,8 +52,17 @@ export default function RegisterShell({ type, step, title, subtitle, children, f
           </Link>
           <span className="hidden h-5 w-px bg-border sm:block" />
           <span className="text-sm font-semibold text-muted">Đăng ký đối tác</span>
-          <Link to="/" className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-muted hover:text-ink">
-            <ArrowLeft className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Về trang chủ</span>
+          <Link
+            to="/"
+            onClick={(e) => {
+              if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+                e.preventDefault();
+                navigate(-1);
+              }
+            }}
+            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-muted hover:text-ink"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Quay về</span>
           </Link>
           <Link to="/portal/login" className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:bg-white">Đăng nhập</Link>
         </div>

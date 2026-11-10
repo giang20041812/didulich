@@ -167,6 +167,12 @@ function DishDetailContent({ identifier }: { identifier?: string }) {
       )}
       <Link
         to="/specialties"
+        onClick={(e) => {
+          if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+            e.preventDefault();
+            navigate(-1);
+          }
+        }}
         className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
       >
         <ArrowLeft className="h-4 w-4 text-[var(--color-primary)]" />

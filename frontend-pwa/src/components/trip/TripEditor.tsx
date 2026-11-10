@@ -197,12 +197,11 @@ export default function TripEditor({
         </section>
       ) : (
         <>
-          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-8">
+          <div className="mt-6 space-y-6">
             <div className="min-w-0">
               <div className="mb-1 flex items-center justify-between gap-2 px-1">
                 <h2 className="text-lg font-extrabold text-slate-900">Lộ trình từng ngày</h2>
                 <div className="flex shrink-0 items-center gap-1">
-                  {/* Điện thoại: bản đồ đóng sẵn sau một nút gọn (máy tính: thẻ bản đồ ở cột phải) */}
                   {!isDesktop && places.length > 0 && (
                     <TripMapPanel
                       places={places}
@@ -248,8 +247,8 @@ export default function TripEditor({
                 </button>
               )}
             </div>
-    
-            <aside className="hidden space-y-4 lg:sticky lg:top-20 lg:block">
+
+            <aside className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
               {places.length > 0 && (
                 <TripMapPanel
                   places={places}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CalendarDays, CheckCircle2, Clock, Loader2, MapPin, Users, Utensils, XCircle } from 'lucide-react';
 import { BRAND_NAME } from '@/components/ui/logo';
 import { getCurrentCustomer } from '@/lib/currentCustomer';
@@ -17,6 +17,7 @@ const todayVn = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_
 /** Chi tiết combo: lịch trình từng ngày, mục đã / không bao gồm, nhà hàng gợi ý và mẫu gửi yêu cầu đặt. */
 export default function ComboDetailPage() {
   const { slug = '' } = useParams();
+  const navigate = useNavigate();
   const [loaded, setLoaded] = useState<{ slug: string; combo: ComboDetail | null; error: string } | null>(null);
   const combo = loaded?.slug === slug ? loaded.combo : null;
   const error = loaded?.slug === slug ? loaded.error : '';
@@ -47,8 +48,17 @@ export default function ComboDetailPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-4 md:px-8">
-      <Link to="/combo" className="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-primary">
-        <ArrowLeft className="h-4 w-4" /> Tất cả combo
+      <Link
+        to="/combo"
+        onClick={(e) => {
+          if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+            e.preventDefault();
+            navigate(-1);
+          }
+        }}
+        className="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-primary"
+      >
+        <ArrowLeft className="h-4 w-4" /> Quay về
       </Link>
       <div className="overflow-hidden rounded-2xl bg-canvas">
         {combo.coverImageUrl

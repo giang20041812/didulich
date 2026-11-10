@@ -34,6 +34,13 @@ import { emailError } from '@/lib/fieldValidation';
 installAxiosBoot();
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// Số điện thoại VN: 0xxxxxxxxx (10–11 số) hoặc +84xxxxxxxxx; cho phép khoảng trắng / dấu chấm / gạch ngang khi gõ.
+const PHONE_REGEX = /^(\+?84|0)\d{8,10}$/;
+const stripPhoneSeparators = (v: string) => v.replace(/[\s.\-]/g, '');
+const normalizeLoginIdentifier = (v: string) => {
+  const t = v.trim();
+  return t.includes('@') ? t : stripPhoneSeparators(t);
+};
 
 export interface UnifiedAuthPageProps {
   initialMode?: 'login' | 'register';
@@ -187,9 +194,9 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
     const errs: { [key: string]: string } = {};
     const cleanId = loginIdentifier.trim();
     if (!cleanId) {
-      errs.identifier = 'Vui lòng nhập Email.';
-    } else if (!EMAIL_REGEX.test(cleanId)) {
-      errs.identifier = 'Email chưa đúng định dạng.';
+      errs.identifier = 'Vui lòng nhập Email hoặc Số điện thoại.';
+    } else if (cleanId.includes('@') ? !EMAIL_REGEX.test(cleanId) : !PHONE_REGEX.test(stripPhoneSeparators(cleanId))) {
+      errs.identifier = 'Email hoặc Số điện thoại chưa đúng định dạng.';
     }
 
     if (!loginPassword) {
@@ -261,7 +268,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
 
     setIsLoading(true);
     setLoginError(null);
-    const cleanId = loginIdentifier.trim();
+    const cleanId = normalizeLoginIdentifier(loginIdentifier);
 
     try {
       try {
@@ -465,7 +472,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
                 htmlFor="loginIdentifier"
                 className="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-800"
               >
-                <span>Email <span className="text-rose-500">*</span></span>
+                <span>Email hoặc Số điện thoại <span className="text-rose-500">*</span></span>
                 {loginTouched.identifier && !loginErrors.identifier && (
                   <span className="flex items-center gap-1 text-xs text-emerald-600">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Hợp lệ
@@ -483,7 +490,7 @@ export default function UnifiedAuthPage({ initialMode }: UnifiedAuthPageProps) {
                     setLoginError(null);
                   }}
                   onBlur={() => setLoginTouched((prev) => ({ ...prev, identifier: true }))}
-                  placeholder="ban@gmail.com"
+                  placeholder="ban@gmail.com hoặc 09xx xxx xxx"
                   autoComplete="username"
                   className={`${authInputClass} ${
                     loginTouched.identifier && loginErrors.identifier
