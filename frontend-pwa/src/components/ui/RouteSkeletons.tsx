@@ -58,7 +58,7 @@ function ListPage({ motif, motifTop, label, children }: { motif: MotifVariant; m
 /** Ảnh bìa chuẩn của các trang danh sách (Du lịch, Nhà hàng, Đặc sản, Di chuyển, Dịch vụ, Văn hóa). */
 function BannerHero({ image, title, overlay = 'via-[#0f2d3c]/50' }: { image: string; title: string; overlay?: string }) {
   return (
-    <section className="relative w-full min-h-[280px] md:min-h-[300px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
+    <section className="relative w-full min-h-[360px] md:min-h-[360px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
       <div className="absolute inset-0 z-0 bg-cover bg-center bg-[#0f2d3c]" style={{ backgroundImage: `url(${image})` }}>
         <div className={`absolute inset-0 bg-gradient-to-b from-[#0f2d3c]/85 ${overlay} to-transparent`} />
       </div>
@@ -157,7 +157,7 @@ export function HomestayListFallback() {
 export function DestinationListFallback() {
   const spec = LIST_SKELETON_SPECS.destinations;
   return (
-    <ListPage motif="explore" motifTop="top-[280px] md:top-[300px]" label="Đang tải điểm đến">
+    <ListPage motif="explore" motifTop="top-[360px]" label="Đang tải điểm đến">
       <BannerHero image={bannerDestinations} title="Điểm Đến & Thắng Cảnh" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
         <Crumb label="Danh thắng & Điểm tham quan" />
@@ -171,7 +171,7 @@ export function DestinationListFallback() {
 export function RestaurantListFallback() {
   const spec = LIST_SKELETON_SPECS.restaurants;
   return (
-    <ListPage motif="restaurant" motifTop="top-[280px] md:top-[300px]" label="Đang tải nhà hàng">
+    <ListPage motif="restaurant" motifTop="top-[360px]" label="Đang tải nhà hàng">
       <BannerHero image={bannerRestaurants} title="Hương Vị Tây Bắc Nguyên Bản" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
         <Crumb label="Nhà hàng & Ẩm thực" />
@@ -188,7 +188,7 @@ export function TransportListFallback() {
   const [params] = useSearchParams();
   const filtering = params.has('q') || params.has('groups');
   return (
-    <ListPage motif="transport" motifTop="top-[280px] md:top-[300px]" label="Đang tải dịch vụ di chuyển">
+    <ListPage motif="transport" motifTop="top-[360px]" label="Đang tải dịch vụ di chuyển">
       <BannerHero image={bannerTransport} title="Dịch Vụ Di Chuyển & Xe Ôm Vượt Dốc" overlay="via-[#0f2d3c]/60" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
         <Crumb label="Dịch vụ di chuyển" />
@@ -218,7 +218,7 @@ export function TransportListFallback() {
 
 export function SpecialtyListFallback() {
   return (
-    <ListPage motif="gift" motifTop="top-[280px] md:top-[300px]" label="Đang tải đặc sản">
+    <ListPage motif="gift" motifTop="top-[360px]" label="Đang tải đặc sản">
       <BannerHero image={bannerSpecialties} title="Đặc Sản Bản Địa" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
         <Crumb label="Đặc sản địa phương" />
@@ -232,7 +232,7 @@ export function UtilityListFallback() {
   const spec = LIST_SKELETON_SPECS.services;
   const [params] = useSearchParams();
   return (
-    <ListPage motif="utility" motifTop="top-[280px] md:top-[300px]" label="Đang tải dịch vụ & tiện ích">
+    <ListPage motif="utility" motifTop="top-[360px]" label="Đang tải dịch vụ & tiện ích">
       <BannerHero image={bannerUtilities} title="Dịch Vụ & Tiện Ích Du Lịch" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
         <Crumb label="Dịch vụ & Tiện ích" />
@@ -263,7 +263,7 @@ export function UtilityListFallback() {
 
 export function CultureFallback() {
   return (
-    <ListPage motif="culture" motifTop="top-[280px] md:top-[300px]" label="Đang tải lễ hội văn hóa">
+    <ListPage motif="culture" motifTop="top-[360px]" label="Đang tải lễ hội văn hóa">
       <BannerHero image={bannerCulture} title="Trải Nghiệm & Lễ Hội Văn Hóa" />
       <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-12">
         <Crumb label="Trải nghiệm & Lễ hội bản địa" className="mb-5" />
@@ -315,26 +315,30 @@ export function TripsHubFallback() {
       active ? 'border-[var(--color-primary)] text-[var(--color-ink-deep)]' : 'border-transparent text-[#59766e]'
     }`;
   return (
-    <div className="relative isolate min-h-screen overflow-x-clip pb-16 bg-[linear-gradient(180deg,var(--color-canvas)_0%,#f1faf6_45%,#fbf7ee_100%)]">
-      <HomeMotifs variant="journey" className="inset-0" />
-      <div className="mx-auto w-full max-w-5xl px-4 pt-5 md:px-8 md:pt-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-[28px] font-black leading-tight tracking-tight text-[var(--color-ink-deep)] md:text-[34px]">Lịch trình</h1>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-[#59766e] md:text-[15px]">
-              Lên lịch trình theo giờ cho chuyến đi, hoặc áp dụng lịch trình du khách đã đi — miễn phí.
-            </p>
+    <ListPage motif="journey" motifTop="top-[360px]" label="Đang tải lịch trình">
+      <BannerHero image={bannerGuide} title="Lịch Trình & Hành Trình Khám Phá" />
+      <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8 pt-3 pb-8">
+        <Crumb label="Lịch trình" />
+        <div className="relative overflow-hidden bg-white/90 backdrop-blur-md ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="text-xl font-black leading-tight tracking-tight text-[var(--color-ink-deep)] md:text-2xl">Lịch trình</h2>
+              <p className="mt-1 max-w-xl text-xs md:text-sm leading-relaxed text-[#59766e]">
+                Lên lịch trình theo giờ cho chuyến đi, hoặc áp dụng lịch trình du khách đã đi — miễn phí.
+              </p>
+            </div>
+            <Link
+              to="/lich-trinh/tao"
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#052620] px-5 text-sm font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(5,38,32,0.8)] transition-colors hover:bg-[#0a3a31]"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.75} aria-hidden /> Tạo lịch trình
+            </Link>
+          </header>
+          <div aria-hidden="true" className="mt-4 flex gap-2 border-b border-[#e3e8dc]">
+            <span className={tab(!mine)}><Compass className="h-4 w-4" /> Khám phá</span>
+            <span className={tab(mine)}><UserRound className="h-4 w-4" /> Của tôi</span>
           </div>
-          <Link
-            to="/lich-trinh/tao"
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#052620] px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_-12px_rgba(5,38,32,0.8)] transition-colors hover:bg-[#0a3a31]"
-          >
-            <Plus className="h-5 w-5" strokeWidth={2.75} aria-hidden /> Tạo lịch trình
-          </Link>
-        </header>
-        <div aria-hidden="true" className="mt-6 flex gap-2 border-b border-[#e3e8dc]">
-          <span className={tab(!mine)}><Compass className="h-4 w-4" /> Khám phá</span>
-          <span className={tab(mine)}><UserRound className="h-4 w-4" /> Của tôi</span>
         </div>
         <div className="mt-5">
           {mine && getCurrentCustomer()?.role === 'TRAVELER' ? (
@@ -364,7 +368,7 @@ export function TripsHubFallback() {
           )}
         </div>
       </div>
-    </div>
+    </ListPage>
   );
 }
 

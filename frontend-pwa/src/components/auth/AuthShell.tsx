@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import bannerAuth from '@/assets/photos/banner-auth.webp';
 import { ArrowLeft, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { LogoMark } from '@/components/ui/logo';
@@ -19,6 +19,7 @@ interface AuthShellProps {
  *   giúp thao tác nhập liệu rõ nét, trực quan và cuốn hút.
  */
 export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
+  const navigate = useNavigate();
   return (
     <main className="relative flex min-h-dvh w-full flex-col justify-between lg:h-dvh lg:overflow-y-hidden overflow-x-hidden bg-[#04261f] font-body text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
       {/* ── BỨC TRANH DI SẢN TÂY BẮC TOÀN MÀN HÌNH (FULL-BLEED BACKGROUND) ── */}
@@ -38,10 +39,16 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
       <header className="relative z-20 flex w-full items-center justify-between px-4 py-5 sm:px-8 lg:px-12 lg:py-3">
         <Link
           to="/"
+          onClick={(e) => {
+            if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+              e.preventDefault();
+              navigate(-1);
+            }
+          }}
           className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-md transition-all duration-200 hover:bg-white/20 hover:border-white/40 hover:scale-105 active:scale-95"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Về trang chủ</span>
+          <span>Quay về</span>
         </Link>
 
         {/* Logo thu nhỏ trên Mobile */}

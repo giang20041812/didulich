@@ -370,7 +370,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 onClick={handleOpen}
                 aria-label="Mở menu điều hướng"
                 title="Mở menu điều hướng"
-                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center ${
+                className={`icon-fx relative p-2 rounded-full cursor-pointer flex items-center justify-center md:hidden ${
                   isSidebarOpen
                     ? 'opacity-0 pointer-events-none invisible'
                     : 'opacity-100'
@@ -388,6 +388,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 Máy tính bảng (md): chỉ biểu tượng, chữ từ lg. */}
             <Link
               to="/"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               aria-label={`${BRAND_NAME} — Trang chủ`}
               className={`flex items-center gap-2.5 group shrink-0 ${searchCompact ? 'max-md:hidden' : ''}`}
             >
@@ -422,6 +423,9 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                   <Link
                     key={item.id}
                     to={item.path}
+                    onClick={() => {
+                      if (item.path === '/') window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     aria-current={active ? 'page' : undefined}
                     className={`nav-fx ${isSolid ? '' : 'nav-fx-light'} relative flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors duration-200 ${navItemSize} ${navItemTone(active)}`}
                   >

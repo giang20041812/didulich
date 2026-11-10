@@ -261,9 +261,9 @@ export default function RestaurantListPage() {
       <div aria-hidden="true" className="pointer-events-none absolute right-[-120px] top-[520px] h-[380px] w-[380px] rounded-full bg-emerald-300/20 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute left-[-140px] top-[1100px] h-[420px] w-[420px] rounded-full bg-amber-200/25 blur-3xl" />
       {/* Họa tiết nét mảnh như trang chủ, phủ phần dưới hero (hero nằm trên lớp này) */}
-      <HomeMotifs variant="restaurant" className="inset-x-0 bottom-0 top-[280px] md:top-[300px]" />
+      <HomeMotifs variant="restaurant" className="inset-x-0 bottom-0 top-[360px]" />
       {/* Hero Section */}
-      <section className="relative w-full min-h-[280px] md:min-h-[300px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
+      <section className="relative w-full min-h-[360px] md:min-h-[360px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
         <div
           className="absolute inset-0 z-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${bannerRestaurants})` }}
@@ -390,40 +390,6 @@ export default function RestaurantListPage() {
                 }`}
             >
               <Car className="w-3 h-3" /> Chỗ đỗ ô tô
-            </button>
-
-            {/* Quick Price Under 100k */}
-            <button
-              onClick={() => {
-                const isUnder100 = filters.maxPrice === 100000;
-                handleFilterChange({
-                  minPrice: undefined,
-                  maxPrice: isUnder100 ? undefined : 100000
-                });
-              }}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${filters.maxPrice === 100000
-                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                : 'bg-slate-50 text-[var(--color-ink)] border-slate-200 hover:border-slate-300 hover:bg-white'
-                }`}
-            >
-              Dưới 100k / người
-            </button>
-
-            {/* Quick Price 100k - 200k */}
-            <button
-              onClick={() => {
-                const is100to200 = filters.minPrice === 100000 && filters.maxPrice === 200000;
-                handleFilterChange({
-                  minPrice: is100to200 ? undefined : 100000,
-                  maxPrice: is100to200 ? undefined : 200000
-                });
-              }}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${filters.minPrice === 100000 && filters.maxPrice === 200000
-                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                : 'bg-slate-50 text-[var(--color-ink)] border-slate-200 hover:border-slate-300 hover:bg-white'
-                }`}
-            >
-              100k - 200k / người
             </button>
           </div>
 

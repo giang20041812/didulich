@@ -266,7 +266,12 @@ export default function SharedJourneyPage() {
       <div className="mx-auto max-w-5xl px-4 pt-4 sm:px-6 sm:pt-6">
         <Link
           to="/lich-trinh"
-          onClick={(e) => { if (fromFeed) { e.preventDefault(); navigate(-1); } }}
+          onClick={(e) => {
+            if (fromFeed || ((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+              e.preventDefault();
+              navigate(-1);
+            }
+          }}
           className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-bold text-[#052620] hover:underline"
         >
           <ArrowLeft className="h-4 w-4" /> Lịch trình du khách

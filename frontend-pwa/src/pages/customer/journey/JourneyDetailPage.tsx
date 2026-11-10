@@ -54,7 +54,16 @@ export default function JourneyDetailPage() {
   return (
     <div className="min-h-screen bg-[var(--color-canvas)] pb-20">
       <div className="mx-auto max-w-5xl px-4 pt-4 sm:px-6">
-        <Link to="/lich-trinh?tab=cua-toi" className="inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-semibold text-slate-600 hover:text-[#052620]">
+        <Link
+          to="/lich-trinh?tab=cua-toi"
+          onClick={(e) => {
+            if (!justSaved && ((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+              e.preventDefault();
+              navigate(-1);
+            }
+          }}
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-full pr-2 text-sm font-semibold text-slate-600 hover:text-[#052620]"
+        >
           <ArrowLeft className="h-4 w-4" /> Lịch trình của tôi
         </Link>
         {justSaved && journey && (

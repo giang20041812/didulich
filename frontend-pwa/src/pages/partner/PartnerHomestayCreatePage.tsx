@@ -331,7 +331,7 @@ export default function PartnerHomestayCreatePage() {
             </Field>
             <Field label="Địa chỉ" required>
               <textarea className={`${ui.textarea} ${showInfo('address') && infoErrors.address ? 'border-danger' : ''}`} rows={2} maxLength={500} value={info.address}
-                onChange={e => setField('address', e.target.value)} onBlur={onAddressBlur} placeholder="Thôn/bản, xã, huyện, tỉnh — VD: Bản Lìm Mông, xã Cao Phạ, Mù Cang Chải, Yên Bái" />
+                onChange={e => setField('address', e.target.value)} onBlur={onAddressBlur} placeholder="Thôn/bản, xã, huyện, tỉnh — VD: Bản Lìm Mông, xã Cao Phạ, Mù Cang Chải, Lào Cai" />
               <FieldError show={showInfo('address')} error={infoErrors.address} />
             </Field>
 

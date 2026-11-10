@@ -31,7 +31,7 @@ const CATEGORY_GROUPS = [
   { id: 'TOUR_MOTO', label: 'Xe ôm tour & ghép đoàn', desc: 'Thuê xế bản địa trọn gói theo tour cả ngày' },
   { id: 'SELF_DRIVE', label: 'Thuê xe tự lái (Xe máy / Ô tô)', desc: 'Xe số phượt đèo Hùng Nga, Ô tô 2 cầu bán tải' },
   { id: 'INTERCITY_BUS', label: 'Xe khách & Limousine', desc: 'Hà Nội – Mù Cang Chải (Hà Trang, An Bình...)' },
-  { id: 'SHARED_CAR', label: 'Xe ghép liên xã & taxi', desc: 'Kết nối TP Yên Bái, Chế Cu Nha, Nậm Có' },
+  { id: 'SHARED_CAR', label: 'Xe ghép liên xã & taxi', desc: 'Kết nối Lào Cai, Chế Cu Nha, Nậm Có' },
 ];
 
 const P400 = '400.000đ';
@@ -173,9 +173,9 @@ export default function TransportListPage() {
       <div aria-hidden="true" className="pointer-events-none absolute right-[-120px] top-[520px] h-[380px] w-[380px] rounded-full bg-emerald-300/20 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute left-[-140px] top-[1100px] h-[420px] w-[420px] rounded-full bg-amber-200/25 blur-3xl" />
       {/* Họa tiết nét mảnh như trang chủ, phủ phần dưới hero (hero nằm trên lớp này) */}
-      <HomeMotifs variant="transport" className="inset-x-0 bottom-0 top-[280px] md:top-[300px]" />
+      <HomeMotifs variant="transport" className="inset-x-0 bottom-0 top-[360px]" />
       {/* Hero Section */}
-      <section className="relative w-full min-h-[280px] md:min-h-[300px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
+      <section className="relative w-full min-h-[360px] md:min-h-[360px] flex items-start md:items-center justify-center pt-[calc(145px+var(--safe-top))] md:pt-[calc(130px+var(--safe-top))] pb-10 md:pb-8">
         <div
           className="absolute inset-0 z-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${bannerTransport})` }}
