@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Bookmark, Check, Share2 } from 'lucide-react';
@@ -39,15 +39,12 @@ interface DetailPageShellProps {
 
 /**
  * Khung trang chi tiết dùng chung, cùng bố cục với trang chi tiết homestay: breadcrumb → tiêu đề + đánh giá/địa chỉ +
- * nút Chia sẻ/Lưu → thư viện ảnh mosaic → thân 2 cột (mục nội dung phẳng bên trái, thẻ thông tin dính bên phải) và thanh
- * mục dính hiện sau khi cuộn qua phần đầu trang.
+ * nút Chia sẻ/Lưu → thư viện ảnh mosaic → thân 2 cột (mục nội dung phẳng bên trái, thẻ thông tin dính bên phải).
  */
 export default function DetailPageShell({
   breadcrumb, badges, title, meta, images, tabs, shareText, saveLabel, aside, children,
 }: DetailPageShellProps) {
   const navigate = useNavigate();
-  const [, setShowSubNav] = useState(false);
-  const [, setActiveSection] = useState(tabs[0]?.id ?? '');
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const fallbackBackTo = breadcrumb.length >= 2 ? (breadcrumb[breadcrumb.length - 2]?.to ?? '/') : '/';
@@ -58,33 +55,6 @@ export default function DetailPageShell({
       navigate(fallbackBackTo);
     }
   };
-
-  const tabKey = tabs.map((t) => t.id).join('|');
-  useEffect(() => {
-    const ids = tabKey.split('|').filter(Boolean).reverse();
-    const onScroll = () => {
-      setShowSubNav(window.scrollY > 480);
-      for (const id of ids) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 140) {
-          setActiveSection(id);
-          return;
-        }
-      }
-      setActiveSection(ids[ids.length - 1] ?? '');
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [tabKey]);
-
-  // Chừa chỗ cho header trang (--app-header-offset) và thanh mục dính (h-14).
-  const scrollToSection = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-header-offset')) || 64;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - header - 56 - 16, behavior: 'smooth' });
-  }, []);
 
   const handleShare = () => {
     if (navigator.share) {

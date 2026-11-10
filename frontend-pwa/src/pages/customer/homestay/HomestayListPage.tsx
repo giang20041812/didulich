@@ -512,28 +512,24 @@ export default function HomestayListPage() {
         <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center gap-1.5">
           <Users className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Số khách & Số phòng
         </h4>
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-[var(--color-ink)]">Số khách</span>
-            <Stepper
-              value={filters.guests ?? 2}
-              min={1}
-              max={50}
-              onChange={(val) => handleFilterChange({ guests: val > 1 ? val : undefined })}
-            />
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-[var(--color-ink)]">Số phòng</span>
-            <Stepper
-              value={roomCount}
-              min={1}
-              max={20}
-              onChange={(val) => {
-                setRoomCount(val);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
+        <div className="flex flex-col gap-2.5">
+          <Stepper
+            label="Số khách"
+            value={filters.guests ?? 2}
+            min={1}
+            max={50}
+            onChange={(val) => handleFilterChange({ guests: val > 1 ? val : undefined })}
+          />
+          <Stepper
+            label="Số phòng"
+            value={roomCount}
+            min={1}
+            max={20}
+            onChange={(val) => {
+              setRoomCount(val);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
 

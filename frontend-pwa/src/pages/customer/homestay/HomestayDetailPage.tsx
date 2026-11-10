@@ -238,8 +238,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
   const [exploreAvailable, setExploreAvailable] = useState(false);
   const [suggestTab, setSuggestTab] = useState<SuggestTab>('trip');
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showSubNav, setShowSubNav] = useState(false);
-  const [activeSection, setActiveSection] = useState('about');
 
   const roomsSectionRef = useRef<HTMLDivElement>(null);
 
@@ -263,36 +261,6 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
     isOpen: false,
     type: null,
   });
-
-  // Sticky sub-nav & active section scrollspy
-  useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY;
-      setShowSubNav(y > 480);
-
-      const sectionIds = ['reviews', 'suggest', 'services', 'amenities', 'about', 'booking'];
-      for (const id of sectionIds) {
-        const el = document.getElementById(id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 140) {
-            setActiveSection(id);
-            break;
-          }
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Cuộn tới mục, chừa chỗ cho header trang (cao theo --app-header-offset) và thanh mục dính bên dưới (h-14).
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-header-offset')) || 64;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - header - 56 - 16, behavior: 'smooth' });
-  };
 
   // Lightbox keyboard controls
   useEffect(() => {
