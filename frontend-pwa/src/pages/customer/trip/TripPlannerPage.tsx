@@ -282,6 +282,10 @@ function NewTrip() {
   }, [resume, draft]);
 
   const close = () => {
+    if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+      navigate(-1);
+      return;
+    }
     const booking = draft?.forBooking ?? forBooking;
     const home = draft?.stayPlaceId ?? stay;
     if (booking) navigate(`/bookings/${encodeURIComponent(booking)}?tab=journey`);
@@ -393,7 +397,16 @@ function EditTrip({ journeyId }: { journeyId: number }) {
   const template = journey ? templateFor(catalog?.templates, journey) : null;
 
   return (
-    <TripShell title="Sửa lịch trình" onClose={() => navigate(viewPath)}>
+    <TripShell
+      title="Sửa lịch trình"
+      onClose={() => {
+        if (((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0) {
+          navigate(-1);
+        } else {
+          navigate(viewPath);
+        }
+      }}
+    >
       {loadError ? (
         <div className="mx-auto mt-10 max-w-md rounded-2xl border border-rose-200/80 bg-white p-6 sm:p-8 text-center shadow-xs">
           <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3 shadow-2xs">

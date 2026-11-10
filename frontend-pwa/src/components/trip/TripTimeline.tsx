@@ -51,48 +51,44 @@ interface TripTimelineProps extends RouteActions {
   dayFooter?: (day: number) => ReactNode;
 }
 
-// ─── Hình học con đường ─────────────────────────────────────────
+// ─── Hình học con đường (Nằm ngang trái → phải) ─────────────────
 
-/** Hoành độ (%) của nút trái / phải / giữa — route uốn lượn qua lại như đường mòn, giống JourneyRoute. */
-const ROUTE_X = { left: 22, right: 78, center: 50 } as const;
+/** Tung độ (px) của nút trên / dưới / giữa trên dải lộ trình nằm ngang. */
+const ROUTE_Y = { top: 118, bottom: 162, center: 140 } as const;
+const ROUTE_HEIGHT = 284;
 /** Cỡ nút (px): điểm dừng (ghim ảnh / nút tròn), điểm đầu / cuối ngày. */
 const NODE = { stop: 54, edge: 40 } as const;
-/** Khoảng cách dọc tối thiểu (px) giữa tâm hai nút: đầu ngày → điểm đầu, hai điểm liền nhau, điểm cuối → cuối ngày. */
-const GAP = { first: 92, stop: 124, last: 100 } as const;
-/** Lề trên tới tâm nút đầu ngày; dưới tâm nút cuối ngày (chừa nhãn "Về đích"). */
-const PAD = { top: 34, bottom: 50 } as const;
-/** Nhãn cách tâm nút (bán kính nút + 10px), cách mép khung 8px; rộng hết phần còn lại (đơn vị cqw = bề ngang khung). */
-const LABEL_OFFSET = NODE.stop / 2 + 10;
-const LABEL_WIDTH = `calc(${100 - ROUTE_X.left}cqw - ${LABEL_OFFSET + 8}px)`;
+/** Khoảng cách ngang tối thiểu (px) giữa tâm hai nút: đầu ngày → điểm đầu, hai điểm liền nhau, điểm cuối → cuối ngày. */
+const GAP_X = { first: 115, stop: 175, last: 125 } as const;
+/** Lề trái tới tâm nút đầu ngày; lề phải sau tâm nút cuối ngày (chừa nhãn "Về đích / Nghỉ đêm"). */
+const PAD_X = { left: 44, right: 86 } as const;
+/** Bề rộng tối đa của thẻ nhãn tại mỗi điểm dừng (px). */
+const LABEL_MAX_W = 168;
 /** Dấu chân: bước (px) giữa hai bàn chân liền nhau, độ lệch hai bên đường, khoảng hở với nút. */
-const FOOT_STEP = 30;
-const FOOT_SPREAD = 7;
+const FOOT_STEP = 28;
+const FOOT_SPREAD = 6.5;
 const FOOT_CLEAR = 8;
-/** Nút "+" chèn mục: bán kính + khoảng hở tới nhãn / nút kề. */
-const ADD_CLEAR = 14;
 
 interface Pt { x: number; y: number }
 
 interface StopNode extends Pt {
   kind: 'stop';
   row: TimelineRow;
-  side: 'left' | 'right';
-  /** Chiều cao nhãn (px) — khoảng cách tới nút sau tính theo đây. */
-  labelH: number;
+  side: 'top' | 'bottom';
 }
 
 type RouteNode = (Pt & { kind: 'start' }) | (Pt & { kind: 'end' }) | (Pt & { kind: 'free' }) | StopNode;
 
 /**
- * Cung bezier giữa hai nút liên tiếp (i = chỉ số nút sau): tiếp tuyến dọc ở hai đầu → đường cong chữ S mềm nối thành một
- * con đường uốn lượn trái/phải (cùng công thức với JourneyRoute.tsx). x theo % bề ngang, y theo px.
+ * Cung bezier giữa hai nút liên tiếp theo phương ngang (trái → phải): tiếp tuyến ngang ở hai đầu tạo đường cong chữ S mềm.
+ * Cả x và y đều tính bằng px.
  */
 function segment(a: Pt, b: Pt, i: number): [Pt, Pt, Pt, Pt] {
-  const dy = b.y - a.y;
-  const same = a.x === b.x;
-  const bend = (same ? 0.35 : 0.6) * dy;
-  const sway = same ? (i % 2 === 0 ? 6 : -6) : 0;
-  return [a, { x: a.x + sway, y: a.y + bend }, { x: b.x + sway, y: b.y - bend }, b];
+  const dx = b.x - a.x;
+  const same = a.y === b.y;
+  const bend = (same ? 0.35 : 0.55) * dx;
+  const sway = same ? (i % 2 === 0 ? 14 : -14) : 0;
+  return [a, { x: a.x + bend, y: a.y + sway }, { x: b.x - bend, y: b.y + sway }, b];
 }
 
 function bezierAt([p0, p1, p2, p3]: [Pt, Pt, Pt, Pt], t: number): Pt {
@@ -105,10 +101,10 @@ function bezierAt([p0, p1, p2, p3]: [Pt, Pt, Pt, Pt], t: number): Pt {
 }
 
 /** Đường nối các nút theo px (cùng các cung bezier với dấu chân). */
-function trailPath(nodes: RouteNode[], width: number): string {
+function trailPath(nodes: RouteNode[]): string {
   const [first] = nodes;
-  if (!first || width <= 0) return '';
-  const px = (p: Pt) => `${(p.x * width) / 100} ${p.y}`;
+  if (!first) return '';
+  const px = (p: Pt) => `${p.x} ${p.y}`;
   let d = `M ${px(first)}`;
   for (let i = 1; i < nodes.length; i += 1) {
     const [, c1, c2, end] = segment(nodes[i - 1] as RouteNode, nodes[i] as RouteNode, i);
@@ -120,19 +116,18 @@ function trailPath(nodes: RouteNode[], width: number): string {
 interface Footprint { x: number; y: number; rot: number; flip: boolean; t: number }
 
 /**
- * Dấu chân dọc con đường: lấy mẫu các cung bezier (đổi sang px theo bề ngang thật), cứ mỗi STEP px dọc đường đặt một bàn chân
- * quay theo hướng đi, chân trái / phải lệch nhau hai bên. Bỏ các dấu chân nằm dưới nút (đầu ngày, điểm dừng, cuối ngày).
+ * Dấu chân dọc con đường ngang: lấy mẫu các cung bezier, cứ mỗi STEP px dọc đường đặt một bàn chân
+ * quay theo hướng đi, chân trái / phải lệch nhau hai bên. Bỏ các dấu chân nằm dưới nút.
  */
-function footprints(nodes: RouteNode[], width: number): Footprint[] {
-  if (width <= 0 || nodes.length < 2) return [];
+function footprints(nodes: RouteNode[]): Footprint[] {
+  if (nodes.length < 2) return [];
   const pts: Pt[] = [];
   for (let i = 1; i < nodes.length; i += 1) {
-    const [p0, p1, p2, p3] = segment(nodes[i - 1] as RouteNode, nodes[i] as RouteNode, i);
-    const curve: [Pt, Pt, Pt, Pt] = [p0, p1, p2, p3].map((p) => ({ x: (p.x * width) / 100, y: p.y })) as [Pt, Pt, Pt, Pt];
+    const curve = segment(nodes[i - 1] as RouteNode, nodes[i] as RouteNode, i);
     for (let n = i === 1 ? 0 : 1; n <= 60; n += 1) pts.push(bezierAt(curve, n / 60));
   }
   const total = pts.reduce((sum, p, k) => (k === 0 ? 0 : sum + Math.hypot(p.x - (pts[k - 1] as Pt).x, p.y - (pts[k - 1] as Pt).y)), 0);
-  const centers = nodes.map((n) => ({ x: (n.x * width) / 100, y: n.y, r: (n.kind === 'stop' ? NODE.stop : NODE.edge) / 2 + FOOT_CLEAR }));
+  const centers = nodes.map((n) => ({ x: n.x, y: n.y, r: (n.kind === 'stop' ? NODE.stop : NODE.edge) / 2 + FOOT_CLEAR }));
   const out: Footprint[] = [];
   let acc = 0;
   let next = FOOT_STEP / 2;
@@ -148,28 +143,17 @@ function footprints(nodes: RouteNode[], width: number): Footprint[] {
     // lệch vuông góc với hướng đi: chân phải bên phải, chân trái bên trái
     const rad = (rot * Math.PI) / 180;
     const off = flip ? -FOOT_SPREAD : FOOT_SPREAD;
-    out.push({ x: b.x + Math.cos(rad) * off, y: b.y + Math.sin(rad) * off, rot, flip, t: acc / total });
+    out.push({ x: b.x + Math.cos(rad) * off, y: b.y + Math.sin(rad) * off, rot, flip, t: acc / (total || 1) });
   }
   return out;
 }
 
 /**
- * Chỗ đặt nút "+" giữa nút a và nút b — nằm ĐÚNG trên đường (giải y(t) của chính cung bezier, y tăng đơn điệu theo t):
- * giữa đoạn nếu trống, không thì ngay dưới nhãn của a; luôn trên nút / nhãn của b.
+ * Chỗ đặt nút "+" giữa nút a và nút b — nằm chính giữa cung bezier nối hai điểm dừng.
  */
 function addPoint(a: StopNode, b: RouteNode, i: number): Pt {
   const curve = segment(a, b, i);
-  const below = a.y - NODE.stop / 2 + a.labelH + ADD_CLEAR;
-  const above = b.y - (b.kind === 'stop' ? NODE.stop : NODE.edge) / 2 - ADD_CLEAR;
-  const target = Math.min(above, Math.max((a.y + b.y) / 2, below));
-  let lo = 0;
-  let hi = 1;
-  for (let n = 0; n < 24; n += 1) {
-    const mid = (lo + hi) / 2;
-    if (bezierAt(curve, mid).y < target) lo = mid;
-    else hi = mid;
-  }
-  return bezierAt(curve, (lo + hi) / 2);
+  return bezierAt(curve, 0.5);
 }
 
 // ─── Giao diện điểm dừng ────────────────────────────────────────
@@ -254,7 +238,7 @@ const hasMeta = (row: TimelineRow, showOrigin: boolean) =>
 
 /** Dòng phụ nhỏ dưới tên: ảnh món, icon dịch vụ thêm, chỗ ở, nhãn "Bạn thêm" / "Tiếp theo". */
 function StopMeta({ row, addons, stayName, stayHint, showOrigin, align }: {
-  row: TimelineRow; addons: Map<string, TripAddon>; stayName: string | null; stayHint: string; showOrigin: boolean; align: 'start' | 'end';
+  row: TimelineRow; addons: Map<string, TripAddon>; stayName: string | null; stayHint: string; showOrigin: boolean; align: 'start' | 'end' | 'center';
 }) {
   if (!hasMeta(row, showOrigin)) return null;
   if (row.kind === 'STAY') {
@@ -267,8 +251,9 @@ function StopMeta({ row, addons, stayName, stayHint, showOrigin, align }: {
   const custom = showOrigin && row.origin === 'CUSTOM';
   const addonNames = row.addons.map((code) => addons.get(code)?.name ?? code).join(', ');
   const firstAddon = row.addons[0];
+  const justifyClass = align === 'center' ? 'justify-center' : align === 'start' ? 'justify-start' : 'justify-end';
   return (
-    <span className={`mt-0.5 flex max-w-full flex-wrap items-center gap-1 ${align === 'start' ? 'justify-start' : 'justify-end'}`}>
+    <span className={`mt-0.5 flex max-w-full flex-wrap items-center gap-1 ${justifyClass}`}>
       {row.status === 'next' && <span className="rounded-[3px] bg-amber-100 px-1.5 py-px text-[10px] font-extrabold uppercase text-amber-800">Tiếp theo</span>}
       {row.dishes.length > 0 && <DishFaces dishes={row.dishes} />}
       {firstAddon && (
@@ -314,10 +299,9 @@ interface DayRouteProps extends RouteActions {
 }
 
 /**
- * Lộ trình một ngày dạng con đường cong trái/phải xen kẽ: mỗi mục là một điểm dừng (điểm tham quan cắm ghim ảnh, mục khác
- * là nút tròn màu theo loại) — tâm nút nằm đúng trên đường, thẻ nhãn (khoảng giờ · tên · dòng phụ) bên cạnh; chạm nút hoặc
- * thẻ đều mở chi tiết / sửa. Khoảng cách giữa hai điểm co giãn theo chiều cao thật của nhãn (đo sau khi vẽ) nên nhãn không
- * đè nhau, nút "+" (chèn mục) luôn nằm trên đường ở chỗ trống. Cuối đường là "Nghỉ đêm" (hoặc "Về đích" ngày cuối).
+ * Lộ trình một ngày dạng con đường nằm ngang (trái sang phải) uốn lượn trên/dưới xen kẽ: mỗi mục là một điểm dừng (điểm tham
+ * quan cắm ghim ảnh, mục khác là nút tròn màu theo loại) — tâm nút nằm đúng trên đường, thẻ nhãn (khoảng giờ · tên · dòng phụ)
+ * đặt xen kẽ phía trên / phía dưới nút để không đè nhau; chạm nút hoặc thẻ đều mở chi tiết / sửa.
  */
 function DayRoute({
   day, rows, addons, first, last, stayName = null, stayHint = 'Chưa chọn chỗ ở',
@@ -327,220 +311,214 @@ function DayRoute({
   const addonMap = new Map(addons.map((a) => [a.code, a]));
   const detail = detailKey ? rows.find((r) => r.key === detailKey) : undefined;
 
-  // Chiều cao thật của từng nhãn (đo trước khi trình duyệt vẽ — không chớp), chưa đo thì ước lượng theo nội dung.
   const routeRef = useRef<HTMLDivElement>(null);
-  const labelEls = useRef(new Map<string, HTMLDivElement>());
-  const [measured, setMeasured] = useState<Record<string, number>>({});
-  const [width, setWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   useLayoutEffect(() => {
     const measure = () => {
-      if (routeRef.current) setWidth(routeRef.current.offsetWidth);
-      const next: Record<string, number> = {};
-      labelEls.current.forEach((el, key) => { next[key] = el.offsetHeight; });
-      setMeasured((prev) => {
-        const keys = Object.keys(next);
-        return keys.length === Object.keys(prev).length && keys.every((k) => prev[k] === next[k]) ? prev : next;
-      });
+      if (routeRef.current) setContainerWidth(routeRef.current.clientWidth);
     };
     measure();
     if (typeof ResizeObserver === 'undefined') return undefined;
     const observer = new ResizeObserver(measure);
     if (routeRef.current) observer.observe(routeRef.current);
-    labelEls.current.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  });
+  }, []);
 
   const actionsOf = (row: TimelineRow) => {
     const sight = isPinned(row);
     return !!((row.alternative && onSwap) || (sight && onCheckin) || (sight && onOpenPlace && onEdit));
   };
-  const labelHeight = (row: TimelineRow) =>
-    measured[row.key] ?? 66 + (hasMeta(row, showOrigin) ? 24 : 0) + (actionsOf(row) ? 32 : 0);
+
+  const minWidth = rows.length === 0
+    ? 360
+    : PAD_X.left + GAP_X.first + Math.max(0, rows.length - 1) * GAP_X.stop + GAP_X.last + PAD_X.right;
+  const width = Math.max(containerWidth || 720, minWidth);
 
   const nodes: RouteNode[] = [];
-  let y = PAD.top;
-  nodes.push({ kind: 'start', x: ROUTE_X.center, y });
+  const startX = PAD_X.left;
+  const endX = width - PAD_X.right;
+  nodes.push({ kind: 'start', x: startX, y: ROUTE_Y.center });
   if (rows.length === 0) {
-    y += GAP.first;
-    nodes.push({ kind: 'free', x: ROUTE_X.center, y });
-    y += GAP.last;
+    nodes.push({ kind: 'free', x: Math.round((startX + endX) / 2), y: ROUTE_Y.center });
   } else {
-    y += GAP.first;
+    const usableSpan = Math.max(1, endX - startX);
     rows.forEach((row, index) => {
-      const side = index % 2 === 0 ? 'left' : 'right';
-      const labelH = labelHeight(row);
-      nodes.push({ kind: 'stop', x: ROUTE_X[side], y, row, side, labelH });
-      // Đủ chỗ cho nhãn + nút "+" bên dưới trước khi tới nút sau.
-      y += index === rows.length - 1 ? Math.max(GAP.last, labelH + 30) : Math.max(GAP.stop, labelH + 34);
+      const side: 'top' | 'bottom' = index % 2 === 0 ? 'top' : 'bottom';
+      const ratio = (index + 1) / (rows.length + 1);
+      const x = Math.round(startX + usableSpan * ratio);
+      nodes.push({ kind: 'stop', x, y: ROUTE_Y[side], row, side });
     });
   }
-  nodes.push({ kind: 'end', x: ROUTE_X.center, y });
-  const height = y + PAD.bottom;
-  const feet = footprints(nodes, width);
-  const path = trailPath(nodes, width);
+  nodes.push({ kind: 'end', x: endX, y: ROUTE_Y.center });
+  const height = ROUTE_HEIGHT;
+  const feet = footprints(nodes);
+  const path = trailPath(nodes);
 
   return (
     <>
-      <div ref={routeRef} className="@container relative" style={{ height }}>
-        {/* Đường nhạt + dấu chân nối các điểm: hai hình bầu dục (bàn + gót), tô chuyển từ xanh ngọc sang xanh đậm theo đường đi */}
-        <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" width={width} height={height}>
-          <path d={path} fill="none" stroke="#0a7d64" strokeOpacity={0.07} strokeWidth={34} strokeLinecap="round" strokeLinejoin="round" />
-          <path d={path} fill="none" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={28} strokeLinecap="round" strokeLinejoin="round" />
-          {feet.map((f, i) => (
-            <g key={i} transform={`translate(${f.x} ${f.y}) rotate(${f.rot})${f.flip ? ' scale(-1 1)' : ''}`}
-              fill={`rgb(${Math.round(94 - 84 * f.t)}, ${Math.round(205 - 80 * f.t)}, ${Math.round(185 - 85 * f.t)})`}>
-              <ellipse cx="0" cy="-4" rx="4.6" ry="7" />
-              <ellipse cx="0" cy="7.5" rx="3.3" ry="3.8" />
-            </g>
-          ))}
-        </svg>
+      <div ref={routeRef} className="w-full overflow-x-auto pb-2 scrollbar-thin">
+        <div className="relative" style={{ width, height }}>
+          {/* Đường nhạt + dấu chân nối các điểm: hai hình bầu dục (bàn + gót), tô chuyển từ xanh ngọc sang xanh đậm theo đường đi */}
+          <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" width={width} height={height}>
+            <path d={path} fill="none" stroke="#0a7d64" strokeOpacity={0.07} strokeWidth={34} strokeLinecap="round" strokeLinejoin="round" />
+            <path d={path} fill="none" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={28} strokeLinecap="round" strokeLinejoin="round" />
+            {feet.map((f, i) => (
+              <g key={i} transform={`translate(${f.x} ${f.y}) rotate(${f.rot})${f.flip ? ' scale(-1 1)' : ''}`}
+                fill={`rgb(${Math.round(94 - 84 * f.t)}, ${Math.round(205 - 80 * f.t)}, ${Math.round(185 - 85 * f.t)})`}>
+                <ellipse cx="0" cy="-4" rx="4.6" ry="7" />
+                <ellipse cx="0" cy="7.5" rx="3.3" ry="3.8" />
+              </g>
+            ))}
+          </svg>
 
-        {nodes.map((n) => {
-          if (n.kind === 'start' || n.kind === 'end') {
-            const isStart = n.kind === 'start';
-            return (
-              <div key={n.kind} className="absolute" style={{ left: `${n.x}%`, top: n.y }}>
-                <span
-                  className={`absolute left-0 top-0 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-white shadow-[0_8px_16px_-6px_rgba(29,45,79,0.75)] ${
-                    isStart ? 'bg-[var(--color-cham)] text-[var(--color-sun)]' : last ? 'bg-[var(--color-sun)] text-amber-950' : 'bg-[var(--color-cham)] text-[var(--color-sun)]'
-                  }`}
-                  style={{ width: NODE.edge, height: NODE.edge }}
-                >
-                  {isStart ? (first ? <span className="h-2 w-2 rounded-full bg-current" /> : <Home className="h-[18px] w-[18px]" strokeWidth={2.5} />)
-                    : last ? <Flag className="h-[18px] w-[18px]" strokeWidth={2.5} /> : <Moon className="h-[18px] w-[18px]" strokeWidth={2.5} />}
-                </span>
-                {!isStart && (
-                  <span className="absolute left-0 -translate-x-1/2 whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.14em] text-[var(--color-cham)]" style={{ top: NODE.edge / 2 + 6 }}>
-                    {last ? 'Về đích' : 'Nghỉ đêm'} · {last ? 'Kết thúc chuyến đi' : stayName ?? 'Chỗ ở của bạn'}
+          {nodes.map((n) => {
+            if (n.kind === 'start' || n.kind === 'end') {
+              const isStart = n.kind === 'start';
+              return (
+                <div key={n.kind} className="absolute" style={{ left: n.x, top: n.y }}>
+                  <span
+                    className={`absolute left-0 top-0 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-white shadow-[0_8px_16px_-6px_rgba(29,45,79,0.75)] ${
+                      isStart ? 'bg-[var(--color-cham)] text-[var(--color-sun)]' : last ? 'bg-[var(--color-sun)] text-amber-950' : 'bg-[var(--color-cham)] text-[var(--color-sun)]'
+                    }`}
+                    style={{ width: NODE.edge, height: NODE.edge }}
+                  >
+                    {isStart ? (first ? <span className="h-2 w-2 rounded-full bg-current" /> : <Home className="h-[18px] w-[18px]" strokeWidth={2.5} />)
+                      : last ? <Flag className="h-[18px] w-[18px]" strokeWidth={2.5} /> : <Moon className="h-[18px] w-[18px]" strokeWidth={2.5} />}
                   </span>
-                )}
-              </div>
-            );
-          }
-          if (n.kind === 'free') {
-            const Tag = onAdd ? 'button' : 'span';
-            return (
-              <div key="free" className="group/stop absolute" style={{ left: `${n.x}%`, top: n.y }}>
-                <span className={`absolute left-0 top-0 flex h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-[0_10px_18px_-8px_rgba(10,46,38,0.7)] ${
-                  onAdd ? 'border-2 border-dashed border-[var(--color-primary)] bg-white text-[var(--color-primary)]' : `border-[3px] border-white ${MARKER.FREE}`
-                }`}
-                >
-                  {onAdd ? <Plus className="h-5 w-5" strokeWidth={3} /> : <Compass className="h-5 w-5" />}
-                </span>
-                <Tag
-                  {...(onAdd ? { type: 'button' as const, onClick: () => onAdd(day, null) } : {})}
-                  className={`absolute left-0 -translate-x-1/2 whitespace-nowrap rounded-md bg-white/90 px-2.5 py-1 text-[13px] font-extrabold leading-snug text-[var(--color-ink-deep)] ring-1 ring-black/5 ${onAdd ? 'outline-none hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] cursor-pointer' : ''}`}
-                  style={{ top: 29 }}
-                >
-                  {onAdd ? 'Thêm hoạt động' : 'Tự do khám phá'}
-                </Tag>
-              </div>
-            );
-          }
+                  {!isStart && (
+                    <span className="absolute right-0 translate-x-3 whitespace-nowrap text-center text-[10px] font-extrabold uppercase tracking-[0.12em] text-[var(--color-cham)]" style={{ top: NODE.edge / 2 + 6 }}>
+                      {last ? 'Về đích' : 'Nghỉ đêm'}
+                    </span>
+                  )}
+                </div>
+              );
+            }
+            if (n.kind === 'free') {
+              const Tag = onAdd ? 'button' : 'span';
+              return (
+                <div key="free" className="group/stop absolute" style={{ left: n.x, top: n.y }}>
+                  <span className={`absolute left-0 top-0 flex h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full shadow-[0_10px_18px_-8px_rgba(10,46,38,0.7)] ${
+                    onAdd ? 'border-2 border-dashed border-[var(--color-primary)] bg-white text-[var(--color-primary)]' : `border-[3px] border-white ${MARKER.FREE}`
+                  }`}
+                  >
+                    {onAdd ? <Plus className="h-5 w-5" strokeWidth={3} /> : <Compass className="h-5 w-5" />}
+                  </span>
+                  <Tag
+                    {...(onAdd ? { type: 'button' as const, onClick: () => onAdd(day, null) } : {})}
+                    className={`absolute left-0 -translate-x-1/2 whitespace-nowrap rounded-md bg-white/90 px-2.5 py-1 text-[13px] font-extrabold leading-snug text-[var(--color-ink-deep)] ring-1 ring-black/5 ${onAdd ? 'outline-none hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] cursor-pointer' : ''}`}
+                    style={{ top: 29 }}
+                  >
+                    {onAdd ? 'Thêm hoạt động' : 'Tự do khám phá'}
+                  </Tag>
+                </div>
+              );
+            }
 
-          const { row, side } = n;
-          const left = side === 'left';
-          const sight = isPinned(row);
-          const guide = sight && onOpenPlace ? () => onOpenPlace(row.key) : undefined;
-          const edit = onEdit ? () => onEdit(row.key) : undefined;
-          const open = guide ?? edit ?? (() => setDetailKey(row.key));
-          const time = timeRange(row);
-          const actions = actionsOf(row);
-          return (
-            <div key={row.key} className="group/stop absolute" style={{ left: `${n.x}%`, top: n.y }}>
-              {/* Nút trên đường: tâm đúng điểm của đường — cùng việc với thẻ nhãn (chỉ cho chuột / chạm, bàn phím dùng thẻ) */}
-              <button
-                type="button"
-                tabIndex={-1}
-                aria-hidden
-                onClick={open}
-                className="absolute left-0 -translate-x-1/2 cursor-pointer outline-none"
-                style={{ top: -NODE.stop / 2 }}
-              >
-                {sight ? <PhotoPin row={row} /> : <RoadMarker row={row} stayName={stayName} />}
-              </button>
-              {onRemove && (
+            const { row, side } = n;
+            const isTop = side === 'top';
+            const sight = isPinned(row);
+            const guide = sight && onOpenPlace ? () => onOpenPlace(row.key) : undefined;
+            const edit = onEdit ? () => onEdit(row.key) : undefined;
+            const open = guide ?? edit ?? (() => setDetailKey(row.key));
+            const time = timeRange(row);
+            const actions = actionsOf(row);
+            return (
+              <div key={row.key} className="group/stop absolute" style={{ left: n.x, top: n.y }}>
+                {/* Nút trên đường: tâm đúng điểm của đường */}
                 <button
                   type="button"
-                  onClick={() => onRemove(row.key)}
-                  aria-label={`Bỏ mục ${row.title}`}
-                  title="Bỏ mục này"
-                  className="absolute z-[2] flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-500 shadow-[0_2px_6px_rgba(10,46,38,0.25)] ring-1 ring-slate-200 transition-colors before:absolute before:-inset-2 hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose-500 cursor-pointer"
-                  // Góc trên bên phải của vòng tròn (45°): ghim ảnh bán kính 27px, nút tròn 23px.
-                  style={sight ? { left: 19 - 12, top: -19 - 12 } : { left: 16 - 12, top: -16 - 12 }}
-                >
-                  <X className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
-                </button>
-              )}
-              <div
-                ref={(el) => { if (el) labelEls.current.set(row.key, el); else labelEls.current.delete(row.key); }}
-                className={`pointer-events-none absolute flex flex-col gap-1 ${left ? 'items-start' : 'items-end'}`}
-                style={{ top: -NODE.stop / 2, width: LABEL_WIDTH, ...(left ? { left: LABEL_OFFSET } : { right: LABEL_OFFSET }) }}
-              >
-                <button
-                  type="button"
+                  tabIndex={-1}
+                  aria-hidden
                   onClick={open}
-                  className={`pointer-events-auto flex max-w-[min(100%,320px)] flex-col gap-0.5 rounded-lg bg-white/90 px-2.5 py-1.5 shadow-[0_1px_3px_rgba(10,46,38,0.1)] ring-1 ring-black/[0.06] backdrop-blur-[2px] transition-[box-shadow,background-color] duration-150 group-hover/stop:bg-white group-hover/stop:shadow-[0_6px_16px_-6px_rgba(10,46,38,0.35)] group-hover/stop:ring-[var(--color-primary)]/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] cursor-pointer ${
-                    left ? 'items-start text-left' : 'items-end text-right'
-                  }`}
+                  className="absolute left-0 -translate-x-1/2 cursor-pointer outline-none"
+                  style={{ top: -NODE.stop / 2 }}
                 >
-                  {time && <span className="text-[11px] font-extrabold leading-4 tabular-nums text-[#59766e]">{time}</span>}
-                  <span className="sr-only">{KIND_META[row.kind].label}: </span>
-                  <span className="line-clamp-2 text-[13px] font-extrabold leading-snug text-[var(--color-ink-deep)] sm:text-sm">{row.title}</span>
-                  <StopMeta row={row} addons={addonMap} stayName={stayName} stayHint={stayHint} showOrigin={showOrigin} align={left ? 'start' : 'end'} />
+                  {sight ? <PhotoPin row={row} /> : <RoadMarker row={row} stayName={stayName} />}
                 </button>
-                {actions && (
-                  <span className={`pointer-events-auto flex max-w-full flex-wrap items-center gap-1 ${left ? 'justify-start' : 'justify-end'}`}>
-                    {row.alternative && onSwap && (
-                      <button
-                        type="button"
-                        onClick={() => onSwap(row.key)}
-                        title={`Đổi sang ${row.alternative.name}`}
-                        className={`${chipBase} bg-white text-[#06604a] ring-1 ring-teal-200 hover:ring-[var(--color-primary)]`}
-                      >
-                        <Repeat className="h-3 w-3 shrink-0" aria-hidden /> <span className="truncate">Đổi: {row.alternative.name}</span>
-                      </button>
-                    )}
-                    {sight && onCheckin && (
-                      <button
-                        type="button"
-                        onClick={() => onCheckin(row.key)}
-                        className={`${chipBase} ${row.status === 'done' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-xs'}`}
-                      >
-                        {row.status === 'done' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> : <Camera className="h-3.5 w-3.5" aria-hidden />}
-                        {row.status === 'done' ? 'Đã check-in' : 'Check-in'}
-                      </button>
-                    )}
-                    {guide && edit && (
-                      <button type="button" onClick={edit} aria-label={`Sửa giờ, ghi chú: ${row.title}`} className={`${chipBase} w-7 justify-center bg-white px-0 text-slate-600 ring-1 ring-slate-200 hover:text-[#06604a] hover:ring-[var(--color-primary)]`}>
-                        <Pencil className="h-3 w-3" aria-hidden />
-                      </button>
-                    )}
-                  </span>
+                {onRemove && (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(row.key)}
+                    aria-label={`Bỏ mục ${row.title}`}
+                    title="Bỏ mục này"
+                    className="absolute z-[2] flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-500 shadow-[0_2px_6px_rgba(10,46,38,0.25)] ring-1 ring-slate-200 transition-colors before:absolute before:-inset-2 hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose-500 cursor-pointer"
+                    style={sight ? { left: 19 - 12, top: -19 - 12 } : { left: 16 - 12, top: -16 - 12 }}
+                  >
+                    <X className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
+                  </button>
                 )}
+                <div
+                  className="pointer-events-none absolute left-0 -translate-x-1/2 flex flex-col items-center gap-1"
+                  style={{
+                    width: LABEL_MAX_W,
+                    ...(isTop
+                      ? { bottom: NODE.stop / 2 + 8 }
+                      : { top: (sight ? NODE.stop / 2 + 12 : NODE.stop / 2 + 6) }),
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={open}
+                    className="pointer-events-auto flex w-full flex-col items-center text-center gap-0.5 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-[0_2px_6px_rgba(10,46,38,0.12)] ring-1 ring-black/[0.06] backdrop-blur-[2px] transition-[box-shadow,background-color] duration-150 group-hover/stop:bg-white group-hover/stop:shadow-[0_6px_16px_-6px_rgba(10,46,38,0.35)] group-hover/stop:ring-[var(--color-primary)]/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] cursor-pointer"
+                  >
+                    {time && <span className="text-[11px] font-extrabold leading-4 tabular-nums text-[#59766e]">{time}</span>}
+                    <span className="sr-only">{KIND_META[row.kind].label}: </span>
+                    <span className="line-clamp-2 text-[12.5px] font-extrabold leading-snug text-[var(--color-ink-deep)]">{row.title}</span>
+                    <StopMeta row={row} addons={addonMap} stayName={stayName} stayHint={stayHint} showOrigin={showOrigin} align="center" />
+                  </button>
+                  {actions && (
+                    <span className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1">
+                      {row.alternative && onSwap && (
+                        <button
+                          type="button"
+                          onClick={() => onSwap(row.key)}
+                          title={`Đổi sang ${row.alternative.name}`}
+                          className={`${chipBase} bg-white text-[#06604a] ring-1 ring-teal-200 hover:ring-[var(--color-primary)]`}
+                        >
+                          <Repeat className="h-3 w-3 shrink-0" aria-hidden /> <span className="truncate">Đổi: {row.alternative.name}</span>
+                        </button>
+                      )}
+                      {sight && onCheckin && (
+                        <button
+                          type="button"
+                          onClick={() => onCheckin(row.key)}
+                          className={`${chipBase} ${row.status === 'done' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-xs'}`}
+                        >
+                          {row.status === 'done' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> : <Camera className="h-3.5 w-3.5" aria-hidden />}
+                          {row.status === 'done' ? 'Đã check-in' : 'Check-in'}
+                        </button>
+                      )}
+                      {guide && edit && (
+                        <button type="button" onClick={edit} aria-label={`Sửa giờ, ghi chú: ${row.title}`} className={`${chipBase} w-7 justify-center bg-white px-0 text-slate-600 ring-1 ring-slate-200 hover:text-[#06604a] hover:ring-[var(--color-primary)]`}>
+                          <Pencil className="h-3 w-3" aria-hidden />
+                        </button>
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {onAdd && nodes.slice(0, -1).map((n, index) => {
-          const next = nodes[index + 1];
-          if (n.kind !== 'stop' || !next) return null;
-          const at = addPoint(n, next, index + 1);
-          return (
-            <button
-              key={`add-${n.row.key}`}
-              type="button"
-              onClick={() => onAdd(day, n.row.key)}
-              aria-label={`Chèn mục sau ${n.row.endTime ?? n.row.startTime ?? n.row.title}`}
-              title="Chèn mục vào đây"
-              className="absolute z-[3] flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[var(--color-primary)] shadow-[0_1px_4px_rgba(10,46,38,0.45)] transition-transform before:absolute before:-inset-2.5 hover:scale-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] cursor-pointer"
-              style={{ left: `${at.x}%`, top: at.y }}
-            >
-              <Plus className="h-3 w-3" strokeWidth={3.5} aria-hidden />
-            </button>
-          );
-        })}
+          {onAdd && nodes.slice(0, -1).map((n, index) => {
+            const next = nodes[index + 1];
+            if (n.kind !== 'stop' || !next) return null;
+            const at = addPoint(n, next, index + 1);
+            return (
+              <button
+                key={`add-${n.row.key}`}
+                type="button"
+                onClick={() => onAdd(day, n.row.key)}
+                aria-label={`Chèn mục sau ${n.row.endTime ?? n.row.startTime ?? n.row.title}`}
+                title="Chèn mục vào đây"
+                className="absolute z-[3] flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[var(--color-primary)] shadow-[0_1px_4px_rgba(10,46,38,0.45)] transition-transform before:absolute before:-inset-2.5 hover:scale-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] cursor-pointer"
+                style={{ left: at.x, top: at.y }}
+              >
+                <Plus className="h-3 w-3" strokeWidth={3.5} aria-hidden />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {detail && (
