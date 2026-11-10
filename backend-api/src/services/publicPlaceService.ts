@@ -42,6 +42,7 @@ export interface PublicAmenityDto {
   code: string;
   name: string;
   scope: AmenityScope;
+  count: number;
 }
 
 /**
@@ -50,12 +51,16 @@ export interface PublicAmenityDto {
  */
 export async function getAmenitiesInUse(kind: CategoryKind | null | undefined): Promise<PublicAmenityDto[]> {
   const target = kind ?? 'HOMESTAY';
-  const byCode = new Map<string, places.AmenityRow>();
+  const byCode = new Map<string, places.AmenityInUseRow>();
   for (const a of await places.placeAmenitiesInUse(target)) if (!byCode.has(a.code)) byCode.set(a.code, a);
-  for (const a of await places.roomAmenitiesInUse(target)) if (!byCode.has(a.code)) byCode.set(a.code, a);
+  for (const a of await places.roomAmenitiesInUse(target)) {
+    const existing = byCode.get(a.code);
+    if (!existing) byCode.set(a.code, a);
+    else if (a.count > existing.count) byCode.set(a.code, { ...existing, count: a.count });
+  }
   return [...byCode.values()]
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
-    .map((a) => ({ code: a.code, name: a.name, scope: a.scope }));
+    .map((a) => ({ code: a.code, name: a.name, scope: a.scope, count: a.count }));
 }
 
 export interface RegionHierarchyDto {
