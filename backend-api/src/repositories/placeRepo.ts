@@ -287,22 +287,26 @@ export async function placeAmenities(placeIds: readonly number[]): Promise<Place
   );
 }
 
+export type AmenityInUseRow = AmenityRow & { count: number };
+
 /** Tiện ích (cấp cơ sở) đang được ít nhất một chỗ nghỉ công khai thuộc kind xác nhận có (YES). */
-export async function placeAmenitiesInUse(kind: CategoryKind): Promise<AmenityRow[]> {
-  return query<AmenityRow>(
-    `SELECT DISTINCT a.* FROM place_amenity pa JOIN amenity a ON a.id = pa.amenity_id JOIN place p ON p.id = pa.place_id
-      WHERE pa.value = 'YES' AND a.is_active = TRUE AND p.kind = $1 AND p.is_deleted = FALSE AND p.visibility = 'PUBLISHED'`,
+export async function placeAmenitiesInUse(kind: CategoryKind): Promise<AmenityInUseRow[]> {
+  return query<AmenityInUseRow>(
+    `SELECT a.*, COUNT(DISTINCT p.id)::int AS count FROM place_amenity pa JOIN amenity a ON a.id = pa.amenity_id JOIN place p ON p.id = pa.place_id
+      WHERE pa.value = 'YES' AND a.is_active = TRUE AND p.kind = $1 AND p.is_deleted = FALSE AND p.visibility = 'PUBLISHED'
+      GROUP BY a.id`,
     [kind],
   );
 }
 
 /** Tiện ích cấp phòng (YES) của các loại phòng đang mở bán thuộc chỗ nghỉ công khai có kind. */
-export async function roomAmenitiesInUse(kind: CategoryKind): Promise<AmenityRow[]> {
-  return query<AmenityRow>(
-    `SELECT DISTINCT a.* FROM room_amenity ra JOIN amenity a ON a.id = ra.amenity_id JOIN room_type rt ON rt.id = ra.room_type_id
+export async function roomAmenitiesInUse(kind: CategoryKind): Promise<AmenityInUseRow[]> {
+  return query<AmenityInUseRow>(
+    `SELECT a.*, COUNT(DISTINCT p.id)::int AS count FROM room_amenity ra JOIN amenity a ON a.id = ra.amenity_id JOIN room_type rt ON rt.id = ra.room_type_id
        JOIN place p ON p.id = rt.place_id
       WHERE ra.value = 'YES' AND a.is_active = TRUE AND rt.status = 'ACTIVE' AND p.kind = $1 AND p.is_deleted = FALSE
-        AND p.visibility = 'PUBLISHED'`,
+        AND p.visibility = 'PUBLISHED'
+      GROUP BY a.id`,
     [kind],
   );
 }
