@@ -29,6 +29,7 @@ export interface PublicAmenityItem {
   code: string;
   name: string;
   scope: 'PLACE' | 'ROOM';
+  count?: number;
 }
 
 export interface PlaceContactItem {

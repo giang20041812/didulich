@@ -240,6 +240,8 @@ export interface PublicRegionDto {
   wards?: PublicRegionWardDto[];
 }
 
+export const peekPublicRegions = (): PublicRegionDto[] | undefined => peekCache<PublicRegionDto[]>('regions');
+
 /** Cây khu vực cho ô tìm kiếm — ít đổi: giữ trong tab 30 phút, ưu tiên thấp (không chặn nội dung trang). */
 export const fetchPublicRegions = async (): Promise<PublicRegionDto[]> => {
   try {
