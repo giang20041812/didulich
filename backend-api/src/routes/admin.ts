@@ -47,6 +47,7 @@ import * as cashflow from '../services/adminCashflowService.js';
 import * as dashboard from '../services/adminDashboardService.js';
 import * as finance from '../services/adminFinanceService.js';
 import * as homestayViews from '../services/adminHomestayViewService.js';
+import * as featuredAdmin from '../services/adminFeaturedService.js';
 import * as placesAdmin from '../services/adminPlaceService.js';
 import * as adminMedia from '../services/adminMediaService.js';
 import * as providersAdmin from '../services/adminProviderService.js';
@@ -151,6 +152,7 @@ const updatePlaceDataVerified = z.object({ dataVerified: z.boolean(notNull('Tr�
 const updatePlaceVisibility = z.object({ visibility: z.enum(PLACE_VISIBILITIES, notNull('Trạng thái hiển thị không được để trống')), reason: strOrNull });
 const bulkVerification = z.object({ ids: idList, verification: z.enum(PLACE_VERIFICATION_STATUSES).nullish(), reason: strOrNull });
 const deletePlaces = z.object({ ids: idList, reason: strOrNull });
+const savePinnedPlaces = z.object({ ids: z.array(z.number().int(), notNull('Thiếu danh sách địa điểm.')) });
 const moderate = z.object({
   action: z.enum(reviewsAdmin.MODERATION_ACTIONS, notNull('Vui lòng chọn cách xử lý')),
   reason: optText({ max: [500, 'Lý do tối đa 500 ký tự'] }),
@@ -644,6 +646,29 @@ adminRouter.patch(`${PLACES}/:id/data-verified`, local, async (req, res) => {
 
 adminRouter.patch(`${PLACES}/:id/visibility`, local, async (req, res) => {
   res.json(await placesAdmin.updateVisibility(pathId(req), parseBody(updatePlaceVisibility, req.body), callerId(req)));
+});
+
+// ---- Địa điểm nổi bật (ghim lên đầu danh sách) ---------------------------------------------------------------------------------
+
+const FEATURED = `${BASE}/featured-places`;
+const kindParam = (raw: unknown): (typeof CATEGORY_KINDS)[number] => {
+  const kind = enumParam(raw as string | undefined, CATEGORY_KINDS);
+  if (!kind) throw new BadParamError();
+  return kind;
+};
+
+adminRouter.get(FEATURED, local, async (req, res) => {
+  res.json(await featuredAdmin.listPinned(kindParam(req.query.kind)));
+});
+
+adminRouter.get(`${FEATURED}/candidates`, local, async (req, res) => {
+  res.json(await featuredAdmin.listCandidates(kindParam(req.query.kind), strParam(req.query.keyword)));
+});
+
+/** Lưu toàn bộ danh sách ghim của một loại theo đúng thứ tự gửi lên (rỗng = bỏ ghim hết). */
+adminRouter.put(`${FEATURED}/:kind`, local, async (req, res) => {
+  const body = parseBody(savePinnedPlaces, req.body);
+  res.json(await featuredAdmin.savePinned(kindParam(req.params.kind), body.ids, callerId(req)));
 });
 
 // ---- Ảnh điểm đến (admin) -----------------------------------------------------------------------------------------------------
