@@ -20,6 +20,7 @@ import HomestayViewsPanel from '@/components/admin/HomestayViewsPanel';
 import AdminStaffPanel from '@/components/admin/AdminStaffPanel';
 import ExplorePlacesPanel from '@/components/admin/ExplorePlacesPanel';
 import CombosPanel from '@/components/admin/CombosPanel';
+import FeaturedPlacesPanel from '@/components/admin/FeaturedPlacesPanel';
 import NearbyOffersPanel from '@/components/admin/NearbyOffersPanel';
 import AdminSidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED } from '@/components/admin/AdminSidebar';
 import AdminCommandPalette, { type QuickAction } from '@/components/admin/AdminCommandPalette';
@@ -762,7 +763,8 @@ export default function AdminDashboardPage() {
           {/* EP02: địa điểm khám phá quanh homestay (cấp 3 chỉ xem) */}
           {activeTab === 'explorePlaces' && <ExplorePlacesPanel key={panelKey} notify={showNotification} />}
           {activeTab === 'combos' && <CombosPanel key={panelKey} notify={showNotification} />}
-          {activeTab === 'nearbyOffers' && <NearbyOffersPanel key={panelKey} notify={showNotification} />}
+          {activeTab === 'featuredPlaces' && <FeaturedPlacesPanel key={panelKey} notify={showNotification} />}
+          {activeTab === 'nearbyOffers' &&<NearbyOffersPanel key={panelKey} notify={showNotification} />}
 
           {/* Tab 5: Tài chính — đang phát triển, chưa bật xử lý dòng tiền thật */}
           {activeTab === 'finance' && (

@@ -59,6 +59,8 @@ export interface PlaceRow {
   rejectReason: string | null;
   /** Cờ Admin: dữ liệu đã được xác thực (chính thống). Địa điểm tạo mới mặc định chưa xác thực. */
   dataVerified: boolean;
+  /** Thứ tự ưu tiên Admin ghim (1 = đầu tiên) trong danh sách công khai của cùng loại; null = không ghim, xếp theo đánh giá. */
+  featuredRank: number | null;
 }
 
 export interface PlaceWithRegion extends PlaceRow {
@@ -520,6 +522,9 @@ function publicWhere(f: PublicListFilter): { where: string; params: unknown[] } 
 
 const LIST_FROM = `FROM place p LEFT JOIN region r ON r.id = p.region_id LEFT JOIN region rp ON rp.id = r.parent_id LEFT JOIN region rpp ON rpp.id = rp.parent_id`;
 
+/** Thứ tự đề xuất: địa điểm Admin ghim (featured_rank nhỏ trước) rồi tới đánh giá cao; NULL luôn xếp cuối. */
+const FEATURED_FIRST_BY_RATING = 'p.featured_rank ASC NULLS LAST, p.rating_avg DESC NULLS LAST, p.rating_count DESC NULLS LAST, p.id ASC';
+
 export type PublicSort = 'recommended' | 'price_asc' | 'price_desc' | 'ratingAvg' | 'priceRefMin';
 
 /**
@@ -536,10 +541,11 @@ export function orderByForSort(property: string | undefined, direction: 'asc' | 
       return 'p.price_ref_min DESC NULLS LAST, p.id ASC';
     case 'priceRefMin':
       return `p.price_ref_min ${dir} NULLS LAST, p.id ASC`;
+    // Giao diện gửi "ratingAvg,desc" cho mục "Đề xuất": địa điểm Admin ghim lên trước, phần còn lại theo đánh giá.
     case 'ratingAvg':
-      return `p.rating_avg ${dir} NULLS LAST, p.rating_count ${dir} NULLS LAST, p.id ASC`;
+      return direction === 'desc' ? FEATURED_FIRST_BY_RATING : `p.rating_avg ASC NULLS LAST, p.rating_count ASC NULLS LAST, p.id ASC`;
     default:
-      return 'p.rating_avg DESC NULLS LAST, p.rating_count DESC NULLS LAST, p.id ASC';
+      return FEATURED_FIRST_BY_RATING;
   }
 }
 
