@@ -71,7 +71,7 @@ export default function TimelySuggestion() {
   useVisibleInterval(() => setNow(new Date()), 60_000);
   const { current: slot, next } = slotAt(now);
 
-  const { state } = useCurrentPosition();
+  const { state } = useCurrentPosition({ live: false });
   const userPos = state.status === 'ready' ? state.position : null;
   const [loaded, setLoaded] = useState<{ kind: NearMeKind; list: NearMePlace[] } | null>(null);
   const [transports, setTransports] = useState<TransportDto[] | null>(null);

@@ -192,14 +192,22 @@ export interface NearMePlace {
 export type NearMeKind = 'ATTRACTION' | 'HOMESTAY' | 'RESTAURANT';
 
 /**
- * Mọi điểm đến / homestay / quán ăn công khai có toạ độ (≤ 100 mục mỗi loại, giới hạn của backend) — khoảng cách tới khách tính
+ * Mọi điểm đến / homestay / quán ăn công khai có toạ độ (lấy nhiều trang, mỗi trang ≤ 100 mục) — khoảng cách tới khách tính
  * ngay trên máy nên vị trí khách không gửi lên máy chủ và kéo bán kính không gọi lại API. Giữ trong tab 10 phút.
  */
 export const fetchNearMeCandidates = (kind: NearMeKind): Promise<NearMePlace[]> =>
   cachedFetch(`nearme:${kind}`, 10 * 60_000, async () => {
-    const params = new URLSearchParams({ kind, page: '0', size: String(MAP_OVERVIEW_PAGE_SIZE) });
-    const data = (await getJson(`/api/public/places?${params}`, { priority: 'low' })) as { content?: PlaceSummaryApiItem[] };
-    return (data.content ?? []).flatMap((item) => {
+    // Backend trả tối đa 100 mục mỗi trang, xếp theo đề xuất: lấy lần lượt các trang để địa điểm gần khách không bị cắt mất
+    // chỉ vì đánh giá thấp hơn (tối đa 5 trang).
+    const items: PlaceSummaryApiItem[] = [];
+    for (let page = 0; page < 5; page++) {
+      const params = new URLSearchParams({ kind, page: String(page), size: String(MAP_OVERVIEW_PAGE_SIZE) });
+      const data = (await getJson(`/api/public/places?${params}`, { priority: 'low' })) as { content?: PlaceSummaryApiItem[] };
+      const content = data.content ?? [];
+      items.push(...content);
+      if (content.length < MAP_OVERVIEW_PAGE_SIZE) break;
+    }
+    return items.flatMap((item) => {
       const lat = toNumberOrNull(item.latitude);
       const lng = toNumberOrNull(item.longitude);
       if (lat === null || lng === null) return [];
