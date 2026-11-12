@@ -63,6 +63,34 @@ export const nearbyAdminApi = {
     (await axios.post<AdminOfferRow>(`/api/v1/admin/nearby-offers/${placeId}/show`, null, auth())).data,
 };
 
+// ------------------------------------------------------------------ địa điểm nổi bật (Admin ghim lên đầu danh sách)
+
+export interface FeaturedPlace {
+  id: number;
+  name: string;
+  kind: string;
+  address: string | null;
+  regionName: string | null;
+  visibility: string;
+  operationStatus: string;
+  ratingAvg: number | null;
+  ratingCount: number;
+  featuredRank: number | null;
+  coverImageUrl: string | null;
+}
+
+export const featuredAdminApi = {
+  /** Địa điểm đã ghim của một loại, theo đúng thứ tự hiển thị cho khách. */
+  list: async (kind: string) =>
+    (await axios.get<FeaturedPlace[]>('/api/v1/admin/featured-places', { ...auth(), params: { kind } })).data,
+  /** Địa điểm chưa ghim (đang xuất bản) để thêm vào danh sách. */
+  candidates: async (kind: string, keyword?: string) =>
+    (await axios.get<FeaturedPlace[]>('/api/v1/admin/featured-places/candidates', { ...auth(), params: { kind, keyword: keyword || undefined } })).data,
+  /** Lưu toàn bộ danh sách ghim của loại theo thứ tự `ids` (rỗng = bỏ ghim hết). */
+  save: async (kind: string, ids: number[]) =>
+    (await axios.put<FeaturedPlace[]>(`/api/v1/admin/featured-places/${kind}`, { ids }, auth())).data,
+};
+
 // ------------------------------------------------------------------ combo
 
 export type ComboScope = 'admin' | 'partner';

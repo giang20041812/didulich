@@ -14,6 +14,7 @@ import {
   MapPinned,
   Package,
   ShieldCheck,
+  Star,
   Users,
   Wallet,
   type LucideIcon,
@@ -38,7 +39,8 @@ export type AdminTab =
   | 'admins'
   | 'explorePlaces'
   | 'combos'
-  | 'nearbyOffers';
+  | 'nearbyOffers'
+  | 'featuredPlaces';
 
 /** Kiểu nhãn cạnh mục: work = số việc cần xử lý (vàng) · fresh = "N mới" (xanh) · soon = "Sắp có" (mục chưa dùng được). */
 export type NavBadgeKind = 'work' | 'fresh' | 'soon';
@@ -168,6 +170,12 @@ export const NAV_GROUPS: NavGroupConfig[] = [
         label: 'Combo',
         description: 'Gói combo (lịch trình, địa điểm, giờ, giá — không gồm ăn uống): tạo, duyệt combo và bản sửa của NCC, yêu cầu đặt của khách.',
         icon: Package,
+      },
+      {
+        key: 'featuredPlaces',
+        label: 'Địa điểm nổi bật',
+        description: 'Ghim homestay, nhà hàng, điểm tham quan uy tín lên đầu danh sách của khách và sắp thứ tự hiển thị.',
+        icon: Star,
       },
       {
         key: 'nearbyOffers',
