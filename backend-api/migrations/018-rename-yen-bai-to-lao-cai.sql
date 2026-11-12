@@ -1,13 +1,24 @@
 --liquibase formatted sql
 
 --changeset viettrek:v2-018-rename-yen-bai-to-lao-cai
---comment: Đổi tên tỉnh Yên Bái thành Lào Cai trong bảng region và cập nhật dữ liệu địa điểm.
+--comment: Đổi tên tỉnh Yên Bái thành Lào Cai trong bảng region và cập nhật dữ liệu địa điểm. Nếu tỉnh Lào Cai đã có sẵn (018-region-lao-cai chạy trước — luôn xảy ra trên DB dựng mới) thì không đổi tên nữa vì trùng mã, mà chỉ tắt cây Yên Bái cũ chưa địa điểm nào dùng.
 UPDATE region
 SET code = 'LAO_CAI',
     name = 'Lào Cai',
     name_norm = 'lao cai',
     path = 'Lào Cai'
-WHERE code = 'YEN_BAI' OR (level = 1 AND name = 'Yên Bái');
+WHERE (code = 'YEN_BAI' OR (level = 1 AND name = 'Yên Bái'))
+  AND NOT EXISTS (SELECT 1 FROM region WHERE code = 'LAO_CAI');
+
+WITH RECURSIVE old_tree AS (
+    SELECT id FROM region WHERE code = 'YEN_BAI'
+    UNION ALL
+    SELECT r.id FROM region r JOIN old_tree t ON r.parent_id = t.id
+)
+UPDATE region
+SET is_active = FALSE
+WHERE id IN (SELECT id FROM old_tree)
+  AND NOT EXISTS (SELECT 1 FROM place WHERE place.region_id = region.id);
 
 UPDATE region
 SET path = regexp_replace(path, '^Yên Bái/', 'Lào Cai/')
