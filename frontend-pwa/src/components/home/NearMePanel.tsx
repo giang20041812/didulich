@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, LocateFixed, MapPinOff, Mountain, Tent } from 'lucide-react';
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder';
-import { useCurrentPosition } from '@/hooks/useCurrentPosition';
+import { isCoarse, useCurrentPosition } from '@/hooks/useCurrentPosition';
 import { formatDistance, haversineKm, MU_CANG_CHAI_CENTER } from '@/lib/distance';
 import { mediaUrl } from '@/lib/mediaUrl';
 import { placeDetailPath } from '@/lib/placeRoutes';
@@ -15,27 +15,34 @@ interface NearMePanelProps {
 
 const MAX_RADIUS_KM = 30;
 const MAX_RESULTS = 12;
+/** Bán kính thử lần lượt cho tới khi quanh khách có đủ vài địa điểm — vùng núi cách nhau cả chục km nên 10 km cố định hay ra trống. */
+const AUTO_RADII_KM = [5, 10, 20, 30];
+const AUTO_MIN_RESULTS = 3;
 
 /**
  * "Gần tôi" ở trang chủ: điểm đến / homestay gần khách nhất trong bán kính khách chọn (1–30 km), khoảng cách đường chim
  * bay tính ngay trên máy. Khách ở xa (đa số xem trang khi còn ở Hà Nội...) hoặc không cho lấy vị trí thì gợi ý xem quanh
  * thị trấn Mù Cang Chải thay vì để trống. Đóng bằng dấu × trên nút "Gần tôi" (một chỗ đóng duy nhất).
+ *
+ * Vị trí cập nhật theo thời gian thực khi khách di chuyển. Bán kính tự chọn nhỏ nhất đủ vài kết quả cho tới khi khách tự kéo thanh.
  */
 export default function NearMePanel({ kind }: NearMePanelProps) {
   const { state, retry } = useCurrentPosition();
   const [aroundTown, setAroundTown] = useState(false);
-  const [radius, setRadius] = useState(10);
+  const [pickedRadius, setPickedRadius] = useState<number | null>(null);
   const [places, setPlaces] = useState<NearMePlace[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const noun = kind === 'HOMESTAY' ? 'homestay' : 'điểm đến';
 
   useEffect(() => {
     let alive = true;
+    setLoadFailed(false);
     fetchNearMeCandidates(kind)
       .then((list) => { if (alive) setPlaces(list); })
       .catch(() => { if (alive) setLoadFailed(true); });
     return () => { alive = false; };
-  }, [kind]);
+  }, [kind, reloadKey]);
 
   const anchor = aroundTown ? MU_CANG_CHAI_CENTER : state.status === 'ready' ? state.position : null;
   const ranked = useMemo(() => {
@@ -46,6 +53,7 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
   }, [anchor, places]);
   const nearest = ranked[0];
   const farAway = !aroundTown && !!nearest && nearest.km > MAX_RADIUS_KM;
+  const radius = pickedRadius ?? (AUTO_RADII_KM.find((r) => ranked.filter((item) => item.km <= r).length >= AUTO_MIN_RESULTS) ?? MAX_RADIUS_KM);
   const results = ranked.filter((item) => item.km <= radius).slice(0, MAX_RESULTS);
   const kmToTown = state.status === 'ready' ? haversineKm(state.position, MU_CANG_CHAI_CENTER) : null;
 
@@ -88,7 +96,18 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
       </div>
     );
   } else if (loadFailed) {
-    body = <p className="py-6 text-sm text-slate-600">Chưa tải được danh sách {noun}. Vui lòng thử lại sau.</p>;
+    body = (
+      <div className="flex flex-col items-start gap-3 py-2">
+        <p className="text-sm text-slate-600">Chưa tải được danh sách {noun} — có thể do sóng yếu. Vui lòng thử lại.</p>
+        <button
+          type="button"
+          onClick={() => setReloadKey((k) => k + 1)}
+          className="rounded-lg border-2 border-teal-600/30 bg-white px-3.5 py-2 text-xs font-bold text-[#052620] transition-colors hover:border-[#052620] cursor-pointer"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
   } else if (!places) {
     body = (
       <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -177,7 +196,7 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
             max={MAX_RADIUS_KM}
             step={1}
             value={radius}
-            onChange={(e) => setRadius(Number(e.target.value))}
+            onChange={(e) => setPickedRadius(Number(e.target.value))}
             aria-label={`Bán kính tìm ${noun}`}
             className="h-1.5 flex-1 cursor-pointer accent-[#052620]"
           />
@@ -185,10 +204,17 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
         </label>
       )}
 
+      {!aroundTown && isCoarse(state) && (
+        <p className="mt-3 flex items-center justify-between gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <span>Vị trí hiện chỉ gần đúng. Bật GPS (Vị trí) trên điện thoại để chính xác hơn — danh sách sẽ tự cập nhật.</span>
+          <button type="button" onClick={retry} className="shrink-0 font-bold underline underline-offset-2 cursor-pointer">Thử lại</button>
+        </p>
+      )}
+
       <div className="mt-4">{body}</div>
 
       <p className="mt-3 text-[11px] text-slate-400">
-        Khoảng cách theo đường chim bay · Vị trí của bạn chỉ dùng trên máy này, không gửi đi.
+        Khoảng cách theo đường chim bay · Tự cập nhật khi bạn di chuyển · Vị trí chỉ dùng trên máy này, không gửi đi.
       </p>
     </div>
   );
