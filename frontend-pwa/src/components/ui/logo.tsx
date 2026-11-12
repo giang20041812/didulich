@@ -50,7 +50,7 @@ export const LogoMark: React.FC<MarkProps> = ({ size = 48, className = '', alt =
 };
 
 /**
- * Chữ "Du Lịch" cạnh biểu tượng "Đi": font thương hiệu Outfit, KHÔNG đậm (500), cỡ lớn hơn chữ ảnh "Mù Cang Chải" trước đây.
+ * Chữ "Đi Du Lịch" cạnh biểu tượng: font tiêu đề DT Phudu.
  * `size` là cỡ chữ (px); `height` giữ cho các chỗ gọi cũ (chiều cao ảnh chữ cũ) và được quy đổi sang cỡ chữ.
  */
 export const LogoWordmark: React.FC<{ size?: number; height?: Size; tone?: 'dark' | 'light'; className?: string }> = ({
@@ -65,14 +65,14 @@ export const LogoWordmark: React.FC<{ size?: number; height?: Size; tone?: 'dark
       aria-hidden
       className={`block shrink-0 whitespace-nowrap leading-none ${className}`}
       style={{
-        fontFamily: 'var(--font-brand)',
-        fontWeight: 500,
+        fontFamily: 'var(--font-display)',
+        fontWeight: 700,
         fontSize: `${fontSize}px`,
         letterSpacing: '-0.01em',
         color: tone === 'light' ? '#F7F5ED' : 'var(--color-ink-deep)',
       }}
     >
-      Du Lịch
+      Đi Du Lịch
     </span>
   );
 };
