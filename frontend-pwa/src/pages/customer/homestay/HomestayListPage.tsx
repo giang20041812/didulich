@@ -573,47 +573,47 @@ export default function HomestayListPage() {
 
       {/* 1. Tiện nghi phòng ngủ (Room Scope) — chỉ hiện khi có homestay khai báo tiện nghi cấp phòng */}
       {roomAmenities.length > 0 && (
-      <div className="p-4 border-b border-gray-100">
-        <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <Wind className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Tiện nghi phòng
-          </span>
-          {roomAmenitiesSelectedCount > 0 && (
-            <span className="text-[10px] bg-[var(--color-primary-50)] text-[var(--color-primary)] px-2 py-0.5 rounded-md font-bold">
-              {roomAmenitiesSelectedCount} đã chọn
+        <div className="p-4 border-b border-gray-100">
+          <h4 className="font-bold text-[var(--color-ink-deep)] mb-3 text-sm flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Wind className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Tiện nghi phòng
             </span>
-          )}
-        </h4>
-        <div className="flex flex-col gap-2.5">
-          {roomAmenities.map(amenity => {
-            const isChecked = filters.amenities?.includes(amenity.code) || false;
-            const count = getAmenityCount(amenity);
-            return (
-              <label key={amenity.code} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded-xs border-gray-300 accent-[var(--color-primary)] cursor-pointer"
-                  checked={isChecked}
-                  onChange={(e) => {
-                    const currentAmenities = filters.amenities || [];
-                    handleFilterChange({
-                      amenities: e.target.checked
-                        ? [...currentAmenities, amenity.code]
-                        : currentAmenities.filter(a => a !== amenity.code)
-                    });
-                  }}
-                />
-                <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
-                  {amenity.name} <span className="text-xs font-medium text-slate-400">({count})</span>
-                </span>
-                <span className="text-[10px] uppercase font-bold text-[var(--color-muted)] bg-gray-100 px-1.5 py-0.5 rounded">
-                  Phòng
-                </span>
-              </label>
-            );
-          })}
+            {roomAmenitiesSelectedCount > 0 && (
+              <span className="text-[10px] bg-[var(--color-primary-50)] text-[var(--color-primary)] px-2 py-0.5 rounded-md font-bold">
+                {roomAmenitiesSelectedCount} đã chọn
+              </span>
+            )}
+          </h4>
+          <div className="flex flex-col gap-2.5">
+            {roomAmenities.map(amenity => {
+              const isChecked = filters.amenities?.includes(amenity.code) || false;
+              const count = getAmenityCount(amenity);
+              return (
+                <label key={amenity.code} className="flex items-center gap-2.5 cursor-pointer group rounded-lg -mx-1.5 px-1.5 py-1 transition-colors hover:bg-emerald-50/70">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded-xs border-gray-300 accent-[var(--color-primary)] cursor-pointer"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const currentAmenities = filters.amenities || [];
+                      handleFilterChange({
+                        amenities: e.target.checked
+                          ? [...currentAmenities, amenity.code]
+                          : currentAmenities.filter(a => a !== amenity.code)
+                      });
+                    }}
+                  />
+                  <span className={`text-sm flex-1 transition-colors ${isChecked ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--color-ink)] group-hover:text-[var(--color-primary)]'}`}>
+                    {amenity.name} <span className="text-xs font-medium text-slate-400">({count})</span>
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-[var(--color-muted)] bg-gray-100 px-1.5 py-0.5 rounded">
+                    Phòng
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         </div>
-      </div>
       )}
 
       {/* 2. Tiện nghi & Dịch vụ Homestay (Place Scope) */}
@@ -735,281 +735,280 @@ export default function HomestayListPage() {
         {firstLoad ? (
           <ToolbarSkeleton {...SKELETON.toolbar} />
         ) : (<>
-        {/* BỘ LỌC BÊN TRÊN HIỆN ĐẠI (Top Filter Toolbar & Quick Filter Bar) */}
-        <div className="relative overflow-hidden bg-white/90 backdrop-blur-md border border-white ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
-          {/* Row 1: Header + Count + Sort & Map View */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
-            <div>
-              <h2 className="text-base md:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                Bộ lọc & Sắp xếp
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border border-emerald-200/60 shadow-2xs">
-                  {totalElements} chỗ nghỉ
-                </span>
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-2.5 shrink-0">
-              {/* Sort Selector */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 hover:border-slate-300 transition-colors">
-                <ArrowUpDown className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-                <span className="text-xs text-slate-500 font-medium hidden md:inline">Sắp xếp:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-                  className="bg-transparent text-xs md:text-sm font-bold text-slate-800 focus:outline-none cursor-pointer"
-                >
-                  <option value="recommended">Gợi ý hàng đầu</option>
-                  <option value="price_asc">Giá: Thấp đến Cao</option>
-                  <option value="price_desc">Giá: Cao đến Thấp</option>
-                </select>
+          {/* BỘ LỌC BÊN TRÊN HIỆN ĐẠI (Top Filter Toolbar & Quick Filter Bar) */}
+          <div className="relative overflow-hidden bg-white/90 backdrop-blur-md border border-white ring-1 ring-slate-900/[0.06] rounded-2xl p-4 md:p-5 shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)] mb-6 transition-shadow duration-500 hover:shadow-[0_18px_40px_-18px_rgba(16,40,34,0.34)]">
+            <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
+            {/* Row 1: Header + Count + Sort & Map View */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+              <div>
+                <h2 className="text-base md:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  Bộ lọc & Sắp xếp
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 border border-emerald-200/60 shadow-2xs">
+                    {totalElements} chỗ nghỉ
+                  </span>
+                </h2>
               </div>
 
-              {/* Map Button (VietMap) */}
-              <button
-                onClick={() => setShowMap(!showMap)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl border transition-all shadow-2xs active:scale-95 cursor-pointer ${showMap
+              <div className="flex items-center gap-2.5 shrink-0">
+                {/* Sort Selector */}
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 hover:border-slate-300 transition-colors">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                  <span className="text-xs text-slate-500 font-medium hidden md:inline">Sắp xếp:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
+                    className="bg-transparent text-xs md:text-sm font-bold text-slate-800 focus:outline-none cursor-pointer"
+                  >
+                    <option value="recommended">Gợi ý hàng đầu</option>
+                    <option value="price_asc">Giá: Thấp đến Cao</option>
+                    <option value="price_desc">Giá: Cao đến Thấp</option>
+                  </select>
+                </div>
+
+                {/* Map Button (VietMap) */}
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl border transition-all shadow-2xs active:scale-95 cursor-pointer ${showMap
                     ? 'border-[#052620] bg-[#052620] text-white shadow-xs'
                     : 'border-emerald-600/30 bg-emerald-50 text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white'
-                  }`}
-                title="Bật/Tắt chế độ xem bản đồ VietMap"
-              >
-                <Map className="w-3.5 h-3.5" />
-                <span>{showMap ? 'Ẩn bản đồ' : 'Bản đồ VietMap'}</span>
-              </button>
+                    }`}
+                  title="Bật/Tắt chế độ xem bản đồ VietMap"
+                >
+                  <Map className="w-3.5 h-3.5" />
+                  <span>{showMap ? 'Ẩn bản đồ' : 'Bản đồ VietMap'}</span>
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Row 2: Thanh lọc nhanh (1-click quick filter buttons) */}
-          <div className="flex items-center gap-2 pt-3.5 overflow-x-auto scrollbar-hide pb-1">
-            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Lọc nhanh:
-            </span>
+            {/* Row 2: Thanh lọc nhanh (1-click quick filter buttons) */}
+            <div className="flex items-center gap-2 pt-3.5 overflow-x-auto scrollbar-hide pb-1">
+              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Lọc nhanh:
+              </span>
 
-            {quickAmenities.map(({ item, Icon }) => {
-              const active = filters.amenities?.includes(item.code) ?? false;
-              return (
-                <button
-                  key={item.code}
-                  onClick={() => {
-                    const current = filters.amenities || [];
-                    handleFilterChange({
-                      amenities: active ? current.filter(a => a !== item.code) : [...current, item.code]
-                    });
-                  }}
-                  className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${active
+              {quickAmenities.map(({ item, Icon }) => {
+                const active = filters.amenities?.includes(item.code) ?? false;
+                return (
+                  <button
+                    key={item.code}
+                    onClick={() => {
+                      const current = filters.amenities || [];
+                      handleFilterChange({
+                        amenities: active ? current.filter(a => a !== item.code) : [...current, item.code]
+                      });
+                    }}
+                    className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${active
                       ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
-                    }`}
-                >
-                  <Icon className="w-3.5 h-3.5" /> {item.code === 'BBQ_AREA' ? 'Có BBQ' : item.name}
-                </button>
-              );
-            })}
+                      }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" /> {item.code === 'BBQ_AREA' ? 'Có BBQ' : item.name}
+                  </button>
+                );
+              })}
 
-            {!quickAmenities.some(q => q.item.code === 'BBQ_AREA') && (
-              <button
-                onClick={() => {
-                  const current = filters.amenities || [];
-                  const active = current.includes('BBQ_AREA');
-                  handleFilterChange({
-                    amenities: active ? current.filter(a => a !== 'BBQ_AREA') : [...current, 'BBQ_AREA']
-                  });
-                }}
-                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.amenities?.includes('BBQ_AREA')
+              {!quickAmenities.some(q => q.item.code === 'BBQ_AREA') && (
+                <button
+                  onClick={() => {
+                    const current = filters.amenities || [];
+                    const active = current.includes('BBQ_AREA');
+                    handleFilterChange({
+                      amenities: active ? current.filter(a => a !== 'BBQ_AREA') : [...current, 'BBQ_AREA']
+                    });
+                  }}
+                  className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.amenities?.includes('BBQ_AREA')
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
-                  }`}
-              >
-                <Flame className="w-3.5 h-3.5" /> Có BBQ
-              </button>
-            )}
+                    }`}
+                >
+                  <Flame className="w-3.5 h-3.5" /> Có BBQ
+                </button>
+              )}
 
-            {/* Quick filter: Gần địa điểm … */}
-            <button
-              type="button"
-              onClick={() => setNearbyDropdownOpen(v => !v)}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${selectedNearbySpot
+              {/* Quick filter: Gần địa điểm … */}
+              <button
+                type="button"
+                onClick={() => setNearbyDropdownOpen(v => !v)}
+                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${selectedNearbySpot
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-transparent shadow-md shadow-emerald-600/25'
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white hover:text-emerald-800 hover:shadow-md'
-                }`}
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              {selectedNearbySpot
-                ? `Gần: ${NEARBY_SPOT_OPTIONS.find(s => s.id === selectedNearbySpot)?.label}`
-                : 'Gần địa điểm …'}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${nearbyDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
+                  }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                {selectedNearbySpot
+                  ? `Gần: ${NEARBY_SPOT_OPTIONS.find(s => s.id === selectedNearbySpot)?.label}`
+                  : 'Gần địa điểm …'}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${nearbyDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            {/* Quick Budget < 500k */}
-            <button
-              onClick={() => {
-                const isUnder500k = filters.maxPrice === 500000 && !filters.minPrice;
-                handleFilterChange({
-                  minPrice: undefined,
-                  maxPrice: isUnder500k ? undefined : 500000
-                });
-              }}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.maxPrice === 500000 && !filters.minPrice
+              {/* Quick Budget < 500k */}
+              <button
+                onClick={() => {
+                  const isUnder500k = filters.maxPrice === 500000 && !filters.minPrice;
+                  handleFilterChange({
+                    minPrice: undefined,
+                    maxPrice: isUnder500k ? undefined : 500000
+                  });
+                }}
+                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${filters.maxPrice === 500000 && !filters.minPrice
                   ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-white border-transparent shadow-md shadow-amber-500/25'
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:-translate-y-0.5 hover:border-amber-300 hover:bg-white hover:text-amber-700 hover:shadow-md'
-                }`}
-            >
-              Dưới 500k / đêm
-            </button>
-
-            {/* Chỉ xem homestay đã lưu trên thiết bị này */}
-            {savedIds.length > 0 && (
-              <button
-                onClick={() => setShowSavedOnly((v) => !v)}
-                className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${showSavedOnly
-                  ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
-                  : 'bg-slate-50 text-rose-700 border-rose-200 hover:border-rose-300 hover:bg-white'
-                }`}
+                  }`}
               >
-                <Heart className={`w-3.5 h-3.5 ${showSavedOnly ? 'fill-white' : 'fill-rose-600 text-rose-600'}`} />
-                Đã lưu ({savedIds.length})
+                Dưới 500k / đêm
               </button>
-            )}
-          </div>
 
-          {nearbyDropdownOpen && (
-            <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/70">
-              <span className="text-xs font-bold text-emerald-900 mr-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Chọn điểm tham quan gần chỗ nghỉ:
-              </span>
-              {NEARBY_SPOT_OPTIONS.map(spot => {
-                const active = selectedNearbySpot === spot.id;
-                const count = countSource.filter(hs => matchesKeywords(hs, spot.keywords)).length;
-                return (
+              {/* Chỉ xem homestay đã lưu trên thiết bị này */}
+              {savedIds.length > 0 && (
+                <button
+                  onClick={() => setShowSavedOnly((v) => !v)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-300 active:scale-95 cursor-pointer ${showSavedOnly
+                    ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
+                    : 'bg-slate-50 text-rose-700 border-rose-200 hover:border-rose-300 hover:bg-white'
+                    }`}
+                >
+                  <Heart className={`w-3.5 h-3.5 ${showSavedOnly ? 'fill-white' : 'fill-rose-600 text-rose-600'}`} />
+                  Đã lưu ({savedIds.length})
+                </button>
+              )}
+            </div>
+
+            {nearbyDropdownOpen && (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-200/70">
+                <span className="text-xs font-bold text-emerald-900 mr-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)]" /> Chọn điểm tham quan gần chỗ nghỉ:
+                </span>
+                {NEARBY_SPOT_OPTIONS.map(spot => {
+                  const active = selectedNearbySpot === spot.id;
+                  const count = countSource.filter(hs => matchesKeywords(hs, spot.keywords)).length;
+                  return (
+                    <button
+                      key={spot.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedNearbySpot(active ? null : spot.id);
+                        setNearbyDropdownOpen(false);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${active
+                          ? 'bg-[var(--color-primary)] text-white border-transparent shadow-xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:text-[var(--color-primary)]'
+                        }`}
+                    >
+                      {spot.label} ({count})
+                    </button>
+                  );
+                })}
+                {selectedNearbySpot && (
                   <button
-                    key={spot.id}
                     type="button"
                     onClick={() => {
-                      setSelectedNearbySpot(active ? null : spot.id);
+                      setSelectedNearbySpot(null);
                       setNearbyDropdownOpen(false);
-                      setCurrentPage(1);
                     }}
-                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer ${
-                      active
-                        ? 'bg-[var(--color-primary)] text-white border-transparent shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:text-[var(--color-primary)]'
-                    }`}
+                    className="px-2.5 py-1 rounded-full text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
                   >
-                    {spot.label} ({count})
+                    Bỏ chọn
                   </button>
-                );
-              })}
-              {selectedNearbySpot && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedNearbySpot(null);
-                    setNearbyDropdownOpen(false);
-                  }}
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
-                >
-                  Bỏ chọn
-                </button>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
-          {/* Thanh tìm kiếm nằm ngay dưới các bộ lọc nhanh */}
-          {renderKeywordSearch()}
+            {/* Thanh tìm kiếm nằm ngay dưới các bộ lọc nhanh */}
+            {renderKeywordSearch()}
 
-          {/* Row 3: Active Filters Tags (Khi có bộ lọc đang chạy) */}
-          {hasActiveFilters && (
-            <div className="flex flex-wrap items-center gap-2 pt-3.5 mt-3 border-t border-slate-100">
-              <span className="text-xs font-bold text-slate-500 mr-1">
-                Đang áp dụng:
-              </span>
+            {/* Row 3: Active Filters Tags (Khi có bộ lọc đang chạy) */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-2 pt-3.5 mt-3 border-t border-slate-100">
+                <span className="text-xs font-bold text-slate-500 mr-1">
+                  Đang áp dụng:
+                </span>
 
-              {filters.province && filters.province !== 'Lào Cai' && (
-                <button
-                  onClick={() => handleFilterChange({ province: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
-                >
-                  <MapPin className="w-3 h-3 text-[var(--color-primary)]" />
-                  Tỉnh: {filters.province} <X className="w-3 h-3 text-[var(--color-primary)]" />
-                </button>
-              )}
-
-              {filters.district && (
-                <button
-                  onClick={() => handleFilterChange({ district: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
-                >
-                  <MapPin className="w-3 h-3 text-[var(--color-primary)]" />
-                  Huyện: {filters.district} <X className="w-3 h-3 text-[var(--color-primary)]" />
-                </button>
-              )}
-
-              {filters.attractions && filters.attractions.length > 0 && (
-                <button
-                  onClick={() => handleFilterChange({ attractions: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-900 text-xs font-bold shadow-2xs transition-all hover:bg-amber-100 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  {filters.attractions.length} điểm du lịch <X className="w-3 h-3 text-amber-800" />
-                </button>
-              )}
-
-              {filters.guests && (
-                <button
-                  onClick={() => handleFilterChange({ guests: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
-                >
-                  <Users className="w-3 h-3 text-[var(--color-primary)]" />
-                  Đủ chỗ {filters.guests} khách <X className="w-3 h-3 text-[var(--color-primary)]" />
-                </button>
-              )}
-
-              {/* Bỏ ngày thì bỏ cả ngày đi lẫn ngày về (không để sót một đầu trên đường dẫn sang trang chi tiết) */}
-              {filters.checkIn && (
-                <button
-                  onClick={() => handleFilterChange({ checkIn: undefined, checkOut: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-teal-200 bg-teal-50 text-teal-800 text-xs font-bold tabular-nums shadow-2xs transition-all hover:bg-teal-100 cursor-pointer"
-                >
-                  Ngày ở: {formatVnDate(filters.checkIn)}{filters.checkOut ? ` → ${formatVnDate(filters.checkOut)}` : ''} <X className="w-3 h-3 text-teal-700" />
-                </button>
-              )}
-
-              {filters.amenities?.map(amenityCode => {
-                const item = amenityCatalog.find(a => a.code === amenityCode);
-                const name = item ? `${item.name}${item.scope === 'ROOM' ? ' (Phòng)' : ''}` : amenityCode;
-                return (
+                {filters.province && filters.province !== 'Lào Cai' && (
                   <button
-                    key={amenityCode}
-                    onClick={() => handleFilterChange({ amenities: filters.amenities?.filter(a => a !== amenityCode) })}
+                    onClick={() => handleFilterChange({ province: undefined })}
                     className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
                   >
-                    {name} <X className="w-3 h-3 text-[var(--color-primary)]" />
+                    <MapPin className="w-3 h-3 text-[var(--color-primary)]" />
+                    Tỉnh: {filters.province} <X className="w-3 h-3 text-[var(--color-primary)]" />
                   </button>
-                );
-              })}
+                )}
 
-              {(filters.minPrice || filters.maxPrice) && (
+                {filters.district && (
+                  <button
+                    onClick={() => handleFilterChange({ district: undefined })}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
+                  >
+                    <MapPin className="w-3 h-3 text-[var(--color-primary)]" />
+                    Huyện: {filters.district} <X className="w-3 h-3 text-[var(--color-primary)]" />
+                  </button>
+                )}
+
+                {filters.attractions && filters.attractions.length > 0 && (
+                  <button
+                    onClick={() => handleFilterChange({ attractions: undefined })}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-300 bg-amber-50 text-amber-900 text-xs font-bold shadow-2xs transition-all hover:bg-amber-100 cursor-pointer"
+                  >
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    {filters.attractions.length} điểm du lịch <X className="w-3 h-3 text-amber-800" />
+                  </button>
+                )}
+
+                {filters.guests && (
+                  <button
+                    onClick={() => handleFilterChange({ guests: undefined })}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
+                  >
+                    <Users className="w-3 h-3 text-[var(--color-primary)]" />
+                    Đủ chỗ {filters.guests} khách <X className="w-3 h-3 text-[var(--color-primary)]" />
+                  </button>
+                )}
+
+                {/* Bỏ ngày thì bỏ cả ngày đi lẫn ngày về (không để sót một đầu trên đường dẫn sang trang chi tiết) */}
+                {filters.checkIn && (
+                  <button
+                    onClick={() => handleFilterChange({ checkIn: undefined, checkOut: undefined })}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-teal-200 bg-teal-50 text-teal-800 text-xs font-bold tabular-nums shadow-2xs transition-all hover:bg-teal-100 cursor-pointer"
+                  >
+                    Ngày ở: {formatVnDate(filters.checkIn)}{filters.checkOut ? ` → ${formatVnDate(filters.checkOut)}` : ''} <X className="w-3 h-3 text-teal-700" />
+                  </button>
+                )}
+
+                {filters.amenities?.map(amenityCode => {
+                  const item = amenityCatalog.find(a => a.code === amenityCode);
+                  const name = item ? `${item.name}${item.scope === 'ROOM' ? ' (Phòng)' : ''}` : amenityCode;
+                  return (
+                    <button
+                      key={amenityCode}
+                      onClick={() => handleFilterChange({ amenities: filters.amenities?.filter(a => a !== amenityCode) })}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
+                    >
+                      {name} <X className="w-3 h-3 text-[var(--color-primary)]" />
+                    </button>
+                  );
+                })}
+
+                {(filters.minPrice || filters.maxPrice) && (
+                  <button
+                    onClick={() => handleFilterChange({ minPrice: undefined, maxPrice: undefined })}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
+                  >
+                    {filters.minPrice ? `Từ ${filters.minPrice.toLocaleString('vi-VN')}đ` : ''}
+                    {filters.minPrice && filters.maxPrice ? ' - ' : ''}
+                    {filters.maxPrice ? `Đến ${filters.maxPrice.toLocaleString('vi-VN')}đ` : ''}
+                    <X className="w-3 h-3 text-[var(--color-primary)]" />
+                  </button>
+                )}
+
                 <button
-                  onClick={() => handleFilterChange({ minPrice: undefined, maxPrice: undefined })}
-                  className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-2xs transition-all hover:bg-emerald-100 cursor-pointer"
+                  onClick={handleClearFilters}
+                  className="shrink-0 flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition-all shadow-2xs cursor-pointer"
                 >
-                  {filters.minPrice ? `Từ ${filters.minPrice.toLocaleString('vi-VN')}đ` : ''}
-                  {filters.minPrice && filters.maxPrice ? ' - ' : ''}
-                  {filters.maxPrice ? `Đến ${filters.maxPrice.toLocaleString('vi-VN')}đ` : ''}
-                  <X className="w-3 h-3 text-[var(--color-primary)]" />
+                  <RotateCcw className="w-3 h-3" /> Xóa tất cả bộ lọc
                 </button>
-              )}
-
-              <button
-                onClick={handleClearFilters}
-                className="shrink-0 flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold transition-all shadow-2xs cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" /> Xóa tất cả bộ lọc
-              </button>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
 
         </>)}
         {/* Main Content Layout with Sidebar */}
@@ -1052,7 +1051,7 @@ export default function HomestayListPage() {
                 </div>
               </div>
             </div>
-          , document.body)}
+            , document.body)}
 
           {/* Sidebar (Desktop) */}
           <aside className="hidden w-[300px] shrink-0 flex-col gap-4 md:flex">
@@ -1138,64 +1137,64 @@ export default function HomestayListPage() {
                   {paginatedHomestays.map((hs, index) => {
                     return (
                       <Reveal key={hs.id} delay={(index % 3) * 80} className="h-full" offset={28}>
-                      <CompactPlaceCard
-                        to={homestayDetailPath(hs.id)}
-                        name={hs.name}
-                        imageUrl={hs.coverImageUrl}
-                        location={hs.district || 'Lào Cai'}
-                        price={formatVnd(hs.price, 'Liên hệ')}
-                        priceUnit={hs.price ? 'đêm' : null}
-                        amenities={hs.amenities ?? []}
-                        ctaText="Khám phá ngay"
-                        // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
-                        onIntent={() => prefetchHomestay(hs.id)}
-                        notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
-                          <span className="text-[11px] font-bold text-amber-300">Tạm ngừng nhận đặt phòng</span>
-                        ) : hs.availableForSelectedDates === false ? (
-                          <span className="text-[11px] font-bold text-slate-300">Hết phòng ngày đã chọn</span>
-                        ) : undefined}
-                      />
+                        <CompactPlaceCard
+                          to={homestayDetailPath(hs.id)}
+                          name={hs.name}
+                          imageUrl={hs.coverImageUrl}
+                          location={hs.district || 'Lào Cai'}
+                          price={formatVnd(hs.price, 'Liên hệ')}
+                          priceUnit={hs.price ? 'đêm' : null}
+                          amenities={hs.amenities ?? []}
+                          ctaText="Khám phá ngay"
+                          // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
+                          onIntent={() => prefetchHomestay(hs.id)}
+                          notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
+                            <span className="text-[11px] font-bold text-amber-300">Tạm ngừng nhận đặt phòng</span>
+                          ) : hs.availableForSelectedDates === false ? (
+                            <span className="text-[11px] font-bold text-slate-300">Hết phòng ngày đã chọn</span>
+                          ) : undefined}
+                        />
                       </Reveal>
                     );
                   })}
                 </FramerSwipeCardStack>
               )}
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mt-6 mb-4">
-                    <button
-                      disabled={currentPage === 1}
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-300 hover:bg-emerald-50 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 bg-white text-xs cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4 text-[var(--color-ink-deep)]" />
-                    </button>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-6 mb-4">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-300 hover:bg-emerald-50 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 bg-white text-xs cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[var(--color-ink-deep)]" />
+                  </button>
 
-                    <div className="flex items-center gap-1">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => handlePageChange(i + 1)}
-                          className={`w-10 h-10 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer active:scale-95 ${currentPage === i + 1
-                              ? 'bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-600/30'
-                              : 'text-[var(--color-ink-deep)] hover:bg-emerald-50 hover:border-emerald-300 hover:-translate-y-0.5 bg-white border border-slate-200'
-                            }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      disabled={currentPage === totalPages}
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-300 hover:bg-emerald-50 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 bg-white text-xs cursor-pointer"
-                    >
-                      <ChevronRight className="w-4 h-4 text-[var(--color-ink-deep)]" />
-                    </button>
+                  <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handlePageChange(i + 1)}
+                        className={`w-10 h-10 rounded-xl font-bold text-xs transition-all duration-300 cursor-pointer active:scale-95 ${currentPage === i + 1
+                          ? 'bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-600/30'
+                          : 'text-[var(--color-ink-deep)] hover:bg-emerald-50 hover:border-emerald-300 hover:-translate-y-0.5 bg-white border border-slate-200'
+                          }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
                   </div>
-                )}
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:border-emerald-300 hover:bg-emerald-50 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-300 bg-white text-xs cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4 text-[var(--color-ink-deep)]" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

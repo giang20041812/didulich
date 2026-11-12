@@ -102,11 +102,10 @@ const FIELD_LABEL = 'text-[11px] font-extrabold uppercase tracking-[0.08em] text
 const FIELD_VALUE = 'truncate text-base font-extrabold text-[var(--color-ink-deep)]';
 
 /** Chip chọn thời lượng / số người: cao 40px, bo 8px; đang chọn viền xanh 1.5px + nền xanh nhạt + dấu tích. */
-const chipClass = (active: boolean, padding = 'px-1.5') => `inline-flex h-10 min-w-0 items-center justify-center gap-1 rounded-lg ${padding} text-sm transition-colors cursor-pointer ${
-  active
+const chipClass = (active: boolean, padding = 'px-1.5') => `inline-flex h-10 min-w-0 items-center justify-center gap-1 rounded-lg ${padding} text-sm transition-colors cursor-pointer ${active
     ? 'border-[1.5px] border-[var(--color-primary)] bg-[var(--color-nav-active-bg)] font-extrabold text-[#06604a]'
     : 'border border-[#d6dfd0] bg-white font-bold text-[var(--color-ink)] hover:border-[var(--color-primary)] hover:text-[#06604a]'
-}`;
+  }`;
 
 /**
  * Khối tìm kiếm (trang chủ, danh sách homestay) — đặt phòng trước: Điểm đến (mặc định tỉnh đầu tiên có lịch trình gợi ý) ·
@@ -267,7 +266,7 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const el = searchRef.current;
+        const el = formRef.current ?? searchRef.current;
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const headerBottom = document.getElementById('app-header')?.getBoundingClientRect().bottom ?? 0;
@@ -275,7 +274,7 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
         else setPopoverBounds(rect);
       });
     };
-    setPopoverBounds(searchRef.current?.getBoundingClientRect() ?? null);
+    setPopoverBounds((formRef.current ?? searchRef.current)?.getBoundingClientRect() ?? null);
     window.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure, { passive: true });
     return () => {
@@ -484,19 +483,19 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
   // Chế độ chốt lúc mở (không đổi giữa chừng khi cuộn làm khối thu gọn / bung ra), vị trí đo lại khi cuộn / đổi cỡ để
   // popover luôn bám ngay dưới khối tìm kiếm thay vì đứng yên rồi nhảy.
   const searchBounds = popoverBounds;
-  const popoverTop = (searchBounds?.bottom ?? 0) + 10;
+  const popoverTop = (searchBounds?.bottom ?? 0) + 6;
   const popoverStyle: React.CSSProperties = popoverDocked
     ? {
-        top: 'calc(var(--app-header-offset, 64px) + 8px)',
-        maxHeight: 'calc(100dvh - var(--app-header-offset, 64px) - 24px)',
-      }
+      top: 'calc(var(--app-header-offset, 64px) + 8px)',
+      maxHeight: 'calc(100dvh - var(--app-header-offset, 64px) - 24px)',
+    }
     : {
-        top: `${popoverTop}px`,
-        maxHeight: `calc(100dvh - ${popoverTop + 16}px)`,
-        left: `${searchBounds?.left ?? 0}px`,
-        width: `${Math.min(searchBounds?.width ?? 820, 820)}px`,
-        maxWidth: 'calc(100vw - 32px)',
-      };
+      top: `${popoverTop}px`,
+      maxHeight: `calc(100dvh - ${popoverTop + 16}px)`,
+      left: `${searchBounds?.left ?? 0}px`,
+      width: `${searchBounds?.width ?? 820}px`,
+      maxWidth: 'calc(100vw - 32px)',
+    };
 
   const tabButton = (tab: Tab, index: number, label: string, Icon: LucideIcon, compact = false) => (
     <button
@@ -504,9 +503,8 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
       type="button"
       onClick={() => setActiveTab(tab)}
       aria-pressed={activeTab === tab}
-      className={`flex items-center justify-center gap-1.5 truncate rounded-lg text-center font-bold transition-[background-color,color,box-shadow] duration-200 cursor-pointer ${
-        compact ? 'min-h-9 py-1.5 text-xs' : 'relative z-10 px-2 py-2 text-xs sm:text-sm'
-      } ${activeTab === tab ? (compact ? 'bg-white text-[var(--color-primary)] shadow-xs' : 'text-[var(--color-primary)]') : compact ? 'text-gray-600 hover:bg-white/60 hover:text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+      className={`flex items-center justify-center gap-1.5 truncate rounded-lg text-center font-bold transition-[background-color,color,box-shadow] duration-200 cursor-pointer ${compact ? 'min-h-9 py-1.5 text-xs' : 'relative z-10 px-2 py-2 text-xs sm:text-sm'
+        } ${activeTab === tab ? (compact ? 'bg-white text-[var(--color-primary)] shadow-xs' : 'text-[var(--color-primary)]') : compact ? 'text-gray-600 hover:bg-white/60 hover:text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
     >
       {!compact && <Icon className="h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />}
       <span className="truncate">{index}. {label}</span>
@@ -563,9 +561,8 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
                 type="button"
                 onClick={() => pickProvince(r.name)}
                 aria-pressed={selected}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-[background-color,border-color,box-shadow] duration-200 cursor-pointer ${
-                  selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)] shadow-xs' : 'border-gray-200 bg-white hover:border-[var(--color-primary)] hover:bg-gray-50'
-                }`}
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-[background-color,border-color,box-shadow] duration-200 cursor-pointer ${selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)] shadow-xs' : 'border-gray-200 bg-white hover:border-[var(--color-primary)] hover:bg-gray-50'
+                  }`}
               >
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${selected ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-primary-50)] text-[var(--color-primary)]'}`}>
                   <MapPin className="h-4 w-4" aria-hidden />
@@ -641,106 +638,105 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           Điện thoại: MỘT hàng gọn — tóm tắt (tỉnh · ngày · số người) bấm vào mở bảng chọn từng bước + nút tìm. Máy tính: một
           hàng ba ô bằng nhau + nút tìm. */}
       <div className="relative">
-      <form
-        ref={formRef}
-        role="search"
-        aria-label="Tìm homestay"
-        onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-        className={`${intro ? 'search-unfold' : ''} w-full rounded-full bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${
-          blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
-        }`}
-      >
-        {/* Điện thoại: một hàng — phần tóm tắt mở bảng chọn (điểm đến → thời gian → số người), nút tìm chạy tìm kiếm ngay */}
-        <div className="flex items-center gap-1.5 p-1.5 md:hidden">
+        <form
+          ref={formRef}
+          role="search"
+          aria-label="Tìm homestay"
+          onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+          className={`${intro ? 'search-unfold' : ''} w-full rounded-full bg-white ring-1 ring-white/70 shadow-[0_2px_6px_rgba(4,36,29,0.12),0_28px_60px_-24px_rgba(4,36,29,0.6)] transition-opacity duration-200 md:grid md:h-[78px] md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-stretch md:gap-1 md:p-1.5 ${blockUnderHeader ? 'pointer-events-none opacity-0' : 'opacity-100'
+            }`}
+        >
+          {/* Điện thoại: một hàng — phần tóm tắt mở bảng chọn (điểm đến → thời gian → số người), nút tìm chạy tìm kiếm ngay */}
+          <div className="flex items-center gap-1.5 p-1.5 md:hidden">
+            <button
+              type="button"
+              onClick={() => setActiveTab('location')}
+              aria-haspopup="dialog"
+              aria-label={`Sửa tìm kiếm: ${summary}`}
+              className={`flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer ${intro ? 'search-unfold-content' : ''}`}
+            >
+              <span className={ICON_TILE}><MapPin className="h-[18px] w-[18px]" aria-hidden /></span>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-[15px] font-extrabold leading-none text-[var(--color-ink-deep)]">{province}</span>
+                <span className="truncate text-xs font-semibold leading-none tabular-nums text-[var(--color-muted)]">
+                  {dateText} · {durationShort} · {guestText}
+                </span>
+              </span>
+            </button>
+            <button
+              ref={ctaMobileRef}
+              type="submit"
+              aria-label={ctaLabel}
+              className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
+            >
+              <Search className="h-5 w-5" strokeWidth={2.75} aria-hidden />
+            </button>
+          </div>
+
+          {/* Điểm đến — máy tính */}
           <button
             type="button"
-            onClick={() => setActiveTab('location')}
+            onClick={() => toggleTab('location')}
             aria-haspopup="dialog"
-            aria-label={`Sửa tìm kiếm: ${summary}`}
-            className={`flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full pl-1.5 pr-1 text-left transition-colors active:bg-[#f3f7f1] cursor-pointer ${intro ? 'search-unfold-content' : ''}`}
+            aria-expanded={activeTab === 'location'}
+            aria-label={`Điểm đến: ${province}, ${areasLine}`}
+            className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'location' ? FIELD_ACTIVE : ''}`}
           >
-            <span className={ICON_TILE}><MapPin className="h-[18px] w-[18px]" aria-hidden /></span>
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-[15px] font-extrabold leading-none text-[var(--color-ink-deep)]">{province}</span>
-              <span className="truncate text-xs font-semibold leading-none tabular-nums text-[var(--color-muted)]">
-                {dateText} · {durationShort} · {guestText}
+            <span className={ICON_TILE}><MapPin className="h-5 w-5" aria-hidden /></span>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-px">
+              <span className={FIELD_LABEL}>Điểm đến</span>
+              <span className={FIELD_VALUE}>
+                {province}
+                {areas && <span className="text-[13px] font-semibold text-[var(--color-muted)]"> · {areas.join(', ')}</span>}
               </span>
             </span>
           </button>
+
+          {/* Thời gian — máy tính: một ô mở popover */}
           <button
-            ref={ctaMobileRef}
-            type="submit"
-            aria-label={ctaLabel}
-            className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
+            type="button"
+            onClick={() => toggleTab('dates')}
+            aria-haspopup="dialog"
+            aria-expanded={activeTab === 'dates'}
+            aria-label={`Thời gian: ${dayLabel(checkIn)} đến ${dayLabel(checkOut)}, ${nightsText}`}
+            className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'dates' ? FIELD_ACTIVE : ''}`}
           >
-            <Search className="h-5 w-5" strokeWidth={2.75} aria-hidden />
+            <span className={ICON_TILE}><Calendar className="h-5 w-5" aria-hidden /></span>
+            <span className="flex min-w-0 flex-1 flex-col gap-px">
+              <span className={FIELD_LABEL}>Thời gian</span>
+              <span className={`${FIELD_VALUE} tabular-nums`}>
+                {dateText} <span className="text-[13px] font-bold text-[#06604a]">· {durationShort}</span>
+              </span>
+            </span>
           </button>
-        </div>
 
-        {/* Điểm đến — máy tính */}
-        <button
-          type="button"
-          onClick={() => toggleTab('location')}
-          aria-haspopup="dialog"
-          aria-expanded={activeTab === 'location'}
-          aria-label={`Điểm đến: ${province}, ${areasLine}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'location' ? FIELD_ACTIVE : ''}`}
-        >
-          <span className={ICON_TILE}><MapPin className="h-5 w-5" aria-hidden /></span>
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-px">
-            <span className={FIELD_LABEL}>Điểm đến</span>
-            <span className={FIELD_VALUE}>
-              {province}
-              {areas && <span className="text-[13px] font-semibold text-[var(--color-muted)]"> · {areas.join(', ')}</span>}
-            </span>
-          </span>
-        </button>
-
-        {/* Thời gian — máy tính: một ô mở popover */}
-        <button
-          type="button"
-          onClick={() => toggleTab('dates')}
-          aria-haspopup="dialog"
-          aria-expanded={activeTab === 'dates'}
-          aria-label={`Thời gian: ${dayLabel(checkIn)} đến ${dayLabel(checkOut)}, ${nightsText}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'dates' ? FIELD_ACTIVE : ''}`}
-        >
-          <span className={ICON_TILE}><Calendar className="h-5 w-5" aria-hidden /></span>
-          <span className="flex min-w-0 flex-1 flex-col gap-px">
-            <span className={FIELD_LABEL}>Thời gian</span>
-            <span className={`${FIELD_VALUE} tabular-nums`}>
-              {dateText} <span className="text-[13px] font-bold text-[#06604a]">· {durationShort}</span>
-            </span>
-          </span>
-        </button>
-
-        {/* Số người — máy tính: một ô mở popover */}
-        <button
-          type="button"
-          onClick={() => toggleTab('guests')}
-          aria-haspopup="dialog"
-          aria-expanded={activeTab === 'guests'}
-          aria-label={`Số người: ${guestText}`}
-          className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'guests' ? FIELD_ACTIVE : ''}`}
-        >
-          <span className={ICON_TILE}><Users className="h-5 w-5" aria-hidden /></span>
-          <span className="flex min-w-0 flex-1 flex-col gap-px">
-            <span className={FIELD_LABEL}>Số người</span>
-            <span className={FIELD_VALUE}>{guestText}</span>
-          </span>
-        </button>
-
-        <div className="hidden md:block">
+          {/* Số người — máy tính: một ô mở popover */}
           <button
-            ref={ctaDesktopRef}
-            type="submit"
-            aria-label={ctaLabel}
-            className={`relative flex h-full w-[66px] items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
+            type="button"
+            onClick={() => toggleTab('guests')}
+            aria-haspopup="dialog"
+            aria-expanded={activeTab === 'guests'}
+            aria-label={`Số người: ${guestText}`}
+            className={`${FIELD_BUTTON} hidden md:flex ${intro ? 'search-unfold-content' : ''} ${activeTab === 'guests' ? FIELD_ACTIVE : ''}`}
           >
-            <Search className="h-6 w-6" strokeWidth={2.75} aria-hidden />
+            <span className={ICON_TILE}><Users className="h-5 w-5" aria-hidden /></span>
+            <span className="flex min-w-0 flex-1 flex-col gap-px">
+              <span className={FIELD_LABEL}>Số người</span>
+              <span className={FIELD_VALUE}>{guestText}</span>
+            </span>
           </button>
-        </div>
-      </form>
+
+          <div className="hidden md:block">
+            <button
+              ref={ctaDesktopRef}
+              type="submit"
+              aria-label={ctaLabel}
+              className={`relative flex h-full w-[66px] items-center justify-center rounded-full cta cta-primary text-white cursor-pointer ${intro ? 'search-cta' : ''}`}
+            >
+              <Search className="h-6 w-6" strokeWidth={2.75} aria-hidden />
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Lối phụ: lên lịch trình trước (cùng tỉnh, ngày, số người) — ẩn khi đang chọn chỗ ở cho một lịch trình */}
@@ -767,36 +763,36 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           trong, nên "fixed" sẽ bám theo div đang cuộn thay vì theo màn hình nếu không thoát ra ngoài bằng portal. */}
       {headerCompact && headerSlot && createPortal(
         <>
-        <button
-          type="button"
-          onClick={toggleSearch}
-          aria-haspopup="dialog"
-          aria-expanded={activeTab !== null}
-          aria-label={`Tìm homestay: ${summary}`}
-          className="md:hidden flex h-10 w-full min-w-0 items-center gap-2 rounded-full bg-white py-0 pl-1 pr-4 text-[13px] font-semibold text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10 cursor-pointer active:scale-[0.98]"
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white">
-            <Search className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
-          </span>
-          <span className="min-w-0 truncate">{province} · {durationShort} · {guestText}</span>
-        </button>
-        <div role="group" aria-label="Tìm homestay" className="hidden md:flex h-11 items-center rounded-full bg-white pl-1.5 pr-1.5 text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10">
-          {([['location', province], ['dates', `${dateText} · ${durationShort}`], ['guests', guestText]] as [Tab, string][]).map(([tab, text], i) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => toggleTab(tab)}
-              aria-haspopup="dialog"
-              aria-expanded={activeTab === tab}
-              className={`h-8 max-w-[220px] truncate rounded-full px-4 text-[13px] font-medium cursor-pointer transition-colors hover:bg-slate-100 ${i > 0 ? 'border-l border-slate-200' : ''} ${activeTab === tab ? 'bg-slate-100 text-[var(--color-primary)]' : ''}`}
-            >
-              {text}
-            </button>
-          ))}
-          <button type="button" onClick={handleSearch} aria-label={ctaLabel} className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer">
-            <Search className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          <button
+            type="button"
+            onClick={toggleSearch}
+            aria-haspopup="dialog"
+            aria-expanded={activeTab !== null}
+            aria-label={`Tìm homestay: ${summary}`}
+            className="md:hidden flex h-10 w-full min-w-0 items-center gap-2 rounded-full bg-white py-0 pl-1 pr-4 text-[13px] font-semibold text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10 cursor-pointer active:scale-[0.98]"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white">
+              <Search className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
+            </span>
+            <span className="min-w-0 truncate">{province} · {durationShort} · {guestText}</span>
           </button>
-        </div>
+          <div role="group" aria-label="Tìm homestay" className="hidden md:flex h-11 items-center rounded-full bg-white pl-1.5 pr-1.5 text-[var(--color-ink-deep)] shadow-[0_6px_20px_-8px_rgba(4,36,29,0.55)] ring-1 ring-slate-900/10">
+            {([['location', province], ['dates', `${dateText} · ${durationShort}`], ['guests', guestText]] as [Tab, string][]).map(([tab, text], i) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => toggleTab(tab)}
+                aria-haspopup="dialog"
+                aria-expanded={activeTab === tab}
+                className={`h-8 max-w-[220px] truncate rounded-full px-4 text-[13px] font-medium cursor-pointer transition-colors hover:bg-slate-100 ${i > 0 ? 'border-l border-slate-200' : ''} ${activeTab === tab ? 'bg-slate-100 text-[var(--color-primary)]' : ''}`}
+              >
+                {text}
+              </button>
+            ))}
+            <button type="button" onClick={handleSearch} aria-label={ctaLabel} className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full cta cta-primary text-white cursor-pointer">
+              <Search className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            </button>
+          </div>
         </>,
         headerSlot
       )}
@@ -807,9 +803,8 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           aria-haspopup="dialog"
           aria-expanded={activeTab !== null}
           aria-label={`Tìm homestay: ${summary}`}
-          className={`search-fab fixed left-1/2 z-40 flex h-11 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-[var(--color-ink-deep)]/95 py-0 pl-1.5 pr-4 text-sm font-bold text-white shadow-[0_10px_28px_-8px_rgba(4,36,29,0.6)] ring-1 ring-white/15 backdrop-blur transition-[opacity,transform] duration-300 cursor-pointer hover:bg-black active:scale-95 bottom-5 max-md:[html[data-pwa-bar]_&]:bottom-24 mb-[var(--safe-bottom)] ${
-            isSticky && !headerCompact ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
-          }`}
+          className={`search-fab fixed left-1/2 z-40 flex h-11 w-fit max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-[var(--color-ink-deep)]/95 py-0 pl-1.5 pr-4 text-sm font-bold text-white shadow-[0_10px_28px_-8px_rgba(4,36,29,0.6)] ring-1 ring-white/15 backdrop-blur transition-[opacity,transform] duration-300 cursor-pointer hover:bg-black active:scale-95 bottom-5 max-md:[html[data-pwa-bar]_&]:bottom-24 mb-[var(--safe-bottom)] ${isSticky && !headerCompact ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
+            }`}
         >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]">
             <Search className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />
@@ -827,11 +822,10 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           style={{ ...popoverStyle, transformOrigin: popoverDocked ? '50% 0' : '30% 0' }}
           role="dialog"
           aria-label="Tìm homestay"
-          className={`search-popover-panel hidden md:flex ${
-            popoverDocked
+          className={`search-popover-panel hidden md:flex ${popoverDocked
               ? 'fixed left-1/2 -translate-x-1/2 w-[820px] max-w-[calc(100vw-32px)] shadow-2xl'
               : 'fixed shadow-2xl'
-          } max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl ring-1 ring-slate-900/[0.06] shadow-[0_30px_70px_-30px_rgba(4,36,29,0.5)] p-4 z-[100] flex-col gap-3.5 search-pop`}
+            } max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl ring-1 ring-slate-900/[0.06] shadow-[0_30px_70px_-30px_rgba(4,36,29,0.5)] p-4 z-[100] flex-col gap-3.5 search-pop`}
           onClick={stopPropagation}
         >
           <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-2.5">
@@ -875,45 +869,45 @@ export default function SearchHub({ intro = false }: SearchHubProps) {
           </div>
 
           <div key={activeTab} className={`flex flex-col gap-3 ${tabDir.current.dir > 0 ? 'search-panel-next' : 'search-panel-prev'}`}>
-          {activeTab === 'location' && locationPanel(false)}
+            {activeTab === 'location' && locationPanel(false)}
 
-          {activeTab === 'dates' && (
-            <div className="flex flex-col gap-3">
-              {datesPanel('search-popover')}
-              <div className="flex items-center justify-end gap-2 border-t border-[var(--color-mist)] pt-3">
-                <button
-                  type="button"
-                  onClick={resetDates}
-                  className="h-10 rounded-lg px-3.5 text-sm font-extrabold text-[var(--color-ink)] transition-colors hover:bg-gray-100 cursor-pointer"
-                >
-                  Đặt lại
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="flex h-10 items-center gap-1.5 rounded-lg bg-[var(--color-ink-deep)] px-4 text-sm font-extrabold text-white transition-colors hover:bg-black cursor-pointer"
-                >
-                  Tiếp: Số người <ChevronRight className="h-4 w-4" aria-hidden />
-                </button>
+            {activeTab === 'dates' && (
+              <div className="flex flex-col gap-3">
+                {datesPanel('search-popover')}
+                <div className="flex items-center justify-end gap-2 border-t border-[var(--color-mist)] pt-3">
+                  <button
+                    type="button"
+                    onClick={resetDates}
+                    className="h-10 rounded-lg px-3.5 text-sm font-extrabold text-[var(--color-ink)] transition-colors hover:bg-gray-100 cursor-pointer"
+                  >
+                    Đặt lại
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="flex h-10 items-center gap-1.5 rounded-lg bg-[var(--color-ink-deep)] px-4 text-sm font-extrabold text-white transition-colors hover:bg-black cursor-pointer"
+                  >
+                    Tiếp: Số người <ChevronRight className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'guests' && (
-            <div className="flex flex-col gap-3">
-              <div className="max-w-md">{guestsPanel}</div>
-              <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
-                <span className="min-w-0 truncate text-xs text-gray-500">{summary}</span>
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white transition-colors cursor-pointer"
-                >
-                  <Search className="h-4 w-4" aria-hidden /> {ctaLabel}
-                </button>
+            {activeTab === 'guests' && (
+              <div className="flex flex-col gap-3">
+                <div className="max-w-md">{guestsPanel}</div>
+                <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
+                  <span className="min-w-0 truncate text-xs text-gray-500">{summary}</span>
+                  <button
+                    type="button"
+                    onClick={handleSearch}
+                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg cta cta-primary px-5 text-sm font-extrabold text-white transition-colors cursor-pointer"
+                  >
+                    <Search className="h-4 w-4" aria-hidden /> {ctaLabel}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
         </div>,
         document.body

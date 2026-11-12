@@ -8,31 +8,31 @@ export interface RestaurantDto {
   images?: string[];
   description?: string;
   categoryName?: string;
-  
+
   // Location
   district?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
-  
+
   // Rating
   ratingScore: number;
   ratingText: string;
   reviewCount: number;
-  
+
   // Badges & Specialties
   promotionalBadge?: string;
   specialtyTag?: string;
   cuisineType?: string;
-  
+
   // Pricing
   priceMin: number;
   priceMax?: number;
   priceUnitNote?: string;
-  
+
   // Tags & Amenities
   amenities: string[];
-  
+
   // Contacts
   contacts?: PlaceContactItem[];
 }
@@ -155,8 +155,8 @@ export const fetchRestaurants = async (params?: RestaurantFilterParams): Promise
     // Lọc keyword cục bộ (nếu người dùng gõ tìm kiếm)
     if (params?.keyword && params.keyword.trim().length > 0) {
       const kw = params.keyword.trim().toLowerCase();
-      result = result.filter(r => 
-        r.name.toLowerCase().includes(kw) || 
+      result = result.filter(r =>
+        r.name.toLowerCase().includes(kw) ||
         (r.address && r.address.toLowerCase().includes(kw)) ||
         (r.cuisineType && r.cuisineType.toLowerCase().includes(kw)) ||
         (r.specialtyTag && r.specialtyTag.toLowerCase().includes(kw))
