@@ -1,10 +1,7 @@
 /*
  * Font tự host (same-origin, Vite băm tên file → cache lâu dài, SW cache offline).
  * - DT Phudu (Duong Tran, SIL OFL 1.1): font tiêu đề, CHỈ CÓ CHỮ IN HOA.
- * - Ganh (Kotie Studio): font nội dung, chỉ có Thin (100) và Regular (400).
- *   Regular khai báo dải 400–500 để weight 500 không bị làm đậm giả;
- *   từ 600 trở lên trình duyệt tự làm đậm (dùng cho chữ nhấn mạnh).
- * Cả hai đều đủ bộ ký tự tiếng Việt.
+ * - Nội dung toàn web dùng Montserrat (@fontsource/montserrat nạp ở main.tsx).
  */
 
 @font-face {
@@ -14,6 +11,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "DT Phudu";
   src: url("../assets/fonts/DTPhudu-Regular.woff2") format("woff2");
@@ -21,6 +19,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "DT Phudu";
   src: url("../assets/fonts/DTPhudu-Medium.woff2") format("woff2");
@@ -28,6 +27,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "DT Phudu";
   src: url("../assets/fonts/DTPhudu-Bold.woff2") format("woff2");
@@ -35,39 +35,11 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "DT Phudu";
   src: url("../assets/fonts/DTPhudu-Black.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Ganh";
-  src: url("../assets/fonts/Ganh-Thin.woff2") format("woff2");
-  font-weight: 100 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ganh";
-  src: url("../assets/fonts/Ganh-ThinItalic.woff2") format("woff2");
-  font-weight: 100 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ganh";
-  src: url("../assets/fonts/Ganh-Regular.woff2") format("woff2");
-  font-weight: 400 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Ganh";
-  src: url("../assets/fonts/Ganh-Italic.woff2") format("woff2");
-  font-weight: 400 500;
-  font-style: italic;
   font-display: swap;
 }

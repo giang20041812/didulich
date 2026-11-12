@@ -178,16 +178,16 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
       </div>
       <div className="min-w-0">
         {compact ? (
-          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.1rem,10.5vw,3rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
-            Du Lịch
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] font-display font-bold text-[clamp(2.1rem,10.5vw,3rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.45)] text-left [animation-delay:120ms]">
+            Đi Du Lịch
           </h1>
         ) : (
-          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] italic font-bold text-[clamp(2.5rem,min(7vw,9.5vh),6rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]" style={{ fontFamily: 'var(--font-brush)' }}>
-            Du Lịch
+          <h1 className="hero-rise max-w-full break-words [overflow-wrap:anywhere] font-display font-bold text-[clamp(2.5rem,min(7vw,9.5vh),6rem)] text-[var(--color-sun)] leading-[0.95] [text-shadow:0_4px_24px_rgba(0,0,0,0.35)] text-left [animation-delay:120ms]">
+            Đi Du Lịch
           </h1>
         )}
         {/* Hiện sau ~3 giây như một nét viết tiếp; giữ chỗ ngay từ đầu nên không đẩy bố cục */}
-        <p className={`hero-tagline mt-1 pl-[0.35em] italic font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(1.1rem,5.6vw,1.6rem)]' : 'text-[clamp(1.5rem,min(3.4vw,4.8vh),2.875rem)]'}`} style={{ fontFamily: 'var(--font-brush)' }}>
+        <p className={`hero-tagline mt-2 pl-[0.35em] not-italic uppercase tracking-[0.12em] font-bold leading-none text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.4)] ${compact ? 'text-[clamp(0.95rem,4.6vw,1.3rem)]' : 'text-[clamp(1.2rem,min(2.6vw,3.8vh),2.2rem)]'}`} style={{ fontFamily: 'var(--font-display)' }}>
           đi như người bản địa
         </p>
       </div>
@@ -581,39 +581,39 @@ export default function HomePage() {
       {/* 5. Đặc Sản Nổi Tiếng - Danh sách món ngon & thức quà bản địa dạng list/grid kèm hiệu ứng hover. Tạm ẩn
           (SHOW_SPECIALTIES) — bật lại thì đổi cờ thành true. */}
       {SHOW_SPECIALTIES && (
-      <section className={`${SHEET} home-glow-ripe`}>
-        <HomeMotifs variant="specialty" />
-        <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
-          <div className="mb-7 flex items-end justify-between gap-4">
-            <Reveal className="min-w-0 flex-1">
-              <SectionHeading
+        <section className={`${SHEET} home-glow-ripe`}>
+          <HomeMotifs variant="specialty" />
+          <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
+            <div className="mb-7 flex items-end justify-between gap-4">
+              <Reveal className="min-w-0 flex-1">
+                <SectionHeading
 
-                title="Đặc Sản Nổi Tiếng"
-                action={<MobileSeeAll to="/specialties" />}
-              />
+                  title="Đặc Sản Nổi Tiếng"
+                  action={<MobileSeeAll to="/specialties" />}
+                />
+              </Reveal>
+              <DesktopSeeAll to="/specialties">Khám phá thêm thức quà</DesktopSeeAll>
+            </div>
+
+            <Reveal delay={100}>
+              {displayedSpecialties.length > 0 ? (
+                // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ (thẻ vuông nên hẹp hơn thẻ điểm đến).
+                <FramerSwipeCardStack
+                  perPage={10}
+                  gridClassName="grid grid-cols-5 gap-3 md:gap-4"
+                  label="Đặc sản nổi tiếng"
+                >
+                  {displayedSpecialties.map((item) => <SpecialtyCard key={item.id} item={item} />)}
+                </FramerSwipeCardStack>
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
+                  <Tag className="w-10 h-10 text-slate-300 mb-2" />
+                  <p className="font-medium text-sm">Chưa có đặc sản nào</p>
+                </div>
+              )}
             </Reveal>
-            <DesktopSeeAll to="/specialties">Khám phá thêm thức quà</DesktopSeeAll>
           </div>
-
-          <Reveal delay={100}>
-            {displayedSpecialties.length > 0 ? (
-              // Từ tablet: lưới 5 cột × 2 hàng (10 thẻ nhỏ). Điện thoại: lướt từng thẻ (thẻ vuông nên hẹp hơn thẻ điểm đến).
-              <FramerSwipeCardStack
-                perPage={10}
-                gridClassName="grid grid-cols-5 gap-3 md:gap-4"
-                label="Đặc sản nổi tiếng"
-              >
-                {displayedSpecialties.map((item) => <SpecialtyCard key={item.id} item={item} />)}
-              </FramerSwipeCardStack>
-            ) : (
-              <div className="py-12 flex flex-col items-center justify-center text-slate-500 bg-white/70 rounded-2xl border-2 border-dashed border-slate-200">
-                <Tag className="w-10 h-10 text-slate-300 mb-2" />
-                <p className="font-medium text-sm">Chưa có đặc sản nào</p>
-              </div>
-            )}
-          </Reveal>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* 6. KẾT HỢP: TIỆN ÍCH DU KHÁCH & CAM KẾT DU LỊCH */}

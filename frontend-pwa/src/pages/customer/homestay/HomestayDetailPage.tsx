@@ -394,7 +394,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
         .then((list) => {
           if (alive) setBookedDates(list);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
     load();
     window.addEventListener('focus', load);
@@ -856,18 +856,16 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                       <button
                         type="button"
                         onClick={() => setNearbyDropdownOpen((prev) => !prev)}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer border ${
-                          nearbyDropdownOpen
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer border ${nearbyDropdownOpen
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-400/20 shadow-xs'
                             : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs'
-                        }`}
+                          }`}
                         aria-expanded={nearbyDropdownOpen}
                       >
                         <span>+{otherAttractions.length} điểm khác</span>
                         <ChevronDown
-                          className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                            nearbyDropdownOpen ? 'rotate-180 text-emerald-700' : 'text-slate-500'
-                          }`}
+                          className={`h-3.5 w-3.5 transition-transform duration-200 ${nearbyDropdownOpen ? 'rotate-180 text-emerald-700' : 'text-slate-500'
+                            }`}
                         />
                       </button>
                     )}
@@ -954,11 +952,10 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                   setIsSaved(nowSaved);
                   if (nowSaved) setInteractionModal({ isOpen: true, type: 'heart' });
                 }}
-                className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium shadow-xs transition cursor-pointer ${
-                  isSaved
+                className={`inline-flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium shadow-xs transition cursor-pointer ${isSaved
                     ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
                     : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <motion.div
                   animate={isSaved ? { scale: [1, 1.3, 1] } : {}}
@@ -1122,14 +1119,12 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                         aria-controls={`suggest-panel-${tab.id}`}
                         tabIndex={selected ? 0 : -1}
                         onClick={() => setSuggestTab(tab.id)}
-                        className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
-                          selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)]' : 'border-slate-200 bg-white hover:border-slate-300'
-                        }`}
+                        className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${selected ? 'border-[var(--color-primary)] bg-[var(--color-primary-50)]' : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
                       >
                         <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                            selected ? 'bg-[var(--color-primary)] text-white' : 'bg-slate-100 text-slate-600'
-                          }`}
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${selected ? 'bg-[var(--color-primary)] text-white' : 'bg-slate-100 text-slate-600'
+                            }`}
                         >
                           <tab.Icon className="h-[18px] w-[18px]" aria-hidden />
                         </span>
@@ -1242,9 +1237,8 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
 
               {overviewFacts.length > 0 && (
                 <dl
-                  className={`grid gap-x-6 gap-y-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 ${
-                    overviewFacts.every((fact) => fact.className) ? 'lg:hidden' : ''
-                  }`}
+                  className={`grid gap-x-6 gap-y-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 ${overviewFacts.every((fact) => fact.className) ? 'lg:hidden' : ''
+                    }`}
                 >
                   {overviewFacts.map((fact) => (
                     <div key={fact.key} className={`flex gap-2.5 ${fact.wide ? 'sm:col-span-2' : ''} ${fact.className ?? ''}`}>
@@ -1373,11 +1367,10 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                         {[1, 2, 3, 4, 5].map((n) => (
                           <Star
                             key={n}
-                            className={`h-4 w-4 ${
-                              n <= Math.round(homestay.ratingAvg)
+                            className={`h-4 w-4 ${n <= Math.round(homestay.ratingAvg)
                                 ? 'fill-amber-500 text-amber-500'
                                 : 'text-slate-300'
-                            }`}
+                              }`}
                           />
                         ))}
                       </div>
@@ -1638,11 +1631,10 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                      interactionModal.type === 'share'
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl ${interactionModal.type === 'share'
                         ? 'bg-emerald-50 text-[var(--color-primary)]'
                         : 'bg-rose-50 text-rose-600'
-                    }`}
+                      }`}
                   >
                     {interactionModal.type === 'share' ? (
                       <Share2 className="h-4 w-4" />
@@ -1794,11 +1786,10 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                     key={i}
                     type="button"
                     onClick={() => setLightboxIndex(i)}
-                    className={`h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
-                      i === lightboxIndex
+                    className={`h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${i === lightboxIndex
                         ? 'border-white opacity-100 scale-105'
                         : 'border-transparent opacity-50 hover:opacity-80'
-                    }`}
+                      }`}
                     aria-label={`Ảnh ${i + 1}`}
                   >
                     <img src={mediaUrl(img)} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -1876,9 +1867,8 @@ function HomestayGallery({
 
       {/* Desktop: Lưới mosaic với Parallax trên ảnh chính */}
       <div
-        className={`hidden h-[420px] gap-2 overflow-hidden rounded-2xl md:grid shadow-xs ${
-          shown.length === 1 ? 'grid-cols-1' : 'grid-cols-4 grid-rows-2'
-        }`}
+        className={`hidden h-[420px] gap-2 overflow-hidden rounded-2xl md:grid shadow-xs ${shown.length === 1 ? 'grid-cols-1' : 'grid-cols-4 grid-rows-2'
+          }`}
       >
         {shown.map((img, idx) => (
           <button

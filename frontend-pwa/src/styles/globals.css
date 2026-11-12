@@ -6,7 +6,7 @@
   /* Fresh Green — Primary (#0a7d64) */
   --color-primary: #0a7d64;
   --color-primary-light: #6ee7b7;
-  --color-primary-50:  #f0fdf4;
+  --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
   --color-primary-200: #bbf7d0;
   --color-primary-300: #86efac;
@@ -20,7 +20,7 @@
   /* Bright Aqua / Turquoise — Secondary (#06B6D4) */
   --color-secondary: #06b6d4;
   --color-secondary-light: #cffafe;
-  --color-secondary-50:  #f0fbfd;
+  --color-secondary-50: #f0fbfd;
   --color-secondary-100: #dbf6fa;
   --color-secondary-200: #bbf0f6;
   --color-secondary-300: #8ee4ef;
@@ -34,7 +34,7 @@
   /* Leaf Green — Accent (#0a7d64) */
   --color-accent: #0a7d64;
   --color-accent-light: #d1fae5;
-  --color-accent-50:  #effcf2;
+  --color-accent-50: #effcf2;
   --color-accent-100: #d9f9e0;
   --color-accent-200: #b5f2c3;
   --color-accent-300: #83e89c;
@@ -55,12 +55,18 @@
   --color-coral-light: #ffedd5;
 
   /* Backgrounds — bảng màu đặc trưng Mù Cang Chải – Lào Cai */
-  --color-canvas: #f4f7ec;         /* SƯƠNG SỚM NÚI RỪNG: xanh lúa non pha sương vàng nắng */
-  --color-canvas-ripe: #faf4e4;    /* LÚA CHÍN: kem vàng ấm mùa 9–10 ruộng bậc thang */
-  --color-cham: #1d2d4f;           /* CHÀM: xanh chàm vải thổ cẩm người Mông/Thái */
-  --color-cham-deep: #16223c;      /* Chàm đậm: chân trang, dải nhấn tối */
-  --color-mist: #edf1e2;           /* MÂY MÙ: lớp phủ sương trên nền canvas */
-  --color-band: #eef3f9;           /* SƯƠNG CHÀM: nền nhấn các phần so le trang chủ (xen kẽ nền trắng), cùng họ màu chàm của chân trang */
+  --color-canvas: #f4f7ec;
+  /* SƯƠNG SỚM NÚI RỪNG: xanh lúa non pha sương vàng nắng */
+  --color-canvas-ripe: #faf4e4;
+  /* LÚA CHÍN: kem vàng ấm mùa 9–10 ruộng bậc thang */
+  --color-cham: #1d2d4f;
+  /* CHÀM: xanh chàm vải thổ cẩm người Mông/Thái */
+  --color-cham-deep: #16223c;
+  /* Chàm đậm: chân trang, dải nhấn tối */
+  --color-mist: #edf1e2;
+  /* MÂY MÙ: lớp phủ sương trên nền canvas */
+  --color-band: #eef3f9;
+  /* SƯƠNG CHÀM: nền nhấn các phần so le trang chủ (xen kẽ nền trắng), cùng họ màu chàm của chân trang */
   --color-surface: rgba(255, 255, 255, 0.85);
 
   /* Ink / Text */
@@ -76,9 +82,10 @@
   --color-warning: #f59e0b;
   --color-danger: #e05252;
 
-  --font-brand: "Outfit", system-ui, sans-serif;
+  --font-brand: "DT Phudu", system-ui, -apple-system, sans-serif;
   --font-display: "DT Phudu", system-ui, -apple-system, sans-serif;
-  --font-body: "Ganh", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-brush: "Dancing Script", cursive;
   --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
 
@@ -105,52 +112,73 @@
   --shadow-lg: 0 12px 32px rgba(13, 43, 38, 0.14);
 }
 
-  @layer base {
+@layer base {
   :root {
     /* === Đi Du Lịch — Eco Tropical Glow Palette === */
 
     /* Brand Core */
-    --color-primary:        #0a7d64; /* Deep Teal - Header, nút chính, liên kết */
-    --color-primary-light:  #7ef2dd; /* Mint Aqua - Nền nhạt, chip active, hover state */
-    --color-primary-50:     #edfbf7;
-    --color-secondary:      #06b6d4; /* Bright Aqua - Trời, biển, sông nước */
-    --color-secondary-light:#cffafe;
-    
+    --color-primary: #0a7d64;
+    /* Deep Teal - Header, nút chính, liên kết */
+    --color-primary-light: #7ef2dd;
+    /* Mint Aqua - Nền nhạt, chip active, hover state */
+    --color-primary-50: #edfbf7;
+    --color-secondary: #06b6d4;
+    /* Bright Aqua - Trời, biển, sông nước */
+    --color-secondary-light: #cffafe;
+
     /* Tropical Warmth & Energy */
-    --color-sun:            #facc15; /* Brighter Yellow - Nắng vàng, lúa chín, rating sao, tag nổi bật */
-    --color-sun-light:      #fef08a; /* Nền vàng tươi nhạt */
-    --color-coral:          #f97316; /* Tropical Coral / Sunset Orange - Nút CTA chuyển đổi cao */
-    --color-coral-hover:    #ea580c; /* Hover cam đậm ấn tượng */
-    --color-coral-light:    #ffedd5; /* Nền cam san hô nhạt */
-    
+    --color-sun: #facc15;
+    /* Brighter Yellow - Nắng vàng, lúa chín, rating sao, tag nổi bật */
+    --color-sun-light: #fef08a;
+    /* Nền vàng tươi nhạt */
+    --color-coral: #f97316;
+    /* Tropical Coral / Sunset Orange - Nút CTA chuyển đổi cao */
+    --color-coral-hover: #ea580c;
+    /* Hover cam đậm ấn tượng */
+    --color-coral-light: #ffedd5;
+    /* Nền cam san hô nhạt */
+
     /* Eco Nature */
-    --color-accent:         #0a7d64; /* Emerald Green - Chứng nhận sinh thái, cam kết xanh */
-    --color-accent-light:   #d1fae5; /* Nền xanh ngọc nhạt */
+    --color-accent: #0a7d64;
+    /* Emerald Green - Chứng nhận sinh thái, cam kết xanh */
+    --color-accent-light: #d1fae5;
+    /* Nền xanh ngọc nhạt */
 
     /* Backgrounds */
-    --color-canvas:         #f4f7ec; /* Sương sớm núi rừng — nền chính (đặc trưng MCC – Lào Cai) */
-    --color-canvas-ripe:    #faf4e4; /* Lúa chín — nền xen kẽ mùa vàng */
-    --color-cham:           #1d2d4f; /* Chàm indigo — thổ cẩm */
-    --color-cham-deep:      #16223c;
-    --color-mist:           #edf1e2;
-    --color-band:           #eef3f9; /* Sương chàm — nền nhấn so le trang chủ: trắng ↔ sương chàm ↔ trắng */
-    --color-surface:        rgba(255, 255, 255, 0.85); /* Semi-transparent White for cards */
+    --color-canvas: #f4f7ec;
+    /* Sương sớm núi rừng — nền chính (đặc trưng MCC – Lào Cai) */
+    --color-canvas-ripe: #faf4e4;
+    /* Lúa chín — nền xen kẽ mùa vàng */
+    --color-cham: #1d2d4f;
+    /* Chàm indigo — thổ cẩm */
+    --color-cham-deep: #16223c;
+    --color-mist: #edf1e2;
+    --color-band: #eef3f9;
+    /* Sương chàm — nền nhấn so le trang chủ: trắng ↔ sương chàm ↔ trắng */
+    --color-surface: rgba(255, 255, 255, 0.85);
+    /* Semi-transparent White for cards */
 
     /* Ink / Text */
-    --color-ink-deep:       #0a2e26; /* Deep Forest - Heading đậm, độ tương phản cao */
-    --color-ink:            #1f2937; /* Forest Charcoal - Thân văn bản dễ đọc */
-    --color-muted:          #59766e; /* Sage Gray - Caption, placeholder, đường kẻ */
+    --color-ink-deep: #0a2e26;
+    /* Deep Forest - Heading đậm, độ tương phản cao */
+    --color-ink: #1f2937;
+    /* Forest Charcoal - Thân văn bản dễ đọc */
+    --color-muted: #59766e;
+    /* Sage Gray - Caption, placeholder, đường kẻ */
 
     /* Feedback */
-    --color-success:        #0a7d64; /* Pine Teal */
-    --color-warning:        #f59e0b; /* Warm Sun Amber */
-    --color-danger:         #e05252; /* Coral Red */
+    --color-success: #0a7d64;
+    /* Pine Teal */
+    --color-warning: #f59e0b;
+    /* Warm Sun Amber */
+    --color-danger: #e05252;
+    /* Coral Red */
 
     /* Depth & Tinted Shadows */
-    --shadow-card:          0 2px 12px -1px rgba(4, 140, 115, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
-    --shadow-card-hover:    0 10px 25px -3px rgba(4, 140, 115, 0.14), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
-    --shadow-coral:         0 4px 16px 0 rgba(249, 115, 22, 0.3);
-    --shadow-teal:          0 4px 16px 0 rgba(4, 140, 115, 0.25);
+    --shadow-card: 0 2px 12px -1px rgba(4, 140, 115, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 10px 25px -3px rgba(4, 140, 115, 0.14), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+    --shadow-coral: 0 4px 16px 0 rgba(249, 115, 22, 0.3);
+    --shadow-teal: 0 4px 16px 0 rgba(4, 140, 115, 0.25);
 
     /* A11y and motion defaults */
     --transition-fast: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -182,30 +210,40 @@
     max-width: 100%;
     overflow-x: hidden;
   }
+
   @supports (overflow-x: clip) {
     html {
       overflow-x: clip;
     }
   }
+
   body {
     max-width: 100%;
     overflow-x: hidden;
   }
+
   @supports (overflow-x: clip) {
     body {
       overflow-x: clip;
     }
   }
-  img, video, canvas, iframe {
+
+  img,
+  video,
+  canvas,
+  iframe {
     max-width: 100%;
   }
 
   /* Ô nhập ngày/giờ trên iOS không bị co giãn lệch: cho phép thu nhỏ, bỏ height cứng của hệ điều hành */
-  input[type="date"], input[type="datetime-local"], input[type="time"] {
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"] {
     min-width: 0;
     -webkit-appearance: none;
     appearance: none;
   }
+
   /* Icon lịch trên iOS đủ rộng để bấm bằng ngón tay */
   input[type="date"]::-webkit-calendar-picker-indicator {
     min-width: 22px;
@@ -226,9 +264,12 @@
   }
 
   /* Lớp polish typography: tiêu đề cân dòng, đoạn văn ngắt chữ đẹp hơn (rõ rệt với tiếng Việt) */
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     text-wrap: balance;
   }
+
   p {
     text-wrap: pretty;
   }
@@ -248,18 +289,23 @@
   }
 
 
-  h1, h2 {
+  h1,
+  h2 {
     font-family: var(--font-display);
     font-weight: 800;
     line-height: 1.3;
     color: var(--color-ink-deep);
   }
 
-  .partner-workspace h1, .partner-workspace h2 {
+  .partner-workspace h1,
+  .partner-workspace h2 {
     font-family: var(--font-display);
   }
 
-  h3, h4, h5, h6 {
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 800;
     line-height: 1.3;
@@ -271,19 +317,56 @@
     font-size: clamp(32px, 5vw, 48px);
     font-weight: 800;
   }
-  .h1 { font-size: 40px; font-weight: 800; }
-  .h2 { font-size: 32px; font-weight: 800; }
-  .h3 { font-size: 24px; font-weight: 800; }
-  .h4 { font-size: 20px; font-weight: 800; }
-  .body-lg { font-size: 18px; font-weight: 400; }
-  .body { font-size: 16px; font-weight: 400; }
-  .body-sm { font-size: 14px; font-weight: 400; }
-  .caption { font-size: 13px; font-weight: 400; color: var(--color-muted); }
-  .font-editorial { font-family: var(--font-serif); }
-  .overline { 
-    font-size: 11px; 
-    font-weight: 600; 
-    text-transform: uppercase; 
+
+  .h1 {
+    font-size: 40px;
+    font-weight: 800;
+  }
+
+  .h2 {
+    font-size: 32px;
+    font-weight: 800;
+  }
+
+  .h3 {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .h4 {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .body-lg {
+    font-size: 18px;
+    font-weight: 400;
+  }
+
+  .body {
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .body-sm {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .caption {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .font-editorial {
+    font-family: var(--font-serif);
+  }
+
+  .overline {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-muted);
   }
@@ -295,32 +378,67 @@
   }
 
   @keyframes slideUpEnter {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
+
   @keyframes slideDownExit {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(100%);
+    }
   }
+
   @keyframes fadeInEnter {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
+
   @keyframes fadeOutExit {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
   }
 
   @keyframes slideRightEnter {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(0);
+    }
   }
+
   @keyframes slideLeftExit {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-100%);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
+
     *,
     ::before,
     ::after {
@@ -335,29 +453,67 @@
 /* Kết thúc bằng transform: none — nếu giữ translate(0) thì phần tử trở thành khung chứa
    cho các con position: fixed (modal/ngăn kéo sẽ bị nhốt trong vùng nội dung). */
 @keyframes slideFromRight {
-  from { transform: translateX(100%); }
-  to { transform: none; }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
 }
+
 @keyframes riseIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
 @keyframes sheetUp {
-  from { transform: translateY(100%); }
-  to { transform: none; }
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: none;
+  }
 }
+
 /* Trang lên lịch trình: bước lọc tiếp theo trượt vào từ phải (lùi bước thì từ trái). */
 @keyframes stepIn {
-  from { opacity: 0; transform: translateX(28px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
 @keyframes stepInBack {
-  from { opacity: 0; transform: translateX(-28px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
 /* Lộ trình (TripTimeline): vạch giữa đường chạy chậm theo hướng đi (2 nhịp vạch 7 + khoảng 11). */
 @keyframes roadFlow {
-  to { stroke-dashoffset: -36; }
+  to {
+    stroke-dashoffset: -36;
+  }
 }
 
 /*
@@ -368,53 +524,115 @@
  * Giảm chuyển động: mọi lớp đứng yên; dòng phụ vẫn giữ độ trễ nhưng chỉ hiện ra, không trượt/nhòe.
  */
 @keyframes heroDrift {
-  from { transform: scale(1.02); }
-  to { transform: scale(1.08) translate3d(-1%, 0.6%, 0); }
+  from {
+    transform: scale(1.02);
+  }
+
+  to {
+    transform: scale(1.08) translate3d(-1%, 0.6%, 0);
+  }
 }
+
 @keyframes heroSunBreath {
-  from { opacity: 0.6; transform: scale(0.94); }
-  to { opacity: 1; transform: scale(1.06); }
+  from {
+    opacity: 0.6;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.06);
+  }
 }
+
 @keyframes heroRaysTurn {
-  to { transform: rotate(1turn); }
+  to {
+    transform: rotate(1turn);
+  }
 }
+
 @keyframes heroCloudA {
-  from { transform: translate3d(-5%, 0, 0); }
-  to { transform: translate3d(7%, -4%, 0); }
+  from {
+    transform: translate3d(-5%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(7%, -4%, 0);
+  }
 }
+
 @keyframes heroCloudB {
-  from { transform: translate3d(6%, 0, 0); }
-  to { transform: translate3d(-6%, 6%, 0); }
+  from {
+    transform: translate3d(6%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-6%, 6%, 0);
+  }
 }
+
 @keyframes heroBreeze {
-  0% { transform: translate3d(-120%, 0, 0) skewX(-18deg); }
-  62%, 100% { transform: translate3d(330%, 0, 0) skewX(-18deg); }
+  0% {
+    transform: translate3d(-120%, 0, 0) skewX(-18deg);
+  }
+
+  62%,
+  100% {
+    transform: translate3d(330%, 0, 0) skewX(-18deg);
+  }
 }
+
 @keyframes heroGrassSway {
-  from { transform: skewX(-0.9deg); }
-  to { transform: skewX(0.7deg); }
+  from {
+    transform: skewX(-0.9deg);
+  }
+
+  to {
+    transform: skewX(0.7deg);
+  }
 }
+
 @keyframes heroRise {
-  from { opacity: 0; transform: translate3d(0, 16px, 0); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
 /* Chỉ opacity + transform (+ nhòe nhẹ trên chữ nhỏ): không đổi letter-spacing vì làm trình duyệt dàn trang lại từng khung hình. */
 @keyframes heroTagline {
-  from { opacity: 0; transform: translate3d(0, 10px, 0); filter: blur(4px); }
-  to { opacity: 1; transform: none; filter: none; }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
+
 /* Khung cùng tỉ lệ 16:9 với ảnh, phủ kín hero như object-fit: cover (đơn vị cq* theo kích thước khung hero).
    contain: paint — hiệu ứng trong hero không bắt trình duyệt vẽ lại phần trang bên ngoài. */
 .hero-backdrop {
   container: hero / size;
   contain: paint;
 }
+
 /* Hero cuộn khuất (HeroBackdrop gắn data-paused): dừng mọi chuyển động nền, đỡ tốn GPU khi đọc phần dưới trang. */
 .hero-backdrop[data-paused] *,
 .hero-backdrop[data-paused] *::before,
 .hero-backdrop[data-paused] *::after {
   animation-play-state: paused !important;
 }
+
 .hero-stage {
   position: absolute;
   left: 50%;
@@ -427,6 +645,7 @@
   will-change: transform;
   backface-visibility: hidden;
 }
+
 /* Điện thoại dựng đứng: dời tâm khung sang phải để thấy nhà sàn và nắng thay vì sườn núi trống; chặn bằng max()
    để mép phải ảnh không bao giờ hở trên màn dọc gần vuông (máy tính bảng). */
 @container hero (orientation: portrait) {
@@ -434,9 +653,11 @@
     --hero-focus-x: max(-72%, calc(50cqw - 100%));
   }
 }
-.hero-stage > * {
+
+.hero-stage>* {
   pointer-events: none;
 }
+
 /* Nắng / tia nắng / mây / gió: mỗi lớp là một layer GPU riêng, chỉ animate transform + opacity. Không dùng
    mix-blend-mode (trước đây screen / soft-light buộc trộn lại cả ảnh nền mỗi khung hình → giật khi cuộn). */
 .hero-sun,
@@ -449,11 +670,13 @@
   border-radius: 9999px;
   will-change: transform, opacity;
 }
+
 .hero-sun {
   width: 30%;
   background: radial-gradient(circle, rgb(255 246 210 / 0.55) 0%, rgb(255 214 120 / 0.26) 20%, rgb(255 190 80 / 0.1) 42%, transparent 66%);
   animation: heroSunBreath 7s ease-in-out infinite alternate;
 }
+
 .hero-rays {
   width: 72%;
   opacity: 0.32;
@@ -461,12 +684,14 @@
   mask-image: radial-gradient(circle, #000 6%, rgb(0 0 0 / 0.5) 26%, transparent 62%);
   animation: heroRaysTurn 160s linear infinite;
 }
+
 .hero-cloud {
   position: absolute;
   border-radius: 9999px;
   background: radial-gradient(closest-side, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0.14) 55%, transparent);
   will-change: transform;
 }
+
 .hero-cloud-a {
   left: 8%;
   top: 28%;
@@ -474,6 +699,7 @@
   height: 11%;
   animation: heroCloudA 34s ease-in-out infinite alternate;
 }
+
 .hero-cloud-b {
   left: 42%;
   top: 32%;
@@ -482,6 +708,7 @@
   opacity: 0.8;
   animation: heroCloudB 47s ease-in-out infinite alternate;
 }
+
 .hero-breeze {
   position: absolute;
   inset: 56% 0 0 0;
@@ -489,7 +716,8 @@
   opacity: 0.45;
   mask-image: linear-gradient(to bottom, transparent, #000 30%);
 }
-.hero-breeze > span {
+
+.hero-breeze>span {
   position: absolute;
   inset: 0 auto 0 0;
   width: 34%;
@@ -498,6 +726,7 @@
   transform: translate3d(-120%, 0, 0);
   will-change: transform;
 }
+
 /* Bản sao ảnh chỉ hiện khóm lúa cao góc phải dưới, nghiêng nhẹ quanh gốc: ngọn lúa đung đưa, mép hòa vào ảnh nền.
    Điện thoại bỏ lớp này (thêm một ảnh lớn có mask chạy liên tục — nặng mà trên màn nhỏ gần như không thấy). */
 .hero-grass {
@@ -510,26 +739,32 @@
   animation: heroGrassSway 4.8s ease-in-out infinite alternate;
   will-change: transform;
 }
+
 /* Lớp có mask-image chạy liên tục là lớp đắt nhất của hero → tắt trên mọi màn hình. */
 .hero-grass,
 .hero-rays {
   display: none;
 }
+
 .hero-rise {
   animation: heroRise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 .hero-tagline {
   animation: heroTagline 1400ms cubic-bezier(0.22, 1, 0.36, 1) 3.2s both;
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   .hero-stage,
   .hero-sun,
   .hero-rays,
   .hero-cloud,
-  .hero-breeze > span,
+  .hero-breeze>span,
   .hero-grass {
     animation: none;
   }
+
   .hero-tagline {
     animation-name: fadeInEnter;
   }
@@ -547,23 +782,27 @@
     radial-gradient(60rem 30rem at 0% 60%, rgb(10 125 100 / 0.08), transparent 70%),
     radial-gradient(44rem 26rem at 100% 85%, rgb(6 182 212 / 0.08), transparent 70%);
 }
+
 .home-glow-sky {
   background-image:
     radial-gradient(50rem 26rem at 100% 0%, rgb(29 45 79 / 0.07), transparent 70%),
     radial-gradient(44rem 24rem at 0% 100%, rgb(10 125 100 / 0.08), transparent 70%),
     linear-gradient(180deg, #f2f7f5 0%, #eef3f9 100%);
 }
+
 .home-glow-ripe {
   background-image:
     radial-gradient(48rem 26rem at 0% 0%, rgb(250 204 21 / 0.14), transparent 70%),
     radial-gradient(40rem 22rem at 100% 100%, rgb(249 115 22 / 0.08), transparent 70%),
     linear-gradient(180deg, #fbf6e8 0%, #fdfaf2 100%);
 }
+
 .home-dots {
   background-image: radial-gradient(rgb(10 46 38 / 0.07) 1px, transparent 1.2px);
   background-size: 22px 22px;
   mask-image: linear-gradient(to bottom, #000, transparent 70%);
 }
+
 .clip-top-2xl {
   clip-path: inset(0 round 1rem 1rem 0 0);
 }
@@ -578,10 +817,12 @@
 .motif {
   contain: strict;
 }
+
 .motif[data-ink] {
   opacity: 0;
   translate: 0 14px;
 }
+
 /* Chuyển động chỉ gắn ở trạng thái đã hiện: lúc thêm data-ink (ẩn) phải ẩn ngay, không mờ dần đi. */
 .motif[data-ink][data-drawn] {
   opacity: 1;
@@ -590,54 +831,68 @@
 }
 
 @layer utilities {
+
   /* Ngăn xem nhanh trượt từ phải (khu vực quản trị) */
   .panel-slide-in {
     animation: slideFromRight 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
   /* Nội dung hiện dần, nâng nhẹ 4px */
   .rise-in {
     animation: riseIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
   .step-in {
     animation: stepIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
   .step-in-back {
     animation: stepInBack 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
   .road-flow {
     animation: roadFlow 2.4s linear infinite;
   }
+
   /* Khung thao tác: trượt từ đáy trên điện thoại, hiện dần ở giữa màn hình từ 640px */
   .sheet-in {
     animation: sheetUp 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
   @media (min-width: 640px) {
     .sheet-in {
       animation: riseIn 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
   }
+
   .drawer-slide-in {
     animation: slideRightEnter 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
   .drawer-slide-out {
     animation: slideLeftExit 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
   .modal-slide-in {
     animation: slideUpEnter 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
   .modal-slide-out {
     animation: slideDownExit 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
   .fade-in-overlay {
     animation: fadeInEnter 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
+
   .fade-out-overlay {
     animation: fadeOutExit 300ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -653,6 +908,7 @@
 /* Trang có thanh nút dính đáy (useStickyBottomBar): trên điện thoại ẩn nút "Về đầu trang" và nút điều hướng mục — thanh
    dính là hành động chính, ba lớp nút nổi cùng lúc che nội dung và dễ bấm nhầm. */
 @media (max-width: 1023.98px) {
+
   body.has-sticky-bar .back-to-top,
   body.has-sticky-bar .section-nav {
     opacity: 0 !important;
@@ -666,14 +922,17 @@
  * Đặt ngoài @layer nên thắng các utility padding/ẩn của Tailwind trong bảng. Ô có data-label hiện nhãn nhỏ phía trước.
  */
 @media (max-width: 639.98px) {
+
   table.admin-stack,
   table.admin-stack tbody {
     display: block;
     width: 100%;
   }
+
   table.admin-stack thead {
     display: none;
   }
+
   table.admin-stack tr {
     display: flex;
     flex-wrap: wrap;
@@ -681,6 +940,7 @@
     gap: 0.375rem 0.75rem;
     padding: 0.875rem 1rem;
   }
+
   table.admin-stack td {
     display: block;
     width: 100%;
@@ -688,13 +948,16 @@
     text-align: left !important;
     white-space: normal;
   }
+
   table.admin-stack td:empty {
     display: none;
   }
+
   /* Ô chọn (checkbox) đứng đầu dòng, không chiếm cả hàng. */
   table.admin-stack td:has(> input[type='checkbox']:only-child) {
     width: auto;
   }
+
   table.admin-stack td[data-label]::before {
     content: attr(data-label);
     display: block;
@@ -705,21 +968,25 @@
     text-transform: uppercase;
     color: var(--color-muted);
   }
+
   /* Cột thao tác (cuối dòng): nút to, dàn trái, dễ chạm bằng ngón cái. */
   table.admin-stack td:last-child {
     margin-top: 0.375rem;
   }
-  table.admin-stack td:last-child > div {
+
+  table.admin-stack td:last-child>div {
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+
   table.admin-stack td:last-child button,
   table.admin-stack td:last-child a {
     min-height: 2.25rem;
     padding-inline: 0.75rem;
     font-size: 0.75rem;
   }
+
   table.admin-stack [class*='max-w-['] {
     max-width: 100%;
   }
@@ -747,6 +1014,7 @@
   --color-canvas: #f1f4f9;
   --shadow-teal: 0 4px 16px 0 rgba(43, 74, 134, 0.25);
 }
+
 [data-partner-type='EXPERIENCE'] {
   --color-primary: #b44a22;
   --color-primary-light: #eb9d7a;
@@ -769,23 +1037,52 @@
  * đây). Ngoài phạm vi data-partner-type các token này giữ giá trị cũ (viền theo màu chữ, nền trong suốt) nên các phía
  * khác không đổi giao diện.
  */
-[data-partner-type] { --color-border: #dbe3df; --color-hover: #f2f5f3; }
-[data-partner-type='TRANSPORT'] { --color-border: #d6deeb; --color-hover: #eef2f9; }
-[data-partner-type='EXPERIENCE'] { --color-border: #ecdccf; --color-hover: #fbf1ea; }
+[data-partner-type] {
+  --color-border: #dbe3df;
+  --color-hover: #f2f5f3;
+}
+
+[data-partner-type='TRANSPORT'] {
+  --color-border: #d6deeb;
+  --color-hover: #eef2f9;
+}
+
+[data-partner-type='EXPERIENCE'] {
+  --color-border: #ecdccf;
+  --color-hover: #fbf1ea;
+}
 
 /* Nút lưu yêu thích trên thẻ: tim "nảy" mềm khi vừa bấm lưu (phóng to rồi nhún về). */
 .heart-pop {
   animation: heartPop 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 @keyframes heartPop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.35); }
-  55% { transform: scale(0.9); }
-  80% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.35);
+  }
+
+  55% {
+    transform: scale(0.9);
+  }
+
+  80% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .heart-pop { animation: none; }
+  .heart-pop {
+    animation: none;
+  }
 }
 
 /*
@@ -797,9 +1094,11 @@
   transform: translateZ(0);
   -webkit-overflow-scrolling: touch;
 }
+
 .card-pages * {
   transition-duration: 0s !important;
 }
+
 .card-pages a,
 .card-pages article {
   box-shadow: none !important;
@@ -817,18 +1116,26 @@ img[data-loading] {
   object-position: -99999px -99999px !important;
   color: transparent;
 }
+
 img[data-loading]:not([data-no-skeleton]) {
   background-color: #e8eeec;
 }
+
 /* Trong @layer base: ảnh nào tự có animation riêng (vd. .hero-grass, animate-*) thì animation đó được ưu tiên. */
 @layer base {
   img[data-loaded] {
     animation: imgReveal 0.45s ease-out;
   }
 }
+
 @keyframes imgReveal {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /*
@@ -840,15 +1147,18 @@ img[data-loading]:not([data-no-skeleton]) {
   position: relative;
   min-width: 0;
 }
-[data-img-gate="pending"] .img-gate-cell > * {
+
+[data-img-gate="pending"] .img-gate-cell>* {
   opacity: 0;
 }
+
 /* Khung skeleton: ::before là nền, ::after là vệt sáng chạy bằng transform (GPU) — không animate background-position (vẽ
    lại trên luồng chính mỗi khung hình, nhân với hàng chục ô). */
 [data-img-gate="pending"] .img-gate-cell {
   overflow: hidden;
   border-radius: 1rem;
 }
+
 [data-img-gate="pending"] .img-gate-cell::before,
 [data-img-gate="pending"] .img-gate-cell::after {
   content: "";
@@ -856,34 +1166,51 @@ img[data-loading]:not([data-no-skeleton]) {
   inset: 0;
   pointer-events: none;
 }
+
 [data-img-gate="pending"] .img-gate-cell::before {
   background-color: #e8eeec;
 }
+
 [data-img-gate="pending"] .img-gate-cell::after {
   background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
   transform: translate3d(-100%, 0, 0);
   animation: gateShimmer 1.3s ease-in-out infinite;
   will-change: transform;
 }
+
 @keyframes gateShimmer {
-  to { transform: translate3d(100%, 0, 0); }
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
 }
-[data-img-gate="ready"] .img-gate-cell > * {
+
+[data-img-gate="ready"] .img-gate-cell>* {
   animation: gateIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: calc(var(--gate-i, 0) * 45ms);
 }
+
 /* Ảnh trong lưới đã chờ đủ rồi mới hiện: không mờ dần thêm lần nữa từng ảnh. */
 [data-img-gate="ready"] img[data-loaded],
 [data-img-gate="instant"] img[data-loaded] {
   animation: none;
 }
+
 @keyframes gateIn {
-  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.985); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
+
   [data-img-gate="pending"] .img-gate-cell::after,
-  [data-img-gate="ready"] .img-gate-cell > * {
+  [data-img-gate="ready"] .img-gate-cell>* {
     animation: none;
   }
 }
@@ -899,26 +1226,42 @@ img[data-loading]:not([data-no-skeleton]) {
   background: currentColor;
   animation: typeCaretBlink 0.9s steps(1) infinite;
 }
+
 .type-caret.is-typing {
   animation: none;
 }
+
 .type-caret.is-done {
   animation: typeCaretBlink 0.9s steps(1) 3, typeCaretOut 0.4s ease 2.7s forwards;
 }
+
 @keyframes typeCaretBlink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
+
 @keyframes typeCaretOut {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 /* Pagination thẻ (components/ui/CardPages): số trang mới trượt lên thay số cũ. */
 .pager-num {
   animation: pagerNumIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 @keyframes pagerNumIn {
-  from { opacity: 0; transform: translateY(70%); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Khối tìm kiếm (SearchHub, trang chủ): chính nút tìm kiếm (kính lúp tròn) bật ra ở đầu trái thanh, rồi gạt sang phải tới
@@ -931,40 +1274,63 @@ img[data-loading]:not([data-no-skeleton]) {
   --cta-r: calc(var(--cta-h, 66px) / 2 + 6px);
   animation: searchUnfold 1.55s linear 0.5s backwards;
 }
+
 .search-cta {
   animation: searchCta 1.55s linear 0.5s backwards;
 }
+
 .search-unfold-content {
   animation: searchUnfoldContent 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.45s backwards;
 }
+
 @keyframes searchUnfold {
   0% {
     clip-path: inset(var(--cta-r) calc(100% - var(--cta-r)) var(--cta-r) var(--cta-r) round 999px);
     animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  26%, 39% {
+
+  26%,
+  39% {
     clip-path: inset(6px calc(100% - 6px - var(--cta-h, 66px)) 6px 6px round 999px);
     animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   }
-  100% { clip-path: inset(0 0 0 0 round 999px); }
+
+  100% {
+    clip-path: inset(0 0 0 0 round 999px);
+  }
 }
+
 @keyframes searchCta {
   0% {
     transform: translate3d(calc(-1 * var(--cta-travel, 0px)), 0, 0) scale(0.3) rotate(-120deg);
     animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  26%, 39% {
+
+  26%,
+  39% {
     transform: translate3d(calc(-1 * var(--cta-travel, 0px)), 0, 0);
     animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   }
-  100% { transform: translate3d(0, 0, 0); }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
 }
+
 @keyframes searchUnfoldContent {
-  from { opacity: 0; transform: translate3d(-16px, 0, 0); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translate3d(-16px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .type-caret,
   .pager-num,
   .search-unfold,
@@ -975,10 +1341,59 @@ img[data-loading]:not([data-no-skeleton]) {
 }
 
 /* Bảng tìm kiếm (máy tính): hiện ra từ mép trên, mờ + phóng nhẹ; đổi tab thì nội dung trượt nhẹ theo chiều chuyển. */
-.search-pop { animation: searchPop 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-.search-panel-next { animation: searchPanelNext 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-.search-panel-prev { animation: searchPanelPrev 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-@keyframes searchPop { from { opacity: 0; transform: scale(0.96) translateY(-6px); } to { opacity: 1; transform: none; } }
-@keyframes searchPanelNext { from { opacity: 0; transform: translate3d(18px, 0, 0); } to { opacity: 1; transform: none; } }
-@keyframes searchPanelPrev { from { opacity: 0; transform: translate3d(-18px, 0, 0); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .search-pop, .search-panel-next, .search-panel-prev { animation: none !important; } }
+.search-pop {
+  animation: searchPop 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.search-panel-next {
+  animation: searchPanelNext 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.search-panel-prev {
+  animation: searchPanelPrev 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes searchPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes searchPanelNext {
+  from {
+    opacity: 0;
+    transform: translate3d(18px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes searchPanelPrev {
+  from {
+    opacity: 0;
+    transform: translate3d(-18px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .search-pop,
+  .search-panel-next,
+  .search-panel-prev {
+    animation: none !important;
+  }
+}

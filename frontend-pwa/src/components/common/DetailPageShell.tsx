@@ -58,7 +58,7 @@ export default function DetailPageShell({
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({ title, text: shareText, url: window.location.href }).catch(() => {});
+      navigator.share({ title, text: shareText, url: window.location.href }).catch(() => { });
       return;
     }
     navigator.clipboard.writeText(window.location.href);
@@ -118,11 +118,10 @@ export default function DetailPageShell({
                   whileTap={{ scale: 0.96 }}
                   type="button"
                   onClick={() => setSaved((v) => !v)}
-                  className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium shadow-xs transition ${
-                    saved
+                  className={`inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium shadow-xs transition ${saved
                       ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
                       : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <Bookmark className={`h-4 w-4 ${saved ? 'fill-rose-600 text-rose-600' : 'text-slate-500'}`} />
                   <span>{saved ? 'Đã lưu' : saveLabel}</span>
