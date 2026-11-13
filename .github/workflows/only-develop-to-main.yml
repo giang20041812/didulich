@@ -1,0 +1,28 @@
+name: Chỉ hợp nhất develop vào main
+
+# main là nhánh phát hành (Vercel production triển khai từ main). Mọi thay đổi phải đi qua develop trước;
+# yêu cầu hợp nhất (pull request) vào main từ bất kỳ nhánh nào khác sẽ bị đánh dấu lỗi.
+# Kiểm tra này được đặt là "required status check" trong ruleset của nhánh main.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  only-develop-to-main:
+    name: only-develop-to-main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kiểm tra nhánh nguồn
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" != "develop" ]; then
+            echo "::error::Chỉ được hợp nhất vào main từ nhánh develop (nhánh nguồn hiện tại: $HEAD_REF)."
+            exit 1
+          fi
+          echo "Nhánh nguồn là develop — hợp lệ."
