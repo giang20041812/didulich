@@ -140,7 +140,7 @@ export interface AppConfig {
     logOtp: boolean;
   };
   push: { vapidPublicKey: string; vapidPrivateKey: string; subject: string };
-  media: { activeProvider: string };
+  media: { activeProvider: string; localDir: string; localPublicPath: string };
   supabase: { url: string; serviceKey: string; storageBucket: string };
   cloudinary: { cloudName: string; apiKey: string; apiSecret: string };
   geocoding: {
@@ -238,7 +238,12 @@ export function loadConfig(): AppConfig {
       vapidPrivateKey: str('PUSH_VAPID_PRIVATE_KEY'),
       subject: str('PUSH_SUBJECT', 'mailto:admin@viettrek.vn'),
     },
-    media: { activeProvider: str('ACTIVE_MEDIA_PROVIDER', 'CLOUDINARY') },
+    media: {
+      activeProvider: str('ACTIVE_MEDIA_PROVIDER', 'CLOUDINARY'),
+      // Provider LOCAL: ảnh lưu thẳng trên ổ đĩa máy chủ (VPS), phục vụ tại localPublicPath (nginx hoặc chính backend).
+      localDir: str('MEDIA_LOCAL_DIR', 'uploads'),
+      localPublicPath: '/' + str('MEDIA_LOCAL_PUBLIC_PATH', '/uploads').replace(/^\/+|\/+$/g, ''),
+    },
     supabase: {
       url: str('SUPABASE_URL'),
       serviceKey: str('SUPABASE_SERVICE_KEY'),

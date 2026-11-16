@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { config } from '../config/env.js';
 import { IllegalArgumentError, IllegalStateError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
@@ -40,8 +42,8 @@ export function supabaseUploadConfig(): Record<string, unknown> {
  * @param folder thư mục logic (vd "partner-media", "reviews/VJ-XXX") — ký tự lạ bị thay bằng "-"
  */
 export async function uploadImage(data: Buffer, contentType: string | null | undefined, folder: string | null): Promise<StoredObject> {
-  const s = config().supabase;
-  if (!supabaseConfigured()) throw new IllegalStateError('Chưa cấu hình Supabase Storage (SUPABASE_URL / SUPABASE_SERVICE_KEY).');
+  const local = isLocalProvider();
+  if (!local && !supabaseConfigured()) throw new IllegalStateError('Chưa cấu hình Supabase Storage (SUPABASE_URL / SUPABASE_SERVICE_KEY).');
   if (!data || data.length === 0) throw new IllegalArgumentError('File rỗng.');
   if (data.length > MAX_BYTES) throw new IllegalArgumentError('Ảnh vượt quá 4MB.');
   const type = (contentType ?? '').toLowerCase();
@@ -50,6 +52,8 @@ export async function uploadImage(data: Buffer, contentType: string | null | und
   const safeFolder = (folder ?? 'misc').replace(/[^a-zA-Z0-9/_-]/g, '-').replace(/^\/+|\/+$/g, '');
   const ext = type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg';
   const objectPath = `${safeFolder}/${crypto.randomUUID()}.${ext}`;
+  if (local) return saveLocal(data, objectPath);
+  const s = config().supabase;
   const base = s.url.replace(/\/+$/, '');
   let res: Response;
   try {
@@ -69,6 +73,36 @@ export async function uploadImage(data: Buffer, contentType: string | null | und
     );
   }
   return { imageId: objectPath, url: `${base}/storage/v1/object/public/${s.storageBucket}/${objectPath}` };
+}
+
+// ---- Local disk (VPS) ---------------------------------------------------------------------------------------------
+
+export function isLocalProvider(): boolean {
+  return config().media.activeProvider.toUpperCase() === 'LOCAL';
+}
+
+/** Thư mục gốc chứa ảnh (tuyệt đối). Dùng chung cho ghi file (đây) và phục vụ tĩnh (app.ts). */
+export function localMediaRoot(): string {
+  return path.resolve(config().media.localDir);
+}
+
+export function localUploadConfig(): Record<string, unknown> {
+  return { provider: 'LOCAL', uploadUrl: '/api/v1/partner/media/upload-image', maxFileBytes: MAX_BYTES, allowedTypes: ALLOWED_TYPES };
+}
+
+/** Ghi ảnh xuống ổ đĩa; URL trả về là đường dẫn tương đối cùng origin (đổi tên miền không phải sửa DB). */
+async function saveLocal(data: Buffer, objectPath: string): Promise<StoredObject> {
+  const root = localMediaRoot();
+  const target = path.resolve(root, objectPath);
+  if (!target.startsWith(root + path.sep)) throw new IllegalArgumentError('Đường dẫn ảnh không hợp lệ.');
+  try {
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, data, { flag: 'wx' });
+  } catch (err) {
+    logger.warn('Ghi ảnh ra ổ đĩa lỗi', { error: (err as Error).message });
+    throw new IllegalStateError('Không lưu được ảnh trên máy chủ. Kiểm tra quyền ghi thư mục MEDIA_LOCAL_DIR.');
+  }
+  return { imageId: objectPath, url: `${config().media.localPublicPath}/${objectPath}` };
 }
 
 // ---- Cloudinary ---------------------------------------------------------------------------------------------------
@@ -114,25 +148,26 @@ export function cloudinarySignedConfig(signedParams: Record<string, string>): Re
 
 function activeProvider(): MediaProvider {
   const name = config().media.activeProvider.toUpperCase();
-  if (name !== 'CLOUDINARY' && name !== 'SUPABASE') throw new Error(`Active media provider not found or not supported: ${name}`);
+  if (name !== 'CLOUDINARY' && name !== 'SUPABASE' && name !== 'LOCAL') throw new Error(`Active media provider not found or not supported: ${name}`);
   return name;
 }
 
 /** Cấu hình tải ảnh của nhà cung cấp đang dùng. */
 export function getActiveUploadConfig(): Record<string, unknown> {
-  return activeProvider() === 'SUPABASE' ? supabaseUploadConfig() : cloudinaryUploadConfig();
+  const p = activeProvider();
+  return p === 'LOCAL' ? localUploadConfig() : p === 'SUPABASE' ? supabaseUploadConfig() : cloudinaryUploadConfig();
 }
 
 /** Cấu hình tải ảnh đánh giá của khách: chữ ký chỉ hợp lệ cho thư mục `folder` và định dạng ảnh jpg/png/webp. */
 export function getReviewImageUploadConfig(folder: string): Record<string, unknown> {
   if (activeProvider() === 'CLOUDINARY') return cloudinarySignedConfig({ folder, allowed_formats: REVIEW_IMAGE_FORMATS });
   // Upload qua backend: FE gửi multipart tới endpoint này (đã kiểm tra quyền với đơn ở route).
-  return { provider: 'SUPABASE', uploadUrl: '/api/public/bookings/{bookingCode}/review/image' };
+  return { provider: activeProvider(), uploadUrl: '/api/public/bookings/{bookingCode}/review/image' };
 }
 
-/** Upload ảnh đánh giá qua backend khi nhà cung cấp lưu trữ là Supabase Storage. */
+/** Upload ảnh đánh giá qua backend khi nhà cung cấp lưu trữ là Supabase Storage hoặc ổ đĩa local. */
 export async function uploadReviewImageThroughBackend(file: { buffer: Buffer; mimetype: string }, folder: string): Promise<StoredObject> {
-  if (activeProvider() !== 'SUPABASE') throw new IllegalStateError('Endpoint này chỉ dùng cho nhà cung cấp lưu trữ Supabase Storage.');
+  if (activeProvider() === 'CLOUDINARY') throw new IllegalStateError('Endpoint này chỉ dùng cho nhà cung cấp lưu trữ Supabase Storage hoặc LOCAL.');
   return uploadImage(file.buffer, file.mimetype, folder);
 }
 

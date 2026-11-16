@@ -166,7 +166,7 @@ export type JourneySource = (typeof JOURNEY_SOURCES)[number];
 export const JOURNEY_STOP_ORIGINS = values('SUGGESTED', 'CUSTOM');
 export type JourneyStopOrigin = (typeof JOURNEY_STOP_ORIGINS)[number];
 
-export const MEDIA_PROVIDERS = values('CLOUDINARY', 'SUPABASE');
+export const MEDIA_PROVIDERS = values('CLOUDINARY', 'SUPABASE', 'LOCAL');
 export type MediaProvider = (typeof MEDIA_PROVIDERS)[number];
 
 export const MEDIA_ROLES = values('COVER', 'GALLERY');
