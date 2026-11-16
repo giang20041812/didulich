@@ -13,7 +13,7 @@ interface Props {
 async function uploadToCloudinary(file: File): Promise<{ imageId: string; url: string }> {
   const cfg = await adminService.getMediaUploadConfig();
 
-  if (cfg.provider === 'SUPABASE') {
+  if (cfg.provider !== 'CLOUDINARY') {
     const form = new FormData();
     form.append('file', file);
     const res = await fetch(cfg.uploadUrl ?? '/api/v1/partner/media/upload-image', {

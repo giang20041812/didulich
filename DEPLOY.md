@@ -182,6 +182,12 @@ Backend hỗ trợ 2 nhà cung cấp lưu trữ ảnh, chuyển bằng env `ACTI
 3. Đặt env trên Vercel project `viettrek-api`: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_STORAGE_BUCKET=viettrek-media`, `ACTIVE_MEDIA_PROVIDER=SUPABASE`.
 4. Push 1 commit (hoặc redeploy) — deployment mới nhận env mới. Giới hạn mỗi ảnh: JPG/PNG/WebP, ≤ 5MB.
 
+**Lưu ảnh ngay trên VPS (`ACTIVE_MEDIA_PROVIDER=LOCAL`, không phụ thuộc Supabase/Cloudinary):** `deploy/vps/docker-compose.yml` đã bật sẵn.
+Backend ghi ảnh vào volume `viettrek_uploads` (`MEDIA_LOCAL_DIR=/data/uploads`), nginx của `web` đọc cùng volume và phục vụ tại `/uploads/...`
+(cache bất biến 1 năm); URL lưu trong DB là đường dẫn tương đối `/uploads/...` nên đổi tên miền không phải sửa DB. Chuyển ảnh cũ từ Supabase về:
+`cd backend-api && npm run migrate:media-local` (chạy thử) rồi thêm `--apply --confirm-host=<host DB>` — xem hướng dẫn đầu file
+`backend-api/scripts/migrate-media-to-local.ts`. Nhớ sao lưu volume `viettrek_uploads` cùng `viettrek_pgdata`.
+
 ### 6.1. Tự động deploy từ GitHub (đã bật 02/10/2026)
 
 Cả 2 project Vercel đã **kết nối Git Integration** với repo `github.com/BAHUY996/Viettrek` và đặt đúng

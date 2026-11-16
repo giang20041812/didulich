@@ -355,7 +355,7 @@ export interface AdminMediaDto {
 }
 
 export interface AdminUploadConfig {
-  provider: 'CLOUDINARY' | 'SUPABASE';
+  provider: 'CLOUDINARY' | 'SUPABASE' | 'LOCAL';
   cloudName?: string;
   apiKey?: string;
   timestamp?: number;

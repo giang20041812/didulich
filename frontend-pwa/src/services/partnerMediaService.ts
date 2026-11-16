@@ -22,12 +22,12 @@ interface CloudinaryUploadConfig {
 /**
  * Upload ảnh theo nhà cung cấp lưu trữ đang bật:
  * - CLOUDINARY: đẩy thẳng lên Cloudinary bằng chữ ký backend cấp.
- * - SUPABASE: gửi multipart qua backend (service key không lộ ra trình duyệt).
+ * - SUPABASE / LOCAL: gửi multipart qua backend (service key không lộ ra trình duyệt; LOCAL lưu ổ đĩa VPS).
  */
 async function uploadImage(file: File): Promise<{id: string, url: string}> {
   const cfg = (await axios.post<CloudinaryUploadConfig>('/api/v1/partner/media/direct-upload', null, config())).data;
 
-  if (cfg.provider === 'SUPABASE') {
+  if (cfg.provider !== 'CLOUDINARY') {
     const form = new FormData();
     form.append('file', file);
     const res = await axios.post<{ imageId: string; url: string }>(cfg.uploadUrl ?? '/api/v1/partner/media/upload-image', form, {

@@ -60,7 +60,7 @@ interface UploadConfig {
 
 async function adminUpload(file: File): Promise<{ imageId: string; url: string }> {
   const cfg = (await axios.post<UploadConfig>(`${ADMIN}/media/direct-upload`, null, auth())).data;
-  if (cfg.provider === 'SUPABASE') {
+  if (cfg.provider !== 'CLOUDINARY') {
     const form = new FormData();
     form.append('file', file);
     const res = await axios.post<{ imageId: string; url: string }>(`${ADMIN}/media/upload-image`, form, auth());
