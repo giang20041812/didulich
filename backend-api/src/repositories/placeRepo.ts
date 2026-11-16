@@ -165,7 +165,7 @@ export async function findDetailById(id: number): Promise<PlaceWithRegion | null
 }
 
 export async function findDetailBySlug(slug: string): Promise<PlaceWithRegion | null> {
-  return one<PlaceWithRegion>(`${WITH_REGION} WHERE p.slug = $1 AND p.is_deleted = FALSE`, [slug]);
+  return one<PlaceWithRegion>(`${WITH_REGION} WHERE p.slug = $1 AND p.is_deleted = FALSE AND (p.provider_id IS NULL OR NOT EXISTS (SELECT 1 FROM provider pv WHERE pv.id = p.provider_id AND pv.status <> 'ACTIVE'))`, [slug]);
 }
 
 export async function withRegionByIds(ids: readonly number[]): Promise<PlaceWithRegion[]> {
@@ -295,7 +295,7 @@ export type AmenityInUseRow = AmenityRow & { count: number };
 export async function placeAmenitiesInUse(kind: CategoryKind): Promise<AmenityInUseRow[]> {
   return query<AmenityInUseRow>(
     `SELECT a.*, COUNT(DISTINCT p.id)::int AS count FROM place_amenity pa JOIN amenity a ON a.id = pa.amenity_id JOIN place p ON p.id = pa.place_id
-      WHERE pa.value = 'YES' AND a.is_active = TRUE AND p.kind = $1 AND p.is_deleted = FALSE AND p.visibility = 'PUBLISHED'
+      WHERE pa.value = 'YES' AND a.is_active = TRUE AND p.kind = $1 AND p.is_deleted = FALSE AND p.visibility = 'PUBLISHED' AND (p.provider_id IS NULL OR NOT EXISTS (SELECT 1 FROM provider pv WHERE pv.id = p.provider_id AND pv.status <> 'ACTIVE'))
       GROUP BY a.id`,
     [kind],
   );
@@ -390,6 +390,7 @@ export async function findNearbyPlaces(
                                                       + sin(radians($1::float8)) * sin(radians(latitude)))))) AS distance
            FROM place
           WHERE visibility = 'PUBLISHED' AND is_deleted = false AND id <> $3
+            AND (provider_id IS NULL OR NOT EXISTS (SELECT 1 FROM provider pv WHERE pv.id = provider_id AND pv.status <> 'ACTIVE'))
             AND latitude BETWEEN $4 AND $5 AND longitude BETWEEN $6 AND $7
             AND kind <> 'HOMESTAY'
        ) n
@@ -411,7 +412,7 @@ export async function findPublicPlacesInProvince(provinceId: number, kind: Categ
   return query<PlaceWithRegion>(
     `SELECT p.*, r.name AS region_name FROM place p JOIN region r ON r.id = p.region_id
        LEFT JOIN region rp ON rp.id = r.parent_id LEFT JOIN region rpp ON rpp.id = rp.parent_id
-      WHERE p.kind = $2 AND p.visibility = 'PUBLISHED' AND p.is_deleted = FALSE
+      WHERE p.kind = $2 AND p.visibility = 'PUBLISHED' AND p.is_deleted = FALSE AND (p.provider_id IS NULL OR NOT EXISTS (SELECT 1 FROM provider pv WHERE pv.id = p.provider_id AND pv.status <> 'ACTIVE'))
         AND (r.id = $1 OR rp.id = $1 OR rpp.id = $1)
       ORDER BY p.name ASC`,
     [provinceId, kind],
@@ -451,7 +452,7 @@ function publicWhere(f: PublicListFilter): { where: string; params: unknown[] } 
     const p = add(kw);
     parts.push(`(${likeSql('p.name', p)} OR ${likeSql('p.address', p)})`);
   }
-  parts.push(`p.visibility = 'PUBLISHED'`, `p.operation_status IN ('OPERATING', 'TEMP_CLOSED')`, `p.is_deleted = FALSE`);
+  parts.push(`p.visibility = 'PUBLISHED'`, `p.operation_status IN ('OPERATING', 'TEMP_CLOSED')`, `p.is_deleted = FALSE`, `(p.provider_id IS NULL OR NOT EXISTS (SELECT 1 FROM provider pv WHERE pv.id = p.provider_id AND pv.status <> 'ACTIVE'))`);
   if (f.kind) parts.push(`p.kind = ${add(f.kind)}`);
 
   if (f.needs && f.needs.trim()) {
