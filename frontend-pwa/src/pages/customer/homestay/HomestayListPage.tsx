@@ -11,7 +11,7 @@ import { PriceSlider } from '@/components/ui/price-slider';
 import { Button } from '@/components/ui/button';
 import { CardSkeleton } from '@/components/ui/CardSkeleton';
 import CompactPlaceCard from '@/components/ui/CompactPlaceCard';
-import { COMPACT_GRID_WITH_SIDEBAR_COLS, formatVnd } from '@/lib/compactCard';
+import { COMPACT_GRID_WITH_SIDEBAR_COLS, COMPACT_MOBILE_SCROLL, formatVnd } from '@/lib/compactCard';
 import FramerSwipeCardStack from '@/components/ui/FramerSwipeCardStack';
 import Reveal from '@/components/ui/Reveal'
 import HomeMotifs from '@/components/home/HomeMotifs';
@@ -1132,8 +1132,8 @@ export default function HomestayListPage() {
                   </button>
                 </div>
               ) : (
-                // Điện thoại: lưới 2 cột cuộn dọc; từ md: lưới cạnh bộ lọc.
-                <FramerSwipeCardStack gridClassName={COMPACT_GRID_WITH_SIDEBAR_COLS} mobileVerticalClassName="grid grid-cols-2 gap-3" label="Homestay & chỗ nghỉ">
+                // Điện thoại: 1 thẻ mỗi khung, vuốt ngang; từ md: lưới 2 cột cạnh bộ lọc.
+                <FramerSwipeCardStack gridClassName={COMPACT_GRID_WITH_SIDEBAR_COLS} mobileVerticalClassName={COMPACT_MOBILE_SCROLL} label="Homestay & chỗ nghỉ">
                   {paginatedHomestays.map((hs, index) => {
                     return (
                       <Reveal key={hs.id} delay={(index % 3) * 80} className="h-full" offset={28}>
@@ -1149,9 +1149,9 @@ export default function HomestayListPage() {
                           // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
                           onIntent={() => prefetchHomestay(hs.id)}
                           notice={hs.operationStatus === 'TEMPORARILY_CLOSED' ? (
-                            <span className="text-[11px] font-bold text-amber-300">Tạm ngừng nhận đặt phòng</span>
+                            <span className="text-xs font-bold text-amber-700">Tạm ngừng nhận đặt phòng</span>
                           ) : hs.availableForSelectedDates === false ? (
-                            <span className="text-[11px] font-bold text-slate-300">Hết phòng ngày đã chọn</span>
+                            <span className="text-xs font-bold text-rose-600">Hết phòng ngày đã chọn</span>
                           ) : undefined}
                         />
                       </Reveal>
