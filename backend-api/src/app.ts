@@ -10,6 +10,7 @@ import { matchPattern } from './security/accessRules.js';
 import { corsMiddleware } from './security/cors.js';
 import { bumpCatalogVersion, invalidateAllCaches } from './services/catalogCache.js';
 import { mountRoutes } from './routes/index.js';
+import * as mediaStorage from './services/mediaStorage.js';
 
 /**
  * Ứng dụng Express: pipeline tương đương chuỗi filter của Spring (request context → header bảo mật → CORS → JWT →
@@ -115,6 +116,11 @@ export function createApp(): Express {
   const trustProxy = (process.env.TRUST_PROXY ?? '').trim();
   app.set('trust proxy', trustProxy === '' ? 'loopback, linklocal, uniquelocal' : trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
 
+  // Ảnh lưu local (ACTIVE_MEDIA_PROVIDER=LOCAL): phục vụ tĩnh TRƯỚC securityHeaders (header đó đặt no-store). Tên file là UUID
+  // nên nội dung không đổi → cache 1 năm. Trên VPS nginx đọc thẳng cùng volume; nhánh này chủ yếu cho dev / khi không có nginx.
+  if (mediaStorage.isLocalProvider()) {
+    app.use(config().media.localPublicPath, express.static(mediaStorage.localMediaRoot(), { maxAge: '365d', immutable: true, index: false, dotfiles: 'deny' }));
+  }
   app.use(securityHeaders);
   app.use(compression({ filter: (req, res) => /json|text/.test(String(res.getHeader('Content-Type') ?? '')) }));
   app.use(corsMiddleware());

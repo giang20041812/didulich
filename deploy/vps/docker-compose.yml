@@ -32,6 +32,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:?đặt JWT_SECRET (>=32 ký tự) trong .env}
       APP_SEED_INITIAL_PASSWORD: ${APP_SEED_INITIAL_PASSWORD:-}
       CORS_ALLOWED_ORIGINS: https://${DOMAIN},http://${PUBLIC_HOST}:${WEB_PORT:-8088}
+      # Ảnh lưu thẳng trên VPS (không còn gọi Supabase Storage / Cloudinary); nginx của web đọc cùng volume.
+      ACTIVE_MEDIA_PROVIDER: LOCAL
+      MEDIA_LOCAL_DIR: /data/uploads
+    volumes:
+      - viettrek_uploads:/data/uploads
     restart: unless-stopped
 
   web:
@@ -42,6 +47,8 @@ services:
         deploy: .
     depends_on:
       - api
+    volumes:
+      - viettrek_uploads:/data/uploads:ro
     ports:
       - "${WEB_PORT:-8088}:80"
     networks: [default, traefik]
@@ -61,3 +68,4 @@ networks:
 
 volumes:
   viettrek_pgdata:
+  viettrek_uploads:

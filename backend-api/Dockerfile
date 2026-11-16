@@ -24,6 +24,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY migrations ./migrations
 COPY package.json ./
+# Thư mục ảnh (ACTIVE_MEDIA_PROVIDER=LOCAL): volume mới gắn vào sẽ thừa hưởng quyền của node.
+RUN mkdir -p /data/uploads && chown node:node /data/uploads
 USER node
 EXPOSE 10000
 # Schema do migrations/*.sql dựng lúc khởi động (db/migrate.ts); DB trống cũng chạy được.

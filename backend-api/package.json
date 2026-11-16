@@ -17,6 +17,7 @@
     "import:data-chinh-thong": "tsx --env-file-if-exists=.env.local scripts/import-data-chinh-thong.ts",
     "import:dimcc": "tsx --env-file-if-exists=.env.local scripts/import-dimcc.ts",
     "import:zip-photos": "tsx --env-file-if-exists=.env.local scripts/import-zip-photos.ts",
+    "migrate:media-local": "tsx --env-file-if-exists=.env.local scripts/migrate-media-to-local.ts",
     "prune:unconfirmed": "tsx --env-file-if-exists=.env.local scripts/prune-unconfirmed.ts",
     "wipe:catalog": "tsx --env-file-if-exists=.env.local scripts/wipe-catalog-data.ts"
   },

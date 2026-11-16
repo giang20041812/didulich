@@ -37,8 +37,8 @@ export async function uploadReviewImageToCloudinary(file: File, bookingCode: str
 
   const config = (await res.json()) as CloudinaryUploadConfig;
 
-  // Supabase Storage (mã nguồn mở): upload multipart qua backend, kèm chứng minh quyền với đơn.
-  if (config.provider === 'SUPABASE') {
+  // Supabase Storage / ổ đĩa VPS (LOCAL): upload multipart qua backend, kèm chứng minh quyền với đơn.
+  if (config.provider !== 'CLOUDINARY') {
     const uploadUrl = new URL(
       (config.uploadUrl ?? '/api/public/bookings/{bookingCode}/review/image')
         .replace('{bookingCode}', encodeURIComponent(bookingCode)),

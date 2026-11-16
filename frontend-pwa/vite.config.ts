@@ -20,6 +20,8 @@ export default defineConfig({
         target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
+      // Ảnh lưu local (ACTIVE_MEDIA_PROVIDER=LOCAL) do backend phục vụ tại /uploads.
+      '/uploads': { target: 'http://127.0.0.1:8080', changeOrigin: true },
       // Mirror rewrite /media + /mediac trong vercel.json để dev lẫn preview đều tải được ảnh media.
       '/media': {
         target: 'https://mbmliqykqjufvngjvdjx.supabase.co',
