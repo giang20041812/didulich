@@ -34,16 +34,6 @@ const CATEGORY_GROUPS = [
   { id: 'SHARED_CAR', label: 'Xe ghép liên xã & taxi', desc: 'Kết nối Lào Cai, Chế Cu Nha, Nậm Có' },
 ];
 
-const P400 = '400.000đ';
-const P350 = '350.000đ';
-const TRANSPORT_SAMPLE_ROWS: { name: string; note?: string; cells: { time?: string; price?: string }[]; route: string }[] = [
-  { name: '1. Nhà xe Mỹ đình - MCC', cells: [{ time: '9h15', price: P400 }, { time: '16h30', price: P400 }, { time: '20h30', price: P400 }, { time: '5h30', price: P400 }], route: 'QL32' },
-  { name: '2. Nhà xe Mỹ đình - Ngã ba Kim', note: '(cách MCC 18km)', cells: [{ time: '10h', price: P400 }, { time: '17h00', price: P400 }, { time: '20h30', price: P400 }, { time: '5h30', price: P400 }], route: 'QL32' },
-  { name: '3. Nhà xe Mỹ đình - MCC', cells: [{ time: '1h00', price: P350 }, { time: '13h00', price: P350 }, { time: '21h30', price: P350 }, { price: '300.000đ' }], route: 'CT Nội Bài - Lào Cai' },
-  { name: '4. Nhà xe Mỹ đình - MCC', cells: [{ time: '18h30', price: P350 }, { time: '2h', price: P350 }, { time: '21h', price: P350 }, { time: '4h', price: P350 }], route: 'QL32' },
-  { name: '5. Nhà xe đón điểm - MCC', cells: [{ time: 'Đón tại Hà Nội (Lĩnh Nam, Hồ Tùng Mậu, Linh Đàm)', price: P350 }, { time: '5h00', price: P350 }, { time: '20h30', price: P350 }, { time: 'Gà', price: P350 }], route: 'QL32' },
-];
-
 export default function TransportListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -197,75 +187,6 @@ export default function TransportListPage() {
           <span>/</span>
           <span className="text-[var(--color-ink-deep)] font-semibold">Dịch vụ di chuyển</span>
         </div>
-
-        <section className="mb-6 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-900/[0.06] shadow-[0_12px_32px_-18px_rgba(16,40,34,0.28)]">
-          <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3.5 md:px-5">
-            <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400" />
-            <div className="pt-1">
-              <h2 className="text-base md:text-lg font-bold text-[var(--color-ink-deep)]">Lịch trình xe Hà Nội – MCC (khứ hồi)</h2>
-              <p className="text-xs text-[var(--color-muted)]">Bảng mẫu tham khảo · giá vé một chiều/người</p>
-            </div>
-            <span className="mt-1 inline-flex items-center rounded-full border border-[var(--color-primary-100)] bg-[var(--color-primary-50)] px-3 py-1 text-xs font-bold text-[var(--color-primary)]">
-              An toàn • Đúng giờ • Thoải mái
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[780px] table-fixed border-collapse text-sm">
-              <colgroup>
-                <col className="w-[22%]" />
-                <col className="w-[14%]" /><col className="w-[14%]" /><col className="w-[14%]" /><col className="w-[14%]" />
-                <col className="w-[22%]" />
-              </colgroup>
-              <thead>
-                <tr className="text-[11px] font-bold uppercase tracking-wider">
-                  <th rowSpan={2} className="sticky left-0 z-10 bg-slate-50 px-4 py-3 text-left text-slate-500 border-b border-slate-200">Nhà xe</th>
-                  <th colSpan={2} className="bg-emerald-50 px-3 py-2 text-center text-emerald-800 border-b border-emerald-100 border-l border-slate-200">Chiều đi · Hà Nội → MCC</th>
-                  <th colSpan={2} className="bg-amber-50 px-3 py-2 text-center text-amber-800 border-b border-amber-100 border-l border-slate-200">Chiều về · MCC → Hà Nội</th>
-                  <th rowSpan={2} className="bg-slate-50 px-4 py-3 text-center text-slate-500 border-b border-slate-200 border-l border-slate-200">Tuyến</th>
-                </tr>
-                <tr className="text-center">
-                  {[['A', 'XB Mỹ Đình', 'emerald'], ['B', 'Đến MCC', 'emerald'], ['C', 'XB MCC', 'amber'], ['D', 'Đến Mỹ Đình', 'amber']].map(([k, label, tone], i) => (
-                    <th key={k} className={`px-3 py-2 border-b border-slate-200 ${tone === 'emerald' ? 'bg-emerald-50/60' : 'bg-amber-50/60'} ${i % 2 === 0 ? 'border-l border-slate-200' : ''}`}>
-                      <span className={`mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-md text-[11px] font-extrabold text-white ${tone === 'emerald' ? 'bg-emerald-600' : 'bg-amber-500'}`}>{k}</span>
-                      <span className="text-xs font-semibold text-slate-600">{label}</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {TRANSPORT_SAMPLE_ROWS.map((r, ri) => {
-                  const m = r.name.match(/^(\d+)\.\s*(.*)$/);
-                  const bg = ri % 2 ? 'bg-slate-50/60' : 'bg-white';
-                  return (
-                    <tr key={r.name} className={`${bg} transition-colors hover:bg-emerald-50/50 group`}>
-                      <td className={`sticky left-0 z-10 ${bg} group-hover:bg-emerald-50 px-4 py-3 text-left border-b border-slate-100`}>
-                        <div className="flex items-start gap-2.5">
-                          {m && <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-50)] text-xs font-bold text-[var(--color-primary)]">{m[1]}</span>}
-                          <div className="min-w-0">
-                            <div className="font-semibold leading-snug text-[var(--color-ink-deep)]">{m ? m[2] : r.name}</div>
-                            {r.note && <div className="text-xs text-slate-500">{r.note}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      {r.cells.map((c, i) => (
-                        <td key={i} className={`px-3 py-3 text-center align-middle border-b border-slate-100 ${i % 2 === 0 ? 'border-l border-slate-200' : ''}`}>
-                          <div className="flex flex-col items-center gap-1.5">
-                            {c.time && <div className={`${c.time.length > 10 ? 'text-xs font-medium leading-snug text-slate-600' : 'text-base font-bold tabular-nums text-slate-800'}`}>{c.time}</div>}
-                            {c.price && <span className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold tabular-nums text-amber-800 ring-1 ring-amber-200">{c.price}</span>}
-                          </div>
-                        </td>
-                      ))}
-                      <td className="px-4 py-3 text-center border-b border-slate-100 border-l border-slate-200">
-                        <span className="inline-block rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 ring-1 ring-emerald-100">{r.route}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <p className="border-t border-slate-100 bg-slate-50/60 px-4 py-2.5 text-xs italic text-slate-500">Đặt xe ngay – Đồng hành cùng bạn trên mọi hành trình!</p>
-        </section>
 
         {firstLoad ? (
           <ToolbarSkeleton {...SKELETON.toolbar} />

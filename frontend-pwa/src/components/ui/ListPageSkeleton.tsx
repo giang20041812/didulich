@@ -20,27 +20,24 @@ export const LIST_SKELETON_SPECS = {
   culture: { count: 8 },
 } satisfies Record<string, { toolbar?: ToolbarSpec; filter?: FilterSpec; count: number }>;
 
-/** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 16:10 + tên + địa điểm + giá, cùng bo góc / khoảng đệm với thẻ thật. */
+/** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 4:3 phía trên + tên, địa điểm, giá bên dưới — cùng bo góc / khoảng đệm với thẻ thật. */
 export function CompactCardSkeleton() {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/10 ring-1 ring-slate-200/80 shadow-xs aspect-square relative p-3.5 sm:p-4 justify-between">
-      <div className="flex justify-between items-center">
-        <Skeleton className={`${bar} h-5 w-20 rounded-full`} />
-        <Skeleton className={`${bar} h-5 w-16 rounded-full`} />
-      </div>
-      <div className="space-y-2 mt-auto">
-        <Skeleton className={`${bar} h-4 w-3/4`} />
-        <Skeleton className={`${bar} h-3 w-full opacity-70`} />
-        <div className="flex justify-between items-center pt-2 border-t border-slate-200/50">
-          <Skeleton className={`${bar} h-3.5 w-16`} />
-          <Skeleton className={`${bar} h-3.5 w-20`} />
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-xs">
+      <Skeleton className={`${bar} aspect-[4/3] w-full rounded-none`} />
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <Skeleton className={`${bar} h-5 w-3/4`} />
+        <Skeleton className={`${bar} h-3.5 w-1/2`} />
+        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-2.5">
+          <Skeleton className={`${bar} h-4 w-20`} />
+          <Skeleton className={`${bar} h-4 w-24`} />
         </div>
       </div>
     </div>
   );
 }
 
-/** Lưới thẻ chờ — cùng lưới với trang thật (có cột bộ lọc: 2 cột; toàn chiều ngang: 2/3/4 cột). */
+/** Lưới thẻ chờ — cùng lưới với trang thật (từ md 2 cột; điện thoại 1 thẻ cuộn ngang). */
 export function CardGridSkeleton({ count = 6, withSidebar = false }: { count?: number; withSidebar?: boolean }) {
   return (
     <div role="status" aria-busy="true" className={withSidebar ? COMPACT_GRID_WITH_SIDEBAR : COMPACT_GRID_FULL}>
