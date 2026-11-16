@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  CalendarClock, Bus, Wallet, UtensilsCrossed, ShieldAlert, Phone, Siren,
-  ChevronRight, Mountain, CloudSun, Bike, Car, Footprints, Info,
+  CalendarClock, Bus, Wallet, ShieldAlert, Phone, Siren,
+  CloudSun, Bike, Car, Footprints, Info,
 } from 'lucide-react';
 import EmergencySosModal from '@/components/customer/EmergencySosModal';
 import Reveal from '@/components/ui/Reveal';
@@ -13,7 +12,6 @@ const SECTIONS = [
   { id: 'thoi-diem', label: 'Thời điểm đẹp', icon: CalendarClock },
   { id: 'di-chuyen', label: 'Di chuyển', icon: Bus },
   { id: 'chi-phi', label: 'Chi phí', icon: Wallet },
-  { id: 'am-thuc', label: 'Ẩm thực', icon: UtensilsCrossed },
   { id: 'an-toan', label: 'An toàn & lưu ý', icon: ShieldAlert },
   { id: 'khan-cap', label: 'Khẩn cấp', icon: Phone },
 ];
@@ -151,25 +149,6 @@ export default function TravelGuidePage() {
                 </div>
               ))}
             </div>
-          </section>
-        </Reveal>
-
-        {/* 4. Ẩm thực */}
-        <Reveal>
-          <section id="am-thuc" className="mb-10 scroll-mt-24">
-            <SectionHead icon={UtensilsCrossed} title="Ẩm thực không nên bỏ lỡ" desc="Cốm Tú Lệ còn ấm, xôi ngũ sắc, gà nướng mắc khén… — xem mục Đặc sản để biết nơi mua, nơi thưởng thức." />
-            <Link to="/specialties" className="group flex items-center justify-between gap-3 rounded-xl border-2 border-slate-100 bg-white p-4 shadow-2xs transition-all hover:border-teal-500/30 hover:shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#052620]/10 text-[#052620]">
-                  <Mountain className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-800">Đặc sản Mù Cang Chải & Tú Lệ</p>
-                  <p className="text-xs text-slate-500">Món đặc trưng của đồng bào vùng cao và nơi mua</p>
-                </div>
-              </div>
-              <span className="flex items-center gap-1 text-xs font-bold text-[#052620]">Xem tất cả <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
-            </Link>
           </section>
         </Reveal>
 

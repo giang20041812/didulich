@@ -70,12 +70,6 @@ export default function Footer() {
                     Nhà hàng & Ẩm thực
                   </Link>
                 </li>
-                <li>
-                  <Link to="/specialties" className="hover:text-amber-400 transition-colors inline-flex items-center gap-1 group">
-                    <span className="text-emerald-400/80 group-hover:translate-x-0.5 transition-transform">›</span>
-                    Đặc sản Tây Bắc
-                  </Link>
-                </li>
               </ul>
             </div>
 

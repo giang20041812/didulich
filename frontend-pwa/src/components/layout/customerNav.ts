@@ -1,4 +1,4 @@
-import { Home, BedDouble, MapPin, UtensilsCrossed, Bus, Compass, Utensils, Layers, Route, type LucideIcon } from 'lucide-react';
+import { Home, BedDouble, MapPin, Bus, Compass, Utensils, Layers, Route, type LucideIcon } from 'lucide-react';
 
 export interface CustomerNavItem {
   id: string;
@@ -13,7 +13,7 @@ export interface CustomerNavItem {
 
 /**
  * Điều hướng chính của trang khách — header và sidebar dùng chung để thứ tự, tên gọi luôn khớp nhau:
- * Trang chủ, Lưu trú, Lịch trình, Du lịch, Đặc sản, Di chuyển, rồi các mục còn lại.
+ * Trang chủ, Lưu trú, Lịch trình, Du lịch, Di chuyển, rồi các mục còn lại.
  */
 export const CUSTOMER_NAV: CustomerNavItem[] = [
   { id: 'home', path: '/', label: 'Trang chủ', Icon: Home },
@@ -21,7 +21,7 @@ export const CUSTOMER_NAV: CustomerNavItem[] = [
   // Lịch trình: tạo lịch trình + lịch trình du khách đăng công khai (/j/…) + lịch trình của tôi (/journeys/…).
   { id: 'trips', path: '/lich-trinh', label: 'Lịch trình', Icon: Route, alsoActiveOn: ['/j', '/journeys', '/trai-nghiem'] },
   { id: 'destinations', path: '/destinations', label: 'Du lịch', Icon: MapPin, alsoActiveOn: ['/places'] },
-  { id: 'specialties', path: '/specialties', label: 'Đặc sản', Icon: UtensilsCrossed },
+  // Đặc sản: tạm ẩn khỏi menu (route /specialties chuyển về trang chủ trong AppRoutes) — bật lại thì thêm mục này.
   { id: 'transport', path: '/transport', label: 'Di chuyển', Icon: Bus },
   { id: 'culture', path: '/culture', label: 'Văn hóa', Icon: Compass, alsoActiveOn: ['/explore', '/experiences', '/festivals'] },
   { id: 'restaurants', path: '/restaurants', label: 'Nhà hàng', Icon: Utensils, alsoActiveOn: ['/food'] },

@@ -11,7 +11,7 @@ import { recoverChunkLoad } from '@/lib/chunkRecovery';
 import { PageSkeleton, DetailSkeleton, DashboardSkeleton, FormSkeleton, ListPageFallback } from '@/components/ui/PageSkeleton';
 import {
   ComboListFallback, CultureFallback, DestinationListFallback, HomestayListFallback, MapFallback, PlannerFallback, RestaurantListFallback,
-  SpecialtyListFallback, TransportListFallback, TravelGuideFallback, TripsHubFallback, UtilityListFallback,
+  TransportListFallback, TravelGuideFallback, TripsHubFallback, UtilityListFallback,
 } from '@/components/ui/RouteSkeletons';
 
 type SkeletonKind = 'cards' | 'detail' | 'list' | 'dashboard' | 'form';
@@ -77,8 +77,6 @@ const DestinationListPage = lazyPage(() => import('@/pages/customer/culture/Dest
 const TravelGuidePage = lazyPage(() => import('@/pages/customer/guide/TravelGuidePage'), TravelGuideFallback);
 const PlaceDetailPage = lazyPage(() => import('@/pages/customer/culture/PlaceDetailPage'), 'detail');
 const RestaurantListPage = lazyPage(() => import('@/pages/customer/services/RestaurantListPage'), RestaurantListFallback);
-const SpecialtyListPage = lazyPage(() => import('@/pages/customer/services/SpecialtyListPage'), SpecialtyListFallback);
-const DishDetailPage = lazyPage(() => import('@/pages/customer/services/DishDetailPage'), 'detail');
 const TransportListPage = lazyPage(() => import('@/pages/customer/services/TransportListPage'), TransportListFallback);
 const ComboListPage = lazyPage(() => import('@/pages/customer/combo/ComboListPage'), ComboListFallback);
 const ComboDetailPage = lazyPage(() => import('@/pages/customer/combo/ComboDetailPage'), 'detail');
@@ -153,8 +151,9 @@ export function AppRoutes() {
           <Route path="places/:identifier" element={<PlaceDetailPage />} />
           <Route path="restaurants" element={<RestaurantListPage />} />
           <Route path="restaurants/:identifier" element={<PlaceDetailPage />} />
-          <Route path="specialties" element={<SpecialtyListPage />} />
-          <Route path="specialties/:identifier" element={<DishDetailPage />} />
+          {/* Đặc sản: tạm ẩn — đường dẫn cũ về trang chủ. Bật lại: trả 2 route SpecialtyListPage / DishDetailPage. */}
+          <Route path="specialties" element={<Moved to="/" search="" />} />
+          <Route path="specialties/:identifier" element={<Moved to="/" search="" />} />
           
           {/* Profile / Other standard layout pages */}
           <Route path="profile" element={<UserProfilePage />} />
