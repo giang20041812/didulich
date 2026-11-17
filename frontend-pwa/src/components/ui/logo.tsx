@@ -50,7 +50,7 @@ export const LogoMark: React.FC<MarkProps> = ({ size = 48, className = '', alt =
 };
 
 /**
- * Chữ "Đi Du Lịch" cạnh biểu tượng: font tiêu đề DT Phudu.
+ * Chữ "Đi Du Lịch" cạnh biểu tượng: font tiêu đề của trang (Nunito, xem --font-display ở styles/globals.css).
  * `size` là cỡ chữ (px); `height` giữ cho các chỗ gọi cũ (chiều cao ảnh chữ cũ) và được quy đổi sang cỡ chữ.
  */
 export const LogoWordmark: React.FC<{ size?: number; height?: Size; tone?: 'dark' | 'light'; className?: string }> = ({
