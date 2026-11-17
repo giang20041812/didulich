@@ -6,6 +6,9 @@
  * Cố ý viết NGOÀI @layer để thắng các tiện ích Tailwind còn sót trên cùng phần tử (shadow-*, bg-*, transition-*).
  * Chỉ động vào nền / bóng / chuyển động — không đụng màu chữ, bo góc, cỡ chữ để từng chỗ dùng vẫn tự quyết định.
  * Họa tiết khi rê chuột chỉ bật trên thiết bị có chuột (hover: hover); cảm ứng vẫn có hiệu ứng bấm.
+ *
+ * Thanh đầu trang (#app-header: menu giữa, menu tài khoản, nút ☰, nút CTA trong header) KHÔNG có hiệu ứng glow:
+ * không quầng sáng / viền sáng chạy vòng / họa tiết lấp lánh — rê chuột chỉ đổi nền phẳng nhạt hoặc màu chữ.
  */
 
 /* ============================== Nút CTA ============================== */
@@ -74,7 +77,7 @@
     filter: brightness(1.05);
     box-shadow:
       0 10px 22px -12px rgba(var(--cta-glow), 0.75),
-      0 0 0 3px rgba(var(--cta-glow), 0.1),
+      0 0 0 3px rgba(var(--cta-glow), var(--cta-ring, 0.1)),
       inset 0 1px 0 rgba(255, 255, 255, 0.26);
   }
   .cta:hover:not(:disabled):not([aria-disabled="true"])::before {
@@ -165,24 +168,31 @@
   }
 }
 
-/* ============================== Mục điều hướng (navbar) ============================== */
+/* ============================== Topbar: nút CTA tĩnh ==============================
+   Nút CTA nằm trong header (Đăng nhập / Đăng ký, nút tìm kiếm thu gọn) không nở họa tiết quanh nút, không có vòng
+   quầng sáng khi rê chuột và không bung halo khi bấm — chỉ nhấc nhẹ và đổi sắc như các nút thường. */
+
+#app-header .cta {
+  --cta-ring: 0;
+}
+#app-header .cta::before,
+#app-header .cta::after {
+  display: none;
+}
+#app-header .cta.cta-pop {
+  animation: none;
+}
+
+/* ============================== Mục điều hướng (navbar) ==============================
+   Rê chuột chỉ phủ một lớp nền phẳng, nhạt — không gradient, không đốm lấp lánh, không gạch chân màu. */
 
 .nav-fx {
-  --nf-a: rgba(16, 185, 129, 0.16);
-  --nf-b: rgba(6, 182, 212, 0.2);
-  --nf-line-a: #10b981;
-  --nf-line-b: #06b6d4;
-  --nf-line-c: #facc15;
+  --nf-bg: rgba(10, 125, 100, 0.09);
   isolation: isolate;
 }
 .nav-fx-light {
-  --nf-a: rgba(255, 255, 255, 0.24);
-  --nf-b: rgba(250, 204, 21, 0.26);
-  --nf-line-a: #ffffff;
-  --nf-line-b: #fde047;
-  --nf-line-c: #fb923c;
+  --nf-bg: rgba(255, 255, 255, 0.18);
 }
-/* Nền gradient mềm nở ra từ giữa mục */
 .nav-fx::before {
   content: "";
   position: absolute;
@@ -190,30 +200,9 @@
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 82% 70%, rgba(255, 255, 255, 0.85) 0 1.2px, transparent 2.2px),
-    radial-gradient(circle at 60% 20%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
-    linear-gradient(120deg, var(--nf-a), var(--nf-b));
+  background: var(--nf-bg);
   opacity: 0;
-  transform: scale(0.72);
-  transition:
-    opacity 0.3s ease,
-    transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
-}
-/* Gạch chân gradient mọc ra từ tâm */
-.nav-fx::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 1px;
-  height: 2px;
-  width: 0;
-  border-radius: 999px;
-  pointer-events: none;
-  background: linear-gradient(90deg, var(--nf-line-a), var(--nf-line-b), var(--nf-line-c));
-  transform: translateX(-50%);
-  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.2s ease;
 }
 .nav-fx > svg {
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -221,10 +210,6 @@
 @media (hover: hover) {
   .nav-fx:hover::before {
     opacity: 1;
-    transform: scale(1);
-  }
-  .nav-fx:hover:not([aria-current="page"])::after {
-    width: calc(100% - 1.5rem);
   }
   .nav-fx:hover > svg {
     transform: translateY(-1px) rotate(-9deg) scale(1.18);
@@ -235,59 +220,40 @@
   opacity: 0;
 }
 
-/* ============================== Mục trong menu thả xuống ============================== */
+/* ============================== Mục trong menu thả xuống ==============================
+   Rê chuột: nền phẳng nhạt (không dải gradient quét qua, không dịch chữ sang phải). */
 
 .menu-fx {
-  background-image: linear-gradient(100deg, rgba(16, 185, 129, 0.14), rgba(6, 182, 212, 0.12) 60%, transparent);
-  background-repeat: no-repeat;
-  background-size: 0% 100%;
+  --mf-bg: rgba(10, 125, 100, 0.08);
   transition:
-    background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.2s ease,
-    padding-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 .menu-fx > svg {
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @media (hover: hover) {
   .menu-fx:hover {
-    background-size: 100% 100%;
-    padding-left: 0.95rem;
+    background-color: var(--mf-bg);
   }
   .menu-fx:hover > svg {
     transform: scale(1.18) rotate(-6deg);
   }
 }
 .menu-fx-warn {
-  background-image: linear-gradient(100deg, rgba(245, 158, 11, 0.18), rgba(251, 146, 60, 0.12) 60%, transparent);
+  --mf-bg: rgba(245, 158, 11, 0.12);
 }
 .menu-fx-danger {
-  background-image: linear-gradient(100deg, rgba(244, 63, 94, 0.14), rgba(251, 113, 133, 0.1) 60%, transparent);
+  --mf-bg: rgba(244, 63, 94, 0.09);
 }
 
-/* ============================== Nút biểu tượng tròn (chuông, ☰…) ============================== */
+/* ============================== Nút biểu tượng tròn (☰…) ==============================
+   Không còn quầng màu mờ phía sau nút; chỉ nhấc nhẹ và nghiêng biểu tượng khi rê chuột. */
 
 .icon-fx {
-  isolation: isolate;
   transition:
     transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    color 0.25s ease,
-    box-shadow 0.35s ease;
-}
-.icon-fx::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: conic-gradient(from 0deg, #10b981, #06b6d4, #facc15, #f97316, #10b981);
-  filter: blur(7px);
-  opacity: 0;
-  transform: scale(0.7);
-  transition:
-    opacity 0.35s ease,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    color 0.25s ease;
 }
 .icon-fx > svg {
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -296,20 +262,12 @@
   .icon-fx:hover {
     transform: translateY(-1px) scale(1.08);
   }
-  .icon-fx:hover::before {
-    opacity: 0.55;
-    transform: scale(1.1);
-    animation: iconSpin 3.2s linear infinite;
-  }
   .icon-fx:hover > svg {
     transform: rotate(-10deg) scale(1.12);
   }
 }
 .icon-fx:active {
   transform: scale(0.92);
-}
-@keyframes iconSpin {
-  to { rotate: 360deg; }
 }
 
 /* ============================== Giảm chuyển động ============================== */
@@ -319,58 +277,13 @@
   .cta::before,
   .cta.cta-pop,
   .nav-fx::before,
-  .nav-fx::after,
   .nav-fx > svg,
   .menu-fx,
   .menu-fx > svg,
   .icon-fx,
-  .icon-fx::before,
   .icon-fx > svg {
     transition-duration: 0.01ms !important;
     animation: none !important;
   }
   .cta::after { display: none; }
-}
-
-/* ============================== Nút tài khoản: viền sáng chạy vòng khi rê chuột ==============================
-   Một dải sáng xoay quanh viền (conic-gradient + mask chỉ để lộ phần viền) kèm quầng mờ phía sau, nền nút giữ nguyên. */
-@property --acct-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-.acct-glow {
-  isolation: isolate;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
-}
-.acct-glow::before,
-.acct-glow::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: conic-gradient(from var(--acct-angle), transparent 0 40%, #2dd4bf 55%, #facc15 70%, #fb923c 82%, transparent 95%);
-  transition: opacity 0.35s ease;
-}
-.acct-glow::before {
-  padding: 2px;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-}
-.acct-glow::after {
-  filter: blur(9px);
-  inset: 0;
-}
-@media (hover: hover) {
-  .acct-glow:hover::before { opacity: 1; animation: acctSpin 2.2s linear infinite; }
-  .acct-glow:hover::after { opacity: 0.55; animation: acctSpin 2.2s linear infinite; }
-}
-.acct-glow:active { transform: scale(0.96); }
-@keyframes acctSpin { to { --acct-angle: 360deg; } }
-@media (prefers-reduced-motion: reduce) {
-  .acct-glow::before, .acct-glow::after { animation: none !important; }
 }
