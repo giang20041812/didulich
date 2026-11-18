@@ -87,7 +87,6 @@ export default function SpecialtyListPage() {
                     name={spec.name}
                     imageUrl={spec.coverImageUrl}
                     FallbackIcon={UtensilsCrossed}
-                    location={spec.district}
                   />
                   </Reveal>
                 ))}

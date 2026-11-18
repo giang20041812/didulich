@@ -58,11 +58,11 @@ export default function LocalExperiencesSection() {
               name={p.name}
               imageUrl={p.coverImageUrl ?? ''}
               FallbackIcon={Compass}
-              location={[text(p, 'duration'), languages].filter(Boolean).join(' · ') || p.address || ''}
+              description={[text(p, 'duration'), languages].filter(Boolean).join(' · ') || null}
               price={formatVnd(p.priceRefMin)}
               priceUnit={unit || 'khách'}
               badge={text(p, 'categoryGroupName') ? (
-                <CompactCardBadge className="bg-[var(--color-primary)]"><span className="truncate">{text(p, 'categoryGroupName')}</span></CompactCardBadge>
+                <CompactCardBadge><span className="truncate">{text(p, 'categoryGroupName')}</span></CompactCardBadge>
               ) : undefined}
             />
           );

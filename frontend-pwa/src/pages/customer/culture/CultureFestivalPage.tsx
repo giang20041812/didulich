@@ -183,9 +183,9 @@ export default function CultureFestivalPage() {
                 to={`/festivals/${fest.slug}`}
                 name={fest.name}
                 imageUrl={fest.coverImageUrl}
-                location={fest.location || fest.regionName}
                 badge={(fest.timeRange || fest.seasonNote) && (
-                  <CompactCardBadge className={fest.isCurrentSeason ? 'bg-amber-500' : 'bg-[var(--color-primary)]'}>
+                  // Đang vào mùa là thông tin quan trọng: màu nổi bật; còn lại cùng tông nhãn chung.
+                  <CompactCardBadge className={fest.isCurrentSeason ? 'bg-[var(--color-primary)]' : undefined}>
                     {fest.isCurrentSeason ? <Flame className="h-3 w-3 shrink-0 fill-white" /> : <Calendar className="h-3 w-3 shrink-0" />}
                     <span className="truncate">{fest.timeRange || fest.seasonNote}</span>
                   </CompactCardBadge>

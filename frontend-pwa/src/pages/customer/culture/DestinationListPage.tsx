@@ -467,13 +467,12 @@ export default function DestinationListPage() {
                         to={`/destinations/${dest.id}`}
                         name={dest.name}
                         imageUrl={dest.coverImageUrl}
-                        location={dest.address || dest.district || 'Lào Cai'}
                         description={dest.description}
                         price={dest.ticketPrice > 0 ? formatVnd(dest.ticketPrice) : 'Miễn phí'}
                         priceUnit={dest.ticketPrice > 0 ? 'lượt' : null}
                         ctaText="Khám phá ngay"
                         badge={
-                          <CompactCardBadge className={season.yearRound ? 'bg-gradient-to-r from-teal-500 to-emerald-600' : 'bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500'}>
+                          <CompactCardBadge>
                             <SakuraBlossomIcon className="h-3 w-3 shrink-0" />
                             <span className="truncate">{season.text}</span>
                           </CompactCardBadge>
@@ -481,7 +480,7 @@ export default function DestinationListPage() {
                         secondaryBadge={
                           dest.scenicType ? (
                             <GlassBadge>
-                              <Mountain className="w-2.5 h-2.5 text-emerald-300 shrink-0" />
+                              <Mountain className="w-2.5 h-2.5 shrink-0" />
                               <span className="truncate max-w-[90px]">{(dest.scenicType.split('&')[0] || '').trim()}</span>
                             </GlassBadge>
                           ) : undefined
