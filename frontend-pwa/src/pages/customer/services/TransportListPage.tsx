@@ -352,12 +352,7 @@ export default function TransportListPage() {
                         price={formatVnd(t.priceRef)}
                         priceUnit={t.priceUnitNote || 'lượt'}
                         badge={t.categoryGroupName ? (
-                          <CompactCardBadge className={
-                            t.categoryGroup === 'LOCAL_MOTO' ? 'bg-amber-600' :
-                              t.categoryGroup === 'TOUR_MOTO' ? 'bg-emerald-700' :
-                                t.categoryGroup === 'SELF_DRIVE' ? 'bg-indigo-600' :
-                                  'bg-[var(--color-primary)]'
-                          }>
+                          <CompactCardBadge>
                             <span className="truncate">{t.categoryGroupName}</span>
                           </CompactCardBadge>
                         ) : undefined}

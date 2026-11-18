@@ -62,7 +62,7 @@ export default function LocalExperiencesSection() {
               price={formatVnd(p.priceRefMin)}
               priceUnit={unit || 'khách'}
               badge={text(p, 'categoryGroupName') ? (
-                <CompactCardBadge className="bg-[var(--color-primary)]"><span className="truncate">{text(p, 'categoryGroupName')}</span></CompactCardBadge>
+                <CompactCardBadge><span className="truncate">{text(p, 'categoryGroupName')}</span></CompactCardBadge>
               ) : undefined}
             />
           );
