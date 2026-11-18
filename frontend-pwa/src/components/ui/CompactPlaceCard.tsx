@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Mountain, ArrowRight, type LucideIcon } from 'lucide-react';
+import { Mountain, ArrowRight, type LucideIcon } from 'lucide-react';
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder';
 import CardFrame, { type CardFrameKind } from '@/components/ui/CardFrame';
 import { mediaUrl, mediaSrcSet } from '@/lib/mediaUrl';
@@ -11,10 +11,9 @@ interface CompactPlaceCardProps {
   name: string;
   imageUrl?: string | null;
   FallbackIcon?: LucideIcon;
-  location?: string | null;
-  /** Mô tả ngắn (1-2 dòng) hiện dưới tên hoặc vị trí như phong cách thẻ hình 3. */
+  /** Mô tả ngắn (1-2 dòng) dưới tên — tuyến xe, thời lượng... Thẻ không hiện địa chỉ. */
   description?: string | null;
-  /** Giá đã định dạng ("350.000đ", "Miễn phí"...). Không có thì thẻ không có dòng giá. */
+  /** Giá đã định dạng ("350.000đ", "Miễn phí"...), hiện cùng dòng với tên. Không có thì thẻ không có giá. */
   price?: string | null;
   priceUnit?: string | null;
   /** Nhãn nhỏ góc trên trái ảnh (mùa đẹp, loại dịch vụ...). */
@@ -23,11 +22,11 @@ interface CompactPlaceCardProps {
   secondaryBadge?: ReactNode;
   /** Nút góc trên phải ảnh (vd. lưu yêu thích) — nằm ngoài link để không lồng nút trong thẻ a. */
   action?: ReactNode;
-  /** Dòng trạng thái ngắn dưới địa điểm (tạm ngừng, hết phòng...). */
+  /** Dòng trạng thái ngắn dưới tên (tạm ngừng, hết phòng...). */
   notice?: ReactNode;
   /**
-   * Tiện ích ngắn (vd. "Wifi", "Bếp") hiện dạng chip dưới địa điểm — chỉ từ md, điện thoại ẩn cho thẻ gọn. Truyền mảng (kể
-   * cả rỗng) để thẻ chừa sẵn dòng này, các thẻ cùng hàng cao bằng nhau.
+   * Tiện ích ngắn (vd. "Wifi", "Bếp") hiện dạng chip dưới tên. Truyền mảng (kể cả rỗng) để thẻ chừa sẵn dòng này, các thẻ
+   * cùng hàng cao bằng nhau.
    */
   amenities?: string[] | null;
   /** Nhãn nút hành động ở chân thẻ (vd. "Khám phá ngay" kèm mũi tên chuyển động) */
@@ -44,16 +43,15 @@ interface CompactPlaceCardProps {
 }
 
 /**
- * Thẻ danh sách gọn cho địa điểm / homestay: ảnh thực tế, tên, địa điểm, (tiện ích) và giá — không mô tả rườm rà.
- * Mọi thẻ trong một hàng cao bằng nhau (giá luôn nằm đáy thẻ).
- * Cả thẻ là một link sang trang chi tiết.
+ * Thẻ danh sách gọn cho mọi loại thông tin (homestay, điểm đến, nhà hàng, di chuyển...): ảnh trong khung phía trên, chữ
+ * dưới ảnh — tên và giá cùng một dòng, không hiện địa chỉ. Tông màu đồng nhất (trắng / slate); màu nổi bật chỉ dành cho giá
+ * và nút hành động. Mọi thẻ trong một hàng cao bằng nhau. Cả thẻ là một link sang trang chi tiết.
  */
 export default function CompactPlaceCard({
   to,
   name,
   imageUrl,
   FallbackIcon = Mountain,
-  location,
   description,
   price,
   priceUnit,
@@ -72,10 +70,13 @@ export default function CompactPlaceCard({
   const resolvedPhoto = resolvePlacePhoto(imageUrl);
   const src = mediaUrl(resolvedPhoto, 640);
 
-  const priceLine = price ? (
-    <p className={`font-extrabold leading-tight text-[#0a7d64] ${compact ? 'text-sm' : 'text-[15px] sm:text-base'}`}>
-      {price}
-      {priceUnit && <span className="text-xs font-medium text-slate-500"> /{priceUnit}</span>}
+  // Giá nằm cùng dòng với tên, bên phải. Thẻ hẹp (2 cột trên điện thoại) thì đơn vị tự xuống dưới giá thay vì ép tên.
+  const priceTag = price ? (
+    <p className="flex max-w-[55%] shrink-0 flex-wrap items-baseline justify-end gap-x-1 text-right leading-snug">
+      <span className={`whitespace-nowrap font-extrabold text-[var(--color-primary)] ${compact ? 'text-sm sm:text-[15px]' : 'text-[15px] sm:text-base'}`}>
+        {price}
+      </span>
+      {priceUnit && <span className="whitespace-nowrap text-xs font-medium text-slate-500">/{priceUnit}</span>}
     </p>
   ) : null;
 
@@ -109,20 +110,17 @@ export default function CompactPlaceCard({
           )}
         </div>
 
-        {/* Nội dung dưới ảnh: nền trắng, chữ tối — không phụ thuộc màu ảnh / nền trang */}
+        {/* Nội dung dưới ảnh: nền trắng, chữ tông slate; màu nổi bật chỉ cho giá và nút hành động (quy tắc 90/10). */}
         <div className={`flex flex-1 flex-col gap-1.5 ${compact ? 'p-3' : 'p-4'}`}>
-          <h3 className={`line-clamp-1 font-bold leading-snug text-slate-900 group-hover:text-[#0a7d64] transition-colors ${compact ? 'text-sm sm:text-[15px]' : 'text-base sm:text-lg'}`}>
-            {name}
-          </h3>
-          {location && (
-            <p className="flex min-w-0 items-center gap-1 text-xs text-slate-500 sm:text-[13px]">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#0a7d64]" />
-              <span className="truncate">{location}</span>
-            </p>
-          )}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className={`line-clamp-2 min-w-0 flex-1 font-bold leading-snug text-slate-900 ${compact ? 'text-sm sm:text-[15px]' : 'text-base sm:text-lg'}`}>
+              {name}
+            </h3>
+            {priceTag}
+          </div>
 
           {description && (
-            <p className="line-clamp-2 text-xs leading-relaxed text-slate-600 sm:text-[13px]">{description}</p>
+            <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 sm:text-[13px]">{description}</p>
           )}
 
           {amenities && !description && (
@@ -140,16 +138,13 @@ export default function CompactPlaceCard({
 
           {notice}
 
-          {ctaText ? (
-            <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
-              {priceLine ?? <span className="text-xs font-semibold text-[#0a7d64]">Tham quan tự do</span>}
-              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-slate-700 transition-colors group-hover:text-[#0a7d64]">
+          {ctaText && (
+            <div className="mt-auto flex items-center justify-end border-t border-slate-100 pt-2.5">
+              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-[var(--color-primary)]">
                 <span>{ctaText}</span>
-                <ArrowRight className="h-3.5 w-3.5 text-[#0a7d64] transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
             </div>
-          ) : (
-            priceLine && <div className="mt-auto pt-1">{priceLine}</div>
           )}
         </div>
       </Link>

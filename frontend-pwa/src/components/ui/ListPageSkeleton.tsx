@@ -20,16 +20,17 @@ export const LIST_SKELETON_SPECS = {
   culture: { count: 8 },
 } satisfies Record<string, { toolbar?: ToolbarSpec; filter?: FilterSpec; count: number }>;
 
-/** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 4:3 phía trên + tên, địa điểm, giá bên dưới — cùng bo góc / khoảng đệm với thẻ thật. */
+/** Khung chờ một thẻ gọn (CompactPlaceCard): ảnh 4:3 phía trên + tên và giá cùng dòng bên dưới — cùng bo góc / khoảng đệm với thẻ thật. */
 export function CompactCardSkeleton() {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-xs">
       <Skeleton className={`${bar} aspect-[4/3] w-full rounded-none`} />
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <Skeleton className={`${bar} h-5 w-3/4`} />
-        <Skeleton className={`${bar} h-3.5 w-1/2`} />
-        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-2.5">
-          <Skeleton className={`${bar} h-4 w-20`} />
+        <div className="flex items-start justify-between gap-3">
+          <Skeleton className={`${bar} h-5 w-3/5`} />
+          <Skeleton className={`${bar} h-5 w-20`} />
+        </div>
+        <div className="mt-auto flex justify-end border-t border-slate-100 pt-2.5">
           <Skeleton className={`${bar} h-4 w-24`} />
         </div>
       </div>

@@ -13,7 +13,7 @@ export const CardSkeleton: React.FC<CardSkeletonProps> = ({
   layout = 'grid-2',
   imageHeight = 'h-48 md:h-52',
 }) => {
-  // Thẻ gọn: dùng đúng khung chờ của CompactPlaceCard (ảnh 16:10, tên, địa điểm, giá).
+  // Thẻ gọn: dùng đúng khung chờ của CompactPlaceCard (ảnh 4:3, tên và giá cùng dòng).
   if (layout === 'compact' || layout === 'compact-full') {
     return <CardGridSkeleton count={count} withSidebar={layout === 'compact'} />;
   }
