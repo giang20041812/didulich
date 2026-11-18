@@ -18,7 +18,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   ThumbsUp,
   AlertCircle,
   Lightbulb,
@@ -597,31 +596,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
   );
 
   const nearbyAttractions = homestay?.highlights?.find(h => h.type === 'NEARBY')?.content ?? null;
-  const parsedNearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
-  const nearestAttraction = parsedNearbyList[0] as NearbyPointItem | undefined;
-  const otherAttractions = useMemo(() => parsedNearbyList.slice(1), [parsedNearbyList]);
-  const [nearbyDropdownOpen, setNearbyDropdownOpen] = useState(false);
-  const nearbyDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!nearbyDropdownOpen) return;
-    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
-      if (nearbyDropdownRef.current && !nearbyDropdownRef.current.contains(e.target as Node)) {
-        setNearbyDropdownOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setNearbyDropdownOpen(false);
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('touchstart', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('touchstart', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [nearbyDropdownOpen]);
+  const nearbyList = useMemo(() => parseAndSortNearbyAttractions(nearbyAttractions), [nearbyAttractions]);
 
   if (loading) {
     return <HomestayDetailSkeleton />;
@@ -703,6 +678,12 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
   const hasRating = homestay.ratingAvg != null && homestay.ratingAvg > 0;
   const priceText = fromPrice != null ? new Intl.NumberFormat('vi-VN').format(fromPrice) : null;
   const scrollToRooms = () => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const openDirections = () =>
+    openGoogleMapsDirections(
+      homestay.latitude ?? undefined,
+      homestay.longitude ?? undefined,
+      `${homestay.address || homestay.district || ''} ${homestay.name}`
+    );
 
   const highlightGroups = [
     { type: 'PRO', title: 'Điểm cộng', Icon: ThumbsUp, dot: 'text-emerald-600' },
@@ -817,109 +798,16 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                   </span>
                 )}
 
-                <span className="text-slate-300" aria-hidden>·</span>
+                {/* Máy tính đã có nút chỉ đường trên thẻ đặt phòng cột phải; điện thoại cần lối vào riêng. */}
+                <span className="text-slate-300 lg:hidden" aria-hidden>·</span>
                 <button
                   type="button"
-                  onClick={() =>
-                    openGoogleMapsDirections(
-                      homestay.latitude ?? undefined,
-                      homestay.longitude ?? undefined,
-                      `${homestay.address || homestay.district || ''} ${homestay.name}`
-                    )
-                  }
-                  className="inline-flex items-center gap-1 text-slate-700 hover:text-[var(--color-primary)] transition-colors cursor-pointer text-left group"
-                  title="Xem chỉ đường trên Google Maps"
+                  onClick={openDirections}
+                  className="inline-flex items-center gap-1 font-medium text-[var(--color-primary)] hover:underline underline-offset-4 cursor-pointer lg:hidden"
                 >
-                  <MapPin className="h-4 w-4 shrink-0 text-[var(--color-primary)] transition-transform duration-200 group-hover:scale-110" />
-                  <span className="underline decoration-slate-300 underline-offset-4 group-hover:decoration-[var(--color-primary)]">
-                    {homestay.address || homestay.district}
-                  </span>
+                  <Navigation className="h-4 w-4 shrink-0" aria-hidden />
+                  <span>Chỉ đường</span>
                 </button>
-
-                {nearestAttraction ? (
-                  <div className="relative inline-flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-slate-700" ref={nearbyDropdownRef}>
-                    <span className="text-slate-300" aria-hidden>·</span>
-                    <div className="inline-flex items-center gap-1.5 font-medium">
-                      <Navigation className="h-4 w-4 text-[var(--color-primary)] shrink-0" aria-hidden />
-                      <span className="text-slate-600">Điểm vui chơi:</span>
-                      <span className="text-[var(--color-primary)] font-bold leading-none shrink-0" aria-hidden>–</span>
-                      <span className="font-bold text-slate-900">{nearestAttraction.name}{nearestAttraction.distanceText ? ':' : ''}</span>
-                      {nearestAttraction.distanceText && (
-                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs border border-emerald-200/60 shadow-2xs">
-                          {nearestAttraction.distanceText}
-                        </span>
-                      )}
-                      <span className="text-xs text-slate-400 font-medium">(gần nhất)</span>
-                    </div>
-
-                    {otherAttractions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setNearbyDropdownOpen((prev) => !prev)}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer border ${nearbyDropdownOpen
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-400/20 shadow-xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs'
-                          }`}
-                        aria-expanded={nearbyDropdownOpen}
-                      >
-                        <span>+{otherAttractions.length} điểm khác</span>
-                        <ChevronDown
-                          className={`h-3.5 w-3.5 transition-transform duration-200 ${nearbyDropdownOpen ? 'rotate-180 text-emerald-700' : 'text-slate-500'
-                            }`}
-                        />
-                      </button>
-                    )}
-
-                    {/* Dropdown menu xổ xuống cho các điểm còn lại */}
-                    <AnimatePresence>
-                      {nearbyDropdownOpen && otherAttractions.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                          transition={{ duration: 0.16, ease: 'easeOut' }}
-                          className="absolute left-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-2xl bg-white p-3.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 backdrop-blur-md"
-                        >
-                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                              Các điểm vui chơi khác
-                            </span>
-                            <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">
-                              từ gần đến xa
-                            </span>
-                          </div>
-                          <ul className="space-y-2">
-                            {otherAttractions.map((item, idx) => (
-                              <li
-                                key={idx}
-                                className="flex items-center justify-between gap-2 rounded-lg p-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
-                              >
-                                <span className="flex items-center gap-1.5 min-w-0">
-                                  <span className="text-[var(--color-primary)] font-bold text-sm leading-none shrink-0" aria-hidden>–</span>
-                                  <span className="font-medium text-slate-800 truncate">{item.name}</span>
-                                </span>
-                                {item.distanceText && (
-                                  <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] border border-emerald-200/60 shadow-2xs shrink-0">
-                                    {item.distanceText}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : nearbyAttractions ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
-                    <span className="text-slate-300" aria-hidden>·</span>
-                    <Navigation className="h-4 w-4 shrink-0 text-[var(--color-primary)]" aria-hidden />
-                    <span>
-                      <span className="font-medium text-slate-600">Điểm vui chơi: </span>
-                      <span className="font-semibold text-slate-800">{nearbyAttractions}</span>
-                    </span>
-                  </span>
-                ) : null}
               </div>
             </div>
 
@@ -967,6 +855,50 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
               </motion.button>
             </div>
           </div>
+
+          {/* Địa điểm xung quanh — nổi bật ngay dưới tên, xếp từ gần đến xa. Điện thoại vuốt ngang, máy tính xuống dòng. */}
+          {nearbyList.length > 0 && (
+            <section
+              aria-labelledby="nearby-top-title"
+              className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
+            >
+              <div className="mb-2.5 flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
+                  <Compass className="h-4 w-4" aria-hidden />
+                </span>
+                <h2 id="nearby-top-title" className="text-sm font-bold text-slate-900 sm:text-base">
+                  Địa điểm xung quanh
+                </h2>
+                {nearbyList.length > 1 && (
+                  <span className="text-xs text-slate-500">· {nearbyList.length} điểm, từ gần đến xa</span>
+                )}
+              </div>
+              <ul className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 scrollbar-hide sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+                {nearbyList.map((item, index) => {
+                  const nearest = index === 0 && !!item.distanceText;
+                  return (
+                    <li
+                      key={item.name}
+                      className={`flex shrink-0 items-center gap-2 rounded-xl border bg-white px-3 py-2 shadow-2xs ${nearest ? 'border-[var(--color-primary)]' : 'border-slate-200'
+                        }`}
+                    >
+                      <MapPin className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                      <span className="max-w-[14rem] truncate text-sm font-semibold text-slate-800" title={item.name}>
+                        {item.name}
+                      </span>
+                      {/* Khoảng cách là thông tin chính của khối — màu nổi bật. */}
+                      {item.distanceText && (
+                        <span className="shrink-0 text-xs font-bold text-[var(--color-primary)]">{item.distanceText}</span>
+                      )}
+                      {nearest && (
+                        <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">Gần nhất</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
         </header>
 
         {/* ── 2. THƯ VIỆN ẢNH (VỚI PARALLAX NHẸ TRÊN DESKTOP) ── */}
@@ -1551,13 +1483,7 @@ function HomestayDetailContent({ identifier }: { identifier: string }) {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  onClick={() =>
-                    openGoogleMapsDirections(
-                      homestay.latitude ?? undefined,
-                      homestay.longitude ?? undefined,
-                      `${homestay.address || homestay.district || ''} ${homestay.name}`
-                    )
-                  }
+                  onClick={openDirections}
                   className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer"
                 >
                   <Navigation className="h-4 w-4 text-[var(--color-primary)]" />
