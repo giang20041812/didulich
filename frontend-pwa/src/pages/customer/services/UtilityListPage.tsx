@@ -266,7 +266,6 @@ export default function UtilityListPage() {
                       name={srv.name}
                       imageUrl={srv.coverImageUrl}
                       FallbackIcon={srv.kind === 'PHOTO' ? Camera : Bike}
-                      location={srv.address || 'Mù Cang Chải'}
                       price={formatVnd(srv.priceRef)}
                       priceUnit={srv.priceUnitNote || 'ngày'}
                       badge={srv.categoryBadge ? <CompactCardBadge><span className="truncate">{srv.categoryBadge}</span></CompactCardBadge> : undefined}

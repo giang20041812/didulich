@@ -1141,7 +1141,6 @@ export default function HomestayListPage() {
                           to={homestayDetailPath(hs.id)}
                           name={hs.name}
                           imageUrl={hs.coverImageUrl}
-                          location={hs.district || 'Lào Cai'}
                           price={formatVnd(hs.price, 'Liên hệ')}
                           priceUnit={hs.price ? 'đêm' : null}
                           amenities={hs.amenities ?? []}

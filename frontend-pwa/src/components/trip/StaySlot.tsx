@@ -264,7 +264,6 @@ export default function StaySlot({ journey, onChange, highlight = false }: StayS
                 name={h.name}
                 imageUrl={h.coverImageUrl}
                 FallbackIcon={BedDouble}
-                location={h.location}
                 price={formatVnd(h.price)}
                 priceUnit={h.price > 0 ? 'đêm' : null}
                 onIntent={() => prefetchHomestay(h.id)}

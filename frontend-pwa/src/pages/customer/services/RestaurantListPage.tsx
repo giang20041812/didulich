@@ -525,7 +525,6 @@ export default function RestaurantListPage() {
                         name={res.name}
                         imageUrl={res.coverImageUrl}
                         FallbackIcon={UtensilsCrossed}
-                        location={res.address || res.district}
                         price={formatVnd(res.priceMin)}
                         priceUnit={res.priceUnitNote || 'người'}
                       />

@@ -348,7 +348,7 @@ export default function TransportListPage() {
                         name={t.name}
                         imageUrl={t.coverImageUrl}
                         FallbackIcon={Bus}
-                        location={t.hasServiceProfile && t.routeType ? t.routeType : t.address || t.routeType}
+                        description={t.routeType}
                         price={formatVnd(t.priceRef)}
                         priceUnit={t.priceUnitNote || 'lượt'}
                         badge={t.categoryGroupName ? (
