@@ -152,12 +152,9 @@ export default function NearMePanel({ kind }: NearMePanelProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-slate-800">{place.name}</p>
-                {place.regionName && <p className="truncate text-xs text-slate-500">{place.regionName}</p>}
-                <p className="mt-0.5 flex items-center gap-2 text-xs text-slate-600">
-                  {kind === 'HOMESTAY' && place.priceRefMin != null && place.priceRefMin > 0 && (
-                    <span className="font-semibold text-[#052620]">từ {place.priceRefMin.toLocaleString('vi-VN')}đ</span>
-                  )}
-                </p>
+                {kind === 'HOMESTAY' && place.priceRefMin != null && place.priceRefMin > 0 && (
+                  <p className="mt-0.5 text-xs font-semibold text-[#052620]">từ {place.priceRefMin.toLocaleString('vi-VN')}đ</p>
+                )}
               </div>
               <span className="shrink-0 rounded-lg bg-[#edfbf7] px-2 py-1 text-xs font-bold text-[#052620]">{formatDistance(km)}</span>
             </Link>

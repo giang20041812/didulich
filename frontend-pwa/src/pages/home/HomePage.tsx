@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import SearchHub from "@/components/layout/SearchHub"
-import { Handshake, Tag, Headphones, ShieldCheck, Mountain, Tent, BookOpenText, PhoneCall, CalendarCheck, Smartphone, ChevronRight, MapPin, ArrowRight, Compass } from "lucide-react"
+import { Handshake, Tag, Headphones, ShieldCheck, Mountain, Tent, BookOpenText, PhoneCall, CalendarCheck, Smartphone, ChevronRight, ArrowRight, Compass } from "lucide-react"
 import { fetchHomeData, peekHomeData } from "@/services/homeService"
 import { prefetchHomestay } from "@/services/homestayService"
 import { placeDetailPath } from "@/lib/placeRoutes"
@@ -18,12 +18,9 @@ import RevealBase from "@/components/ui/Reveal"
 import TypeText from "@/components/ui/TypeText"
 import CompactPlaceCard, { CompactCardBadge } from "@/components/ui/CompactPlaceCard"
 import { formatVnd } from "@/lib/compactCard"
-import { mediaUrl } from "@/lib/mediaUrl"
 import { LogoMark } from "@/components/ui/logo"
-import { resolvePlacePhoto } from "@/lib/placeImages"
 import HeroBackdrop from "@/components/home/HeroBackdrop"
 import HomeMotifs from "@/components/home/HomeMotifs"
-import CardFrame from "@/components/ui/CardFrame"
 
 /** Trang chủ: các khối hiện ra một lần khi cuộn tới, lướt qua rồi thì ở nguyên đó (không ẩn lại khi cuộn khuất). */
 const Reveal = RevealBase;
@@ -82,14 +79,6 @@ const CARD =
   'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 shadow-[0_1px_2px_rgba(16,40,34,0.05),0_10px_24px_-14px_rgba(16,40,34,0.18)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]';
 /** Màu viền: xanh rừng cho thẻ điểm đến / tiện ích (đặc sản dùng vàng hổ phách), có sẵn và đậm lên khi rê chuột. */
 const CARD_GREEN = `${CARD} ring-emerald-800/25`;
-/** Thẻ điểm đến / đặc sản: ảnh phủ kín cả thẻ, chữ nằm đè lên chân ảnh trên một lớp glow xanh (CARD_GLOW) — không còn phần nền xanh riêng. */
-const CARD_DARK =
-  'group relative flex h-full flex-col overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-black/10 shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 ease-out';
-/** Lớp glow xanh tan dần từ chân thẻ lên ảnh, nằm DƯỚI chữ (chữ ở lớp z-10 phía trên). */
-const CARD_GLOW = 'pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-black/85 via-black/40 via-45% to-transparent';
-/** Ảnh phủ kín thẻ. */
-const CARD_MEDIA = 'absolute inset-0 overflow-hidden bg-slate-100';
-const CARD_IMAGE = 'h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]';
 
 /**
  * Các phần sau hero là những "tấm" vuông vức nối tiếp nhau (không bo góc), đổ bóng nhẹ ngược lên phần trước để có chiều
@@ -195,97 +184,39 @@ function HeroTitle({ compact = false, className = '' }: { compact?: boolean; cla
   );
 }
 
-/** Thẻ điểm đến: ảnh vuông + tag mùa đẹp + địa phương và tên (cả thẻ là link, không cần nút mũi tên). Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
+/** Thẻ điểm đến: cùng kiểu thẻ chung (ảnh trong khung, chữ dưới ảnh, không địa chỉ) — nhãn mùa đẹp trên ảnh. */
 function DestinationCard({ dest }: { dest: PlaceSummaryDto }) {
-  const src = mediaUrl(resolvePlacePhoto(dest.coverImageUrl), 640);
   return (
-    <CardFrame kind="mountain">
-      <Link to={`/destinations/${dest.id}`} className={`${CARD_DARK} aspect-[4/5]`}>
-        <div className={CARD_MEDIA}>
-          {src ? (
-            <img src={src} alt={dest.name} loading="lazy" className={CARD_IMAGE} />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-              <Mountain className="h-7 w-7" />
-            </div>
-          )}
-        </div>
-        <div className={CARD_GLOW} aria-hidden />
-
-        {/* Chữ đè lên glow ở chân thẻ */}
-        <div className="relative z-10 mt-auto px-3 pb-3 pt-10">
-          <div className="min-w-0">
-            {dest.regionName && (
-              <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-100 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-                <MapPin className="w-3 h-3 text-emerald-300 shrink-0" />
-                <span className="truncate">{dest.regionName}</span>
-              </p>
-            )}
-            <h3 className="mt-0.5 text-base font-medium leading-snug text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
-              {dest.name}
-            </h3>
-            {dest.description && (
-              <p className="mt-0.5 text-[11px] font-normal leading-relaxed text-white/80 line-clamp-2">{dest.description}</p>
-            )}
-            <div className="mt-2 flex items-center justify-between border-t border-white/15 pt-2 text-[11px] font-medium text-white/95">
-              <span className="text-amber-200">{seasonLabel(dest).text}</span>
-              <span className="inline-flex items-center gap-1">Khám phá ngay <ArrowRight className="h-3 w-3 text-amber-300 transition-transform duration-300 group-hover:translate-x-1" aria-hidden /></span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </CardFrame>
+    <CompactPlaceCard
+      frame="mountain"
+      compact
+      to={`/destinations/${dest.id}`}
+      name={dest.name}
+      imageUrl={dest.coverImageUrl}
+      description={dest.description}
+      ctaText="Khám phá ngay"
+      badge={<CompactCardBadge><span className="truncate">{seasonLabel(dest).text}</span></CompactCardBadge>}
+      // Điện thoại: một thẻ giữa khung lướt; từ tablet 4 cột.
+      sizes="(max-width: 767px) 80vw, 25vw"
+    />
   );
 }
 
-/** Thẻ đặc sản: ảnh vuông + tag + địa phương, tên và giá. Dùng cho cả lưới (tablet+) lẫn băng chuyền (điện thoại). */
+/** Thẻ đặc sản: cùng kiểu thẻ chung — tên và giá cùng dòng. */
 function SpecialtyCard({ item }: { item: NonNullable<HomeResponseDto['specialties']>[number] }) {
-  const authenticUrl = resolvePlacePhoto(item.coverImageUrl);
-  const src = authenticUrl ? mediaUrl(authenticUrl, 640) : null;
   return (
-    <CardFrame kind="specialty">
-      <Link to={placeDetailPath(item.kind, item.id)} className={`${CARD_DARK} aspect-[4/5]`}>
-        <div className={CARD_MEDIA}>
-          {src ? (
-            <img src={src} alt={item.name} loading="lazy" className={CARD_IMAGE} />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-              <Tag className="h-6 w-6" />
-            </div>
-          )}
-        </div>
-        <div className={CARD_GLOW} aria-hidden />
-
-        {/* Tag đặc sản / món ngon */}
-        {item.tagBadge && (
-          <div className="absolute left-1.5 top-1.5 z-10 max-w-[calc(100%-0.75rem)]">
-            <span className="inline-flex max-w-full rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-extrabold text-amber-950 shadow-[0_4px_10px_-4px_rgba(180,83,9,0.7)]">
-              <span className="truncate">{item.tagBadge}</span>
-            </span>
-          </div>
-        )}
-
-        {/* Chữ đè lên glow ở chân thẻ */}
-        <div className="relative z-10 mt-auto px-2.5 pb-2.5 pt-8">
-          {item.regionName && (
-            <p className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-100 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">
-              <MapPin className="w-3 h-3 text-amber-300 shrink-0" />
-              <span className="truncate">{item.regionName}</span>
-            </p>
-          )}
-          <h3 className="mt-0.5 text-[13px] font-extrabold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] line-clamp-1">
-            {item.name}
-          </h3>
-          {item.priceRefMin ? (
-            <p className="mt-0.5 truncate text-[11px] font-bold text-emerald-200">
-              Từ {formatVnd(item.priceRefMin)} {item.priceUnitNote ? `/ ${item.priceUnitNote}` : ''}
-            </p>
-          ) : (
-            <p className="mt-0.5 truncate text-[11px] text-white/75 font-medium">Thức quà truyền thống</p>
-          )}
-        </div>
-      </Link>
-    </CardFrame>
+    <CompactPlaceCard
+      frame="specialty"
+      compact
+      to={placeDetailPath(item.kind, item.id)}
+      name={item.name}
+      imageUrl={item.coverImageUrl}
+      FallbackIcon={Tag}
+      price={formatVnd(item.priceRefMin)}
+      priceUnit={item.priceRefMin ? item.priceUnitNote : null}
+      badge={item.tagBadge ? <CompactCardBadge><span className="truncate">{item.tagBadge}</span></CompactCardBadge> : undefined}
+      sizes="(max-width: 767px) 60vw, 20vw"
+    />
   );
 }
 
@@ -500,7 +431,6 @@ export default function HomePage() {
                     to={`/homestays/${hs.id}`}
                     name={hs.name}
                     imageUrl={hs.coverImageUrl}
-                    location={hs.regionName}
                     price={formatVnd(hs.priceRefMin, 'Liên hệ')}
                     priceUnit={hs.priceRefMin ? 'đêm' : null}
                     // Khách sắp mở chi tiết: tải trước (ưu tiên thấp) để bấm vào là hiện ngay.
