@@ -27,7 +27,7 @@ export default function DesignSystemPage() {
           <div className="bg-[#f8f9fa] rounded-2xl p-6 border border-[#66716c]/10">
             <div className="text-[10px] font-bold text-[#66716c] uppercase tracking-wider mb-2">HỆ THỐNG TYPE</div>
             <div className="text-2xl font-bold text-[#16709a] mb-1">10 Cấp bậc</div>
-            <div className="text-sm text-[#3f7656]">Plus Jakarta Sans & Inter</div>
+            <div className="text-sm text-[#3f7656]">Nunito (OFL)</div>
           </div>
           <div className="bg-[#f8f9fa] rounded-2xl p-6 border border-[#66716c]/10">
             <div className="text-[10px] font-bold text-[#66716c] uppercase tracking-wider mb-2">COMPONENTS</div>
@@ -172,7 +172,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Display Hero</div>
-                  <div className="text-[11px] text-[#66716c]">Plus Jakarta Sans / 48px / Bold</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 48px / Bold</div>
                 </div>
                 <div className="md:col-span-2 font-display text-[48px] font-bold text-[#16709a] leading-tight">Khám phá Việt Nam</div>
               </div>
@@ -180,7 +180,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Headline H1</div>
-                  <div className="text-[11px] text-[#66716c]">Plus Jakarta Sans / 40px / Bold</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 40px / Bold</div>
                 </div>
                 <div className="md:col-span-2 font-display text-[40px] font-bold text-[#0f2d3c] leading-tight">Biển Xanh & Đại Ngàn</div>
               </div>
@@ -188,7 +188,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Headline H2</div>
-                  <div className="text-[11px] text-[#66716c]">Plus Jakarta Sans / 32px / Bold</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 32px / Bold</div>
                 </div>
                 <div className="md:col-span-2 font-display text-[32px] font-bold text-[#0f2d3c] leading-tight">Hành Trình Bản Địa Trọn Vẹn</div>
               </div>
@@ -196,7 +196,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Headline H3</div>
-                  <div className="text-[11px] text-[#66716c]">Plus Jakarta Sans / 24px / SemiBold</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 24px / SemiBold</div>
                 </div>
                 <div className="md:col-span-2 font-display text-[24px] font-semibold text-[#0f2d3c] leading-tight">Văn Hóa Cố Đô Huế & Phố Hội</div>
               </div>
@@ -204,7 +204,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Headline H4</div>
-                  <div className="text-[11px] text-[#66716c]">Plus Jakarta Sans / 20px / SemiBold</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 20px / SemiBold</div>
                 </div>
                 <div className="md:col-span-2 font-display text-[20px] font-semibold text-[#0f2d3c] leading-tight">Lịch trình chi tiết 3 ngày 2 đêm</div>
               </div>
@@ -212,7 +212,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Body Large</div>
-                  <div className="text-[11px] text-[#66716c]">Inter / 18px / Regular</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 18px / Regular</div>
                 </div>
                 <div className="md:col-span-2 font-body text-[18px] text-[#66716c] leading-relaxed">Mỗi chuyến đi là một chương truyện đáng nhớ với ẩm thực và con người.</div>
               </div>
@@ -220,7 +220,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-[#66716c]/10">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Body Regular</div>
-                  <div className="text-[11px] text-[#66716c]">Inter / 16px / Regular</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 16px / Regular</div>
                 </div>
                 <div className="md:col-span-2 font-body text-[16px] text-[#66716c] leading-relaxed">Trải nghiệm chèo sup ngắm bình minh trên vịnh Lan Hạ, thưởng thức hải sản tươi rói.</div>
               </div>
@@ -228,7 +228,7 @@ export default function DesignSystemPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <div className="font-bold text-[#0f2d3c] text-[13px]">Caption & Badge</div>
-                  <div className="text-[11px] text-[#66716c]">Inter & Jakarta / 12px / 500-600</div>
+                  <div className="text-[11px] text-[#66716c]">Nunito / 12px / 500-600</div>
                 </div>
                 <div className="md:col-span-2 flex items-center gap-2">
                   <span className="font-body text-[12px] font-medium text-[#66716c] uppercase tracking-wider">Lưu ý: Giá chưa bao gồm VAT</span>

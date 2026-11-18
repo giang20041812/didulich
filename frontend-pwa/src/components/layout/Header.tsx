@@ -413,8 +413,8 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 animate={desktopPill.animate}
                 className={
                   isSolid
-                    ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886_55%,#06b6d4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_8px_18px_-8px_rgba(10,125,100,0.85)]'
-                    : 'bg-white/95 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.45)]'
+                    ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886_55%,#06b6d4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_1px_3px_rgba(10,46,38,0.22)]'
+                    : 'bg-white/95 shadow-[0_2px_8px_rgba(0,0,0,0.2)]'
                 }
               />
               {visibleNav.map((item) => {
@@ -508,10 +508,10 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                     ref={accountButtonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen((v) => !v)}
-                    className={`acct-glow relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border ${
+                    className={`relative flex items-center gap-2 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full cursor-pointer border transition-[background-color,border-color,transform] duration-200 active:scale-[0.97] ${
                       isSolid
-                        ? 'bg-white/90 border-slate-200/80 hover:border-emerald-500/50 shadow-2xs'
-                        : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:border-white/60 shadow-xs'
+                        ? 'bg-white/90 border-slate-200/80 hover:bg-[var(--color-primary-50)] hover:border-emerald-500/50 shadow-2xs'
+                        : 'bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/30 hover:border-white/60 shadow-xs'
                     }`}
                     aria-label={`Tài khoản: ${user.fullName || user.email}`}
                     aria-expanded={isDropdownOpen}
@@ -698,7 +698,7 @@ export default function Header({ isSidebarOpen = false, toggleSidebar }: HeaderP
                 <SlidingPill
                   rect={mobilePill.rect}
                   animate={mobilePill.animate}
-                  className={isSolid ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886,#06b6d4)] shadow-[0_6px_14px_-6px_rgba(10,125,100,0.6)]' : 'bg-[linear-gradient(120deg,rgba(255,255,255,0.28),rgba(250,204,21,0.24))]'}
+                  className={isSolid ? 'bg-[linear-gradient(120deg,#0a7d64,#12b886,#06b6d4)] shadow-[0_1px_3px_rgba(10,46,38,0.22)]' : 'bg-white/20'}
                 />
                 {CUSTOMER_NAV.map((item) => {
                   const active = isCustomerNavActive(item, location.pathname);
